@@ -1,0 +1,15 @@
+{
+  "hash": "2d895e754f18a6582af1af302788b20d",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"In-class Exercise 1\"\nauthor: \"Ng Meng Ye\"\ndate: \"Aug 20 2024\"\ndate-modified: \"last-modified\"\nexecute: \n  eval: true\necho: true\nmessage: false\nfreeze: true\n---\n\n::: {.cell}\n\n```{.r .cell-code}\n# pacman::p_load(ggstatsplot)\n# \n# \n# mpsz14_kml = st_read(\"Hands-on_Ex01/data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml\")\n# \n# preschool = st_read(\"Hands-on_Ex01/data/geospatial/PreSchoolsLocation.kml\")\n# \n# mpsz = st_read(dsn = \"Hands-on_Ex01/data/geospatial\", layer = \"MP14_SUBZONE_WEB_PL\")\n# \n# #mpsz3414 <- st_set_crs(mpsz, 3414) st_write(mpsz14_shp, \"C:/mengyeng/Hands-on_Ex01/data/geospatial/MP14_SUBZONE_WEB_PL.kml\", delete_dsn = TRUE)\n# \n# mpsz19_kml <- st_read(\"In-class_Ex/In-class exercise 01/data/MPSZ-2019/MasterPlan2019SubzoneBoundaryNoSea.KML\")\n# \n# mpsz19_shp <- st_read(dsn = \"C:/mengyeng/ISSS608-VAA/In-class_Ex/In-class exercise 01/data/MPSZ-2019\", layer = \"MPSZ-2019\")\n# \n# mpsz19_shp <- st_read(dsn = \"data/\", layer = \"MPSZ-2019\" %\\>% st_transform(CRS=3414))\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

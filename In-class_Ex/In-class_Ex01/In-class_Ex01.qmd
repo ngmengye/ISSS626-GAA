@@ -1,0 +1,31 @@
+---
+title: "In-class_Ex01"
+---
+
+```{r}
+pacman::p_load(tidyverse, sf, tmap, ggstatsplot)
+```
+
+```{r}
+mpsz14_shp <- st_read(dsn = "data/",
+                layer = "MP14_SUBZONE_WEB_PL")    
+```
+
+
+mpsz14_kml <- st_read("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex01/data/MasterPlan2014SubzoneBoundaryWebKML.kml")
+
+```{r}
+st_write(mpsz14_shp, 
+         "data/MP14_SUBZONE_WEB_PL.kml",
+         delete_dsn = TRUE)
+```
+
+```{r}
+preschool_kml <- st_read("data/PreschoolsLocation.kml")
+```
+
+```{r}
+preschool_geojson <- st_read("data/PreschoolsLocation.geojson")
+
+```
+

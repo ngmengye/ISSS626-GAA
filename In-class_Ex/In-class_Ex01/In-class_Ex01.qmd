@@ -21,11 +21,88 @@ st_write(mpsz14_shp,
 ```
 
 ```{r}
-preschool_kml <- st_read("data/PreschoolsLocation.kml")
+preschool_kml <- st_read("data/PreschoolsLocation.kml")%>% 
+  st_transform(crs=3414)
 ```
 
 ```{r}
 preschool_geojson <- st_read("data/PreschoolsLocation.geojson")
 
 ```
+```{r}
+mpsz19_shp <- st_read(dsn="C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex02/data/",
+                layer = "MPSZ-2019") %>% 
+  st_transform(crs=3414)
+```
+```{r}
+mpsz19_kml <- st_read("data/MasterPlan2019SubzoneBoundaryNoSeaKML.kml")
+```
+```{r}
+st_crs(mpsz19_shp)
+```
+```{r}
+st_crs(mpsz19_kml)
+```
+```{r}
+st_crs(preschool_geojson)
+```
+```{r}
+st_crs(preschool_kml)
+```
+```{r}
+st_crs(mpsz14_shp)
+```
+```{r}
+preschool <- st_read("data/PreSchoolsLocation.kml") %>% 
+  st_transform(crs=3414)
+```
+```{r}
+st_crs(preschool)
+```
+```{r}
+intersect_list <- st_intersects(mpsz19_shp, preschool)
+print(intersect_list)
+```
+```{r}
+intersect_lengths <- lengths(intersect_list)
+print(intersect_lengths)
+```
+```{r}
+# Mutate `mpsz19_shp` to add the "PreSch Count" column
+mpsz19_shp <- mpsz19_shp %>%
+  mutate(`PreSch Count` = intersect_lengths)
+```
+
+```{r}
+mpsz19_shp <- mpsz19_shp %>%
+  mutate(Area = units::drop_units(
+    st_area(.)),
+    `PreSch Density` = `PreSch Count` / Area * 1000000
+  )
+```
+
+
+
+```{r}
+mpsz19_shp$`PreSch Density` <- as.numeric(as.character(mpsz19_shp$`PreSch Density`))
+
+mpsz19_shp$`PreSch Count` <- as.numeric(as.character(mpsz19_shp$`PreSch Count`))
+
+mpsz19_shp <- as.data.frame(mpsz19_shp)
+
+str(mpsz19_shp)
+```
+```{r}
+
+ggscatterstats(
+  data = mpsz19_shp,
+  x = `PreSch Density`,
+  y = `PreSch Count`,
+  type = 'parametric',
+  label.var = SUBZONE_N,  # Column to be used for labeling
+  label.expression = `PreSch Count` > 50 & `PreSch Density` > 10  # 
+)
+
+```
+
 

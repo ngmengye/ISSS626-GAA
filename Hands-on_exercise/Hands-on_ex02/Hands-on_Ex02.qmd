@@ -1,0 +1,46 @@
+---
+title: "Hands-on_Ex02"
+---
+
+```{r}
+
+pacman::p_load(sf,raster,spatstat,tmap,tidyverse)
+
+```
+
+
+```{r}
+
+childcare_sf <- st_read('C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex02/data/child-care-services-geojson.geojson')
+
+```
+```{r}
+st_crs(childcare_sf)
+```                                                               
+
+```{r}
+childcare_sf <- st_read('C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex02/data/child-care-services-geojson.geojson') %>% 
+  st_transform(crs=3414)
+```
+```{r}
+sg_sf <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex02/data", layer="CostalOutline")%>% 
+  st_transform(crs=3414)
+```
+```{r}
+st_crs(sg_sf)
+```
+```{r}
+mpsz_sf <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex02/data", layer="MP14_SUBZONE_WEB_PL")%>% 
+  st_transform(crs=3414)
+```
+```{r}
+st_crs(mpsz_sf)
+```
+```{r}
+# Plot the subzones first
+plot(st_geometry(mpsz_sf), col = "lightgrey", border = "black")
+
+plot(st_geometry(childcare_sf), col = "black", pch = 16, cex = 0.5, add = TRUE)
+
+```
+

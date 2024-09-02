@@ -1,0 +1,32 @@
+---
+title: "In-class Exercise 02"
+---
+
+
+```{r}
+#| eval: false
+install.packages("maptools", repos = "https://packagemanager.posit.co/cran/2023-10-13")
+```
+```{r}
+# set_seed(1234)
+pacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools)
+```
+
+```{r}
+
+# filter out NA or missing data of longitude and latitude
+# check how many missing values (make sure less than 25%)
+rdacc_sf <- read_csv("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex02/data/thai_road_accident_2019_2022.csv") %>% 
+  filter(!is.na(longitude) & longitude != "",
+         !is.na(latitude)& latitude != "") %>% 
+  st_as_sf(coords = c(
+    "longitude", "latitude"),
+    crs = 4326) %>% 
+  st_transform(crs = 32647)
+```
+```{r}
+view(rdacc_sf)
+```
+
+
+

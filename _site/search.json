@@ -40,5 +40,12 @@
     "title": "ISSS626-GAA",
     "section": "",
     "text": "&lt;!DOCTYPE qgis PUBLIC ‘http://mrcc.com/qgis.dtd’ ‘SYSTEM’&gt;     dataset\n\n\n        0 0     false"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex02/In-class_Ex02.html",
+    "href": "In-class_Ex/In-class_Ex02/In-class_Ex02.html",
+    "title": "In-class Exercise 02",
+    "section": "",
+    "text": "install.packages(\"maptools\", repos = \"https://packagemanager.posit.co/cran/2023-10-13\")\n\n\n# set_seed(1234)\npacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools)\n\n\n# filter out NA or missing data of longitude and latitude\n# check how many missing values (make sure less than 25%)\nrdacc_sf &lt;- read_csv(\"C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex02/data/thai_road_accident_2019_2022.csv\") %&gt;% \n  filter(!is.na(longitude) & longitude != \"\",\n         !is.na(latitude)& latitude != \"\") %&gt;% \n  st_as_sf(coords = c(\n    \"longitude\", \"latitude\"),\n    crs = 4326) %&gt;% \n  st_transform(crs = 32647)\n\nRows: 81735 Columns: 18\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr  (10): province_th, province_en, agency, route, vehicle_type, presumed_c...\ndbl   (6): acc_code, number_of_vehicles_involved, number_of_fatalities, numb...\ndttm  (2): incident_datetime, report_datetime\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\n\nview(rdacc_sf)"
   }
 ]

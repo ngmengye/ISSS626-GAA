@@ -2,11 +2,11 @@
 title: "In-class Exercise 02"
 ---
 
-
 ```{r}
 #| eval: false
 install.packages("maptools", repos = "https://packagemanager.posit.co/cran/2023-10-13")
 ```
+
 ```{r}
 # set_seed(1234)
 pacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools)
@@ -24,9 +24,12 @@ rdacc_sf <- read_csv("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex02/data/tha
     crs = 4326) %>% 
   st_transform(crs = 32647)
 ```
+
 ```{r}
 view(rdacc_sf)
 ```
 
 
-
+```{r}
+acled_sg %>% 
+  filter

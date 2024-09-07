@@ -11,12 +11,24 @@ website:
             href: "Hands-on_exercise/Hands-on_ex01/Hands-on_Ex01.html"
           - text: "Hands-on Exercise 2"
             href: "Hands-on_exercise/Hands-on_ex02/Hands-on_Ex02.html"  # Example additional link
+          - text: "Hands-on Exercise 3"
+            href: "Hands-on_exercise/Hands-on_ex03/Hands-on_ex03.html" 
       - text: "In-class Exercise"  # New menu for In-class exercises
         menu:
           - text: "In-class Exercise 1"
             href: "In-class_Ex/In-class_Ex01/In-class_Ex01.html"
           - text: "In-class Exercise 2"
-            href: "In-class_Ex/In-class_Ex02/In-class_Ex02.html"  # Example additional link
+            href: "In-class_Ex/In-class_Ex02/In-class_Ex02.html" # Example additional link
+      - text: "Take-home Exercise"  # New menu for In-class exercises
+        menu:
+          - text: "Take-home Exercise 1"
+            href: "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html"
+          - text: "Take-home Exercise 2"
+            href: "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html" 
+          - text: "Take-home Exercise 2"
+            href: "Take-home_Ex/Take-home_Ex03/Take-home_Ex02.html"           
+  
+            
     right:
       - href: index.qmd
         text: Home

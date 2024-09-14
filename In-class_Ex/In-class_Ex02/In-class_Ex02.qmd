@@ -13,7 +13,6 @@ pacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools)
 ```
 
 ```{r}
-
 # filter out NA or missing data of longitude and latitude
 # check how many missing values (make sure less than 25%)
 rdacc_sf <- read_csv("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex02/data/thai_road_accident_2019_2022.csv") %>% 
@@ -29,7 +28,4 @@ rdacc_sf <- read_csv("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex02/data/tha
 view(rdacc_sf)
 ```
 
-
-```{r}
-acled_sg %>% 
-  filter
+\`\`\`{r} acled_sg %\>% filter

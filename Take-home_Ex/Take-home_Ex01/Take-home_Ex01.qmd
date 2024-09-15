@@ -234,10 +234,10 @@ plot(rdacc_bmr_sf$geometry,add=T,col='red',pch = 19)
 ```
 
 ```{r}
-tmap_mode('view')
-tm_shape(thaiBMR) + tm_polygons()+
-  tm_shape(rdacc_bmr_sf$geometry) + 
-  tm_dots()
+# tmap_mode('view')
+# tm_shape(thaiBMR) + tm_polygons()+
+#   tm_shape(rdacc_bmr_sf$geometry) + 
+#   tm_dots()
   
 ```
 

@@ -156,6 +156,50 @@ network32647 <- st_transform(network,32647)
 network32647
 ```
 
+To see the type of highway
+
+```{r}
+unique_values <- unique(network32647$highway)
+
+print(unique_values)
+```
+
+According to [Highway classification on WikiProject Thailand](https://wiki.openstreetmap.org/wiki/WikiProject_Thailand#Highway_classification), we should only include urban and local road wide enough for motor cars:
+
+1 secondary \
+2 residential \
+3 secondary_link \
+4 service \
+5 tertiary \
+6 trunk \
+7 trunk_link \
+8 primary \
+9 primary_link \
+10 motorway_link \
+11 tertiary_link \
+12 motorway \
+13 road \
+14 living_street
+
+```{r}
+highway_types <- c(
+"secondary", "tertiary","trunk", "primary", "motorway", "unclassified"
+)
+
+# highway_types <- c(
+# "secondary", "residential", "secondary_link", "tertiary",
+# "trunk", "trunk_link", "primary", "primary_link", "motorway_link",
+# "tertiary_link", "motorway", "road", "living_street", "unclassified"
+# )
+
+
+#highway_types <- c("motorway")
+
+filtered_network <- network32647 %>%
+  filter(highway %in% highway_types)
+```
+
+
 ### Thailand - Subnational Administrative Boundaries
 
 #### Importing Geospatial Data
@@ -164,7 +208,7 @@ Thailand administrative level 0 (country), 1 (province), 2 (district), and 3 (su
 
 ```{r}
 thai_map <- st_read(dsn="C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data/geospatial", 
-                   layer="tha_admbnda_adm3_rtsd_20220121")
+                   layer="tha_admbnda_adm1_rtsd_20220121")
 ```
 
 ```{r}
@@ -198,20 +242,18 @@ tm_shape(thaiBMR) + tm_polygons()+
 ```
 
 ```{r}
-#BMR_network <- st_intersection(network32647,thaiBMR)
+BMR_network <- st_intersection(filtered_network,thaiBMR)
 
 ```
 
 ```{r}
-#plot(st_geometry(BMR_network))
+# Plot the background (BMR and highways)
+plot(st_geometry(thaiBMR), col = "lightblue", main = "BMR with Highways")
+plot(st_geometry(BMR_network), col = "black", add = TRUE)
+
+# Add dots for road accidents with smaller size
+plot(rdacc_bmr_sf, add = TRUE, col = 'red', pch = 19, cex = 0.5)  # cex = 0.5 makes the dots smaller
+
+
 ```
 
-```{r}
-#tmap_mode('view')
-#tm_shape(BMR_network) + tm_lines()
-
-```
-
-```{r}
-#tmap_mode('plot')
-```

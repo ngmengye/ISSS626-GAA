@@ -55,7 +55,7 @@ This data sets are in `csv` format
 ```{r}
 #| output: false
 set.seed(1234)
-pacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools)
+pacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools,spNetwork)
 ```
 
 ## 4 Data Wrangling
@@ -107,7 +107,7 @@ rdacc_sf <- rdacc %>%
 ```
 
 ::: callout-caution
-## Correcting the projection
+### Correcting the projection
 
 `EPSG: 4326` is wgs84 Geographic Coordinate System and `EPSG: 32647` refers to the WGS 84 / UTM zone 47N Projected Coordinate System, which is specifically used for areas in Thailand.
 :::
@@ -227,7 +227,7 @@ thaiBMR <- thai_map_32647 %>%
 ```{r}
 thaiBMR
 ```
-
+#### Visualizing the Geospatial Data
 ```{r}
 plot(st_geometry(thaiBMR))
 plot(rdacc_bmr_sf$geometry,add=T,col='red',pch = 19)
@@ -255,5 +255,63 @@ plot(st_geometry(BMR_network), col = "black", add = TRUE)
 plot(rdacc_bmr_sf, add = TRUE, col = 'red', pch = 19, cex = 0.5)  # cex = 0.5 makes the dots smaller
 
 
+```
+## 5 Network Constrained Spatial Point Patterns Analysis
+
+### 5.1 Network KDE (NKDE) Analysis
+
+#### 5.1.1 Preparing the lixels objects
+
+```{r}
+BMR_network_linestring <- st_cast(BMR_network, "LINESTRING")
+```
+
+```{r}
+lixels <- lixelize_lines(BMR_network_linestring, 10000, mindist = 5000)
+```
+
+#### 5.1.2 Generating the line centre points
+
+```{r}
+samples <- lines_center(lixels) 
+```
+
+```{r}
+densities <- nkde(BMR_network_linestring, 
+                  events = rdacc_bmr_sf,
+                  w = rep(1, nrow(rdacc_bmr_sf)),
+                  samples = samples,
+                  kernel_name = "quartic",
+                  bw = 30, 
+                  div= "bw", 
+                  method = "simple", 
+                  digits = 1, 
+                  tol = 1,
+                  grid_shape = c(5,5), 
+                  max_depth = 8,
+                  agg = 5, 
+                  sparse = TRUE,
+                  verbose = FALSE)
+
+```
+
+```{r}
+samples$density <- densities
+lixels$density <- densities
+```
+
+```{r}
+# rescaling to help the mapping# rescaling to help the mapping
+samples$density <- samples$density*1000
+lixels$density <- lixels$density*1000
+```
+
+```{r}
+tmap_mode('view')
+tm_shape(lixels)+
+  tm_lines(col="density")+
+tm_shape(rdacc_bmr_sf)+
+  tm_dots()
+tmap_mode('plot')
 ```
 

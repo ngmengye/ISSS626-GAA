@@ -1,0 +1,155 @@
+---
+title: "in-class exercise 04"
+author: "Ng Meng Ye"
+---
+
+```{r}
+pacman::p_load(sf,spdep,tmap,tidyverse,knitr,GWmodel,ggstatsplot)
+```
+
+
+no need to perform transform to projected coordinate system
+ideally we should have the projection
+it is polygon instead of multipolygon, no island
+```{r}
+hunan_sf <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex04/data/geospatial",
+                 layer = "Hunan")
+```
+please dont use read.csv which is base R
+```{r}
+hunan2012 <- read_csv("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex04/data/aspatial/Hunan_2012.csv")
+```
+combine spatial and aspatial data using left_join
+in reality, need to have common identifier, the values must be identical
+cannot be one lowercase and other is uppercase, the code chunk can use by
+
+```{r}
+hunan_sf <- left_join(hunan_sf,hunan2012)
+hunan_sf <- select(hunan_sf,1:3,7,15,16,31,32)
+```
+```{r}
+wm_q <- poly2nb(hunan_sf)
+summary(wm_q)
+```
+convert sf to sp because of GWmodel
+
+```{r}
+hunan_sp <- hunan_sf %>% 
+  as_Spatial()
+```
+
+
+Determine adaptive bandwith using bw.gwr, linear regression model
+dependent and independent variables.
+abitrary number = 1 which is independent variable, just to provide the lrm requirements
+adaptive false = fixed bandwidth
+kernel = not much effect, can use others
+longlat = T, great circle calculation, convert to km
+
+```{r}
+bw_CV <- bw.gwr(GDPPC ~ 1,
+              data = hunan_sp,
+              approach = "CV",
+              adaptive = TRUE,
+              kernel = "bisquare",
+              longlat = T)
+```
+```{r}
+bw_CV
+```
+```{r}
+bw_AIC <- bw.gwr(GDPPC ~ 1,
+              data = hunan_sp,
+              approach = "AIC",
+              adaptive = TRUE,
+              kernel = "bisquare",
+              longlat = T)
+```
+```{r}
+bw_AIC
+```
+22 means optimum number of neighbours
+the bandwidth is in kilometre, 
+adaptive is always the best
+
+```{r}
+bw_AIC2 <- bw.gwr(GDPPC ~ 1,
+              data = hunan_sp,
+              approach = "AIC",
+              adaptive = FALSE,
+              kernel = "bisquare",
+              longlat = T)
+
+```
+```{r}
+bw_AIC2
+```
+```{r}
+bw_CV2 <- bw.gwr(GDPPC ~ 1,
+              data = hunan_sp,
+              approach = "CV",
+              adaptive = FALSE,
+              kernel = "bisquare",
+              longlat = T)
+```
+```{r}
+bw_CV2
+```
+
+make sure kernel, adaptive and longlat is the same as the bw requirement
+```{r}
+gwstat <- gwss(data=hunan_sp,
+               vars = "GDPPC",
+               bw = bw_AIC,
+               kernel = 'bisquare',
+               adaptive = TRUE,
+               longlat = T)
+
+```
+
+
+SDF= spatial data frame
+LM = local mean
+every 22 neighbours, calculate the local mean
+
+LSD = standard deviation
+88 area = 88 standard deviation
+
+LSKe = standard estimate
+
+LCV = correlation variance
+
+all take 22 neighbours, from the bandwidth
+```{r}
+gwstat
+```
+```{r}
+gwstat_df <- as.data.frame(gwstat$SDF)
+```
+gwstat dont have common identifier
+use cbind because the sequence is the same as gwstat and hunan_sf
+as long no sorting is used, can just cbind, because it just append blindly
+
+
+```{r}
+hunan_gstat <- cbind(hunan_sf,gwstat_df)
+```
+
+
+n = 5, classes
+```{r}
+tm_shape(hunan_gstat) + 
+  tm_fill("GDPPC_LM",
+          n = 5,
+          style = "quantile") + 
+  tm_borders(alpha = 0.5) + 
+  tm_layout(main.title = "Distribution of geographically weighted mean",
+            main.title.position = "center",
+            main.title.size = 1.0,
+            legend.text.size= 0.4,
+            legend.height = 0.4,
+            legend.width = 0.4,
+            frame = TRUE)
+```
+
+

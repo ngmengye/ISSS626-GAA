@@ -12,11 +12,13 @@ network <- st_read(dsn="C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex03/
                    layer = "Punggol_St") %>% 
               st_transform(crs = 3414)
 ```
+
 ```{r}
 childcare <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex03/data/geospatial",
                      layer = "Punggol_CC") %>% 
               st_transform(crs = 3414)
 ```
+
 ```{r}
 childcare <- st_zm(childcare)
 ```
@@ -24,10 +26,12 @@ childcare <- st_zm(childcare)
 ```{r}
 childcare
 ```
+
 ```{r}
 plot(st_geometry(network))
 plot(childcare,add=T,col='red',pch = 19)
 ```
+
 ```{r}
 tmap_mode('view')
 tm_shape(childcare) + 
@@ -35,9 +39,11 @@ tm_shape(childcare) +
   tm_shape(network) +
   tm_lines()
 ```
+
 ```{r}
 tmap_mode('plot')
 ```
+
 ```{r}
 lixels <- lixelize_lines(network, 
                          700, 
@@ -75,6 +81,7 @@ samples$density <- samples$density*1000
 lixels$density <- lixels$density*1000
 
 ```
+
 ```{r}
 tmap_mode('view')
 tm_shape(lixels)+
@@ -83,6 +90,7 @@ tm_shape(childcare)+
   tm_dots()
 tmap_mode('plot')
 ```
+
 ```{r}
 kfun_childcare <- kfunctions(network, 
                              childcare,
@@ -99,4 +107,3 @@ kfun_childcare <- kfunctions(network,
 ```{r}
 kfun_childcare$plotk
 ```
-

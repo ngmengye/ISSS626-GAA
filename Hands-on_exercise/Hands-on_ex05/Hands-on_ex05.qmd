@@ -1,0 +1,143 @@
+---
+title: "Hands-on_ex05"
+---
+
+
+If development are evenly distributed geographically?
+No -> is there sign of spatial clustering?
+Yes -> where are these clusters?
+
+
+```{r}
+
+pacman::p_load(sf, spdep, tmap, tidyverse)
+
+```
+
+```{r}
+hunan <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex05/data/geospatial",
+                 layer = "Hunan")
+```
+
+```{r}
+hunan2012 <- read_csv("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex04/data/aspatial/Hunan_2012.csv")
+```
+
+```{r}
+hunan <- left_join(hunan,hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+equal interval = equal range of values quantile = equal number of observations
+
+```{r}
+equal <- tm_shape(hunan) +
+  tm_fill("GDPPC",
+          n = 5,
+          style = "equal") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Equal interval classification")
+
+quantile <- tm_shape(hunan) +
+  tm_fill("GDPPC",
+          n = 5,
+          style = "quantile") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Equal quantile classification")
+
+tmap_arrange(equal, 
+             quantile, 
+             asp=1, 
+             ncol=2)
+```
+
+```{r}
+wm_q <- poly2nb(hunan,
+                queen=TRUE)
+summary(wm_q)
+```
+
+s0: sum of all weights in the spatial weights matrix s1: sum of squared weights for each region's links. rows sums s2: sum of squared weights of all the elements in the weights matrix
+
+```{r}
+rswm_q <- nb2listw(wm_q, 
+                   style="W", 
+                   zero.policy = TRUE)
+rswm_q
+```
+##Moran's I
+```{r}
+moran.test(hunan$GDPPC, 
+           listw=rswm_q, 
+           zero.policy = TRUE, 
+           na.action=na.omit)
+```
+Null Hypothesis (H0): The GDPPC values are evenly distributed geographically, with no spatial autocorrelation (random pattern).
+Alternative Hypothesis (H1): The GDPPC values are not evenly distributed geographically, indicating positive spatial autocorrelation (clusters of similar values).
+
+p-value < 0.05, we reject null hypothesis (H0). 
+
+Standard deviate (Z value) = 4.7351, positive: clustered, observations tend to be similar
+
+
+```{r}
+set.seed(1234)
+bperm= moran.mc(hunan$GDPPC, 
+                listw=rswm_q, 
+                nsim=999, 
+                zero.policy = TRUE, 
+                na.action=na.omit)
+bperm
+```
+The Monte Carlo simulation you ran provides a way to assess the significance of the observed Moran's I value. 
+
+We reject the null hypothesis and conclude that there is significant positive spatial autocorrelation in the GDPPC values across the regions in the hunan dataset.
+
+##Visualize Monte Carlo Moran's I
+
+res = expected value under random spatial distribution, close to orginal expectation -0.011494253
+
+The observed Moran's I statistic (0.300749970) being significantly different from the expected value under randomness (-0.01504572) indicates that there is spatial autocorrelation in your data.
+
+Why Calculate This Mean?
+Calculating the mean of the simulated Moran's I values helps to understand the distribution of Moran's I under the null hypothesis of spatial randomness. It gives you an idea of what the Moran's I would typically be if there were no spatial autocorrelation present in the data.
+
+```{r}
+mean(bperm$res[1:999])
+```
+```{r}
+var(bperm$res[1:999])
+```
+```{r}
+var(bperm$res[1:999])
+```
+```{r}
+summary(bperm$res[1:999])
+```
+```{r}
+hist(bperm$res, 
+     freq=TRUE, 
+     breaks=20, 
+     xlab="Simulated Moran's I")
+abline(v=0, 
+       col="red") 
+```
+```{r}
+library(ggplot2)
+
+# Convert the simulated Moran's I values to a data frame
+moran_res_df <- data.frame(simulated_moran = bperm$res[1:999])  # Use only the simulated values
+
+# Create the histogram with ggplot
+ggplot(moran_res_df, aes(x = simulated_moran)) +
+  geom_histogram(bins = 20, fill = "lightblue", color = "black", alpha = 0.7) +  # Histogram with 20 bins
+  geom_vline(xintercept = 0, color = "red", linetype = "dashed") +  # Add vertical line at 0
+  labs(
+    x = "Simulated Moran's I",
+    y = "Frequency",
+    title = "Histogram of Simulated Moran's I Values"
+  ) +
+  theme_minimal()  # Use a minimal theme for a clean look
+
+```
+

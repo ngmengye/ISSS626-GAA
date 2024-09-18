@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Ng Meng Ye">
 
 <title>ISSS626-GAA - Hands-on_ex05</title>
 <style>
@@ -163,6 +164,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">In-class Exercise 2</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex03/In-class_Ex03.html">
+ <span class="dropdown-text">In-class Exercise 3</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex04/In-class_Ex04.html">
  <span class="dropdown-text">In-class Exercise 4</span></a>
   </li>  
@@ -209,7 +214,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#morans-i" id="toc-morans-i" class="nav-link active" data-scroll-target="#morans-i">Moran’s I</a>
+  <ul class="collapse">
+  <li><a href="#visualize-monte-carlo-morans-i" id="toc-visualize-monte-carlo-morans-i" class="nav-link" data-scroll-target="#visualize-monte-carlo-morans-i">Visualize Monte Carlo Moran’s I</a></li>
+  <li><a href="#gearys-c-test" id="toc-gearys-c-test" class="nav-link" data-scroll-target="#gearys-c-test">Geary’s C test</a></li>
+  <li><a href="#spatial-correlogram" id="toc-spatial-correlogram" class="nav-link" data-scroll-target="#spatial-correlogram">Spatial Correlogram</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -223,6 +239,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ng Meng Ye </p>
+          </div>
+  </div>
     
   
     
@@ -271,7 +293,8 @@ dbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...
 <pre><code>Joining with `by = join_by(County)`</code></pre>
 </div>
 </div>
-<p>equal interval = equal range of values quantile = equal number of observations</p>
+<p>equal interval = equal range of values<br>
+quantile = equal number of observations</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>equal <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(hunan) <span class="sc">+</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="st">"GDPPC"</span>,</span>
@@ -319,7 +342,9 @@ Link number distribution:
 85 with 11 links</code></pre>
 </div>
 </div>
-<p>s0: sum of all weights in the spatial weights matrix s1: sum of squared weights for each region’s links. rows sums s2: sum of squared weights of all the elements in the weights matrix</p>
+<p>s0: sum of all weights in the spatial weights matrix<br>
+s1: sum of squared weights for each region’s links. rows sums<br>
+s2: sum of squared weights of all the elements in the weights matrix</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>rswm_q <span class="ot">&lt;-</span> <span class="fu">nb2listw</span>(wm_q, </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">style=</span><span class="st">"W"</span>, </span>
@@ -339,7 +364,8 @@ Weights constants summary:
 W 88 7744 88 37.86334 365.9147</code></pre>
 </div>
 </div>
-<p>##Moran’s I</p>
+<section id="morans-i" class="level2">
+<h2 class="anchored" data-anchor-id="morans-i">Moran’s I</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">moran.test</span>(hunan<span class="sc">$</span>GDPPC, </span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">listw=</span>rswm_q, </span>
@@ -359,7 +385,8 @@ Moran I statistic       Expectation          Variance
       0.300749970      -0.011494253       0.004348351 </code></pre>
 </div>
 </div>
-<p>Null Hypothesis (H0): The GDPPC values are evenly distributed geographically, with no spatial autocorrelation (random pattern). Alternative Hypothesis (H1): The GDPPC values are not evenly distributed geographically, indicating positive spatial autocorrelation (clusters of similar values).</p>
+<p>Null Hypothesis (H0): The GDPPC values are evenly distributed geographically, with no spatial autocorrelation (random pattern).<br>
+Alternative Hypothesis (H1): The GDPPC values are not evenly distributed geographically, indicating positive spatial autocorrelation (clusters of similar values).</p>
 <p>p-value &lt; 0.05, we reject null hypothesis (H0).</p>
 <p>Standard deviate (Z value) = 4.7351, positive: clustered, observations tend to be similar</p>
 <div class="cell">
@@ -384,7 +411,8 @@ alternative hypothesis: greater</code></pre>
 </div>
 <p>The Monte Carlo simulation you ran provides a way to assess the significance of the observed Moran’s I value.</p>
 <p>We reject the null hypothesis and conclude that there is significant positive spatial autocorrelation in the GDPPC values across the regions in the hunan dataset.</p>
-<p>##Visualize Monte Carlo Moran’s I</p>
+<section id="visualize-monte-carlo-morans-i" class="level3">
+<h3 class="anchored" data-anchor-id="visualize-monte-carlo-morans-i">Visualize Monte Carlo Moran’s I</h3>
 <p>res = expected value under random spatial distribution, close to orginal expectation -0.011494253</p>
 <p>The observed Moran’s I statistic (0.300749970) being significantly different from the expected value under randomness (-0.01504572) indicates that there is spatial autocorrelation in your data.</p>
 <p>Why Calculate This Mean? Calculating the mean of the simulated Moran’s I values helps to understand the distribution of Moran’s I under the null hypothesis of spatial randomness. It gives you an idea of what the Moran’s I would typically be if there were no spatial autocorrelation present in the data.</p>
@@ -428,6 +456,12 @@ alternative hypothesis: greater</code></pre>
 </div>
 </div>
 </div>
+<section id="question-what-statistical-observation-can-you-draw-from-the-output-above" class="level4">
+<h4 class="anchored" data-anchor-id="question-what-statistical-observation-can-you-draw-from-the-output-above">Question: What statistical observation can you draw from the output above?</h4>
+<p>The observed Moran’s I value is much larger than the values expected under the null hypothesis (as seen in the histogram), provides a strong evidence that the data has significant positive spatial autocorrelation</p>
+</section>
+<section id="challenge-instead-of-using-base-graph-to-plot-the-values-plot-the-values-by-using-ggplot2-package" class="level4">
+<h4 class="anchored" data-anchor-id="challenge-instead-of-using-base-graph-to-plot-the-values-plot-the-values-by-using-ggplot2-package">Challenge: Instead of using Base Graph to plot the values, plot the values by using ggplot2 package</h4>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -452,8 +486,170 @@ alternative hypothesis: greater</code></pre>
 </div>
 </div>
 </div>
+</section>
+</section>
+<section id="gearys-c-test" class="level3">
+<h3 class="anchored" data-anchor-id="gearys-c-test">Geary’s C test</h3>
+<p>like Moran’s I, but it focuses more on detecting local differences or dissimilarities between neighbouring values on a map.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">geary.test</span>(hunan<span class="sc">$</span>GDPPC, <span class="at">listw=</span>rswm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Geary C test under randomisation
+
+data:  hunan$GDPPC 
+weights: rswm_q   
+
+Geary C statistic standard deviate = 3.6108, p-value = 0.0001526
+alternative hypothesis: Expectation greater than statistic
+sample estimates:
+Geary C statistic       Expectation          Variance 
+        0.6907223         1.0000000         0.0073364 </code></pre>
+</div>
+</div>
+<section id="question-what-statistical-conclusion-can-you-draw-from-the-output-above" class="level4">
+<h4 class="anchored" data-anchor-id="question-what-statistical-conclusion-can-you-draw-from-the-output-above">Question: What statistical conclusion can you draw from the output above?</h4>
+<p>Geary C statistic 0.69 less than 1 indicates positive spatial autocorrelation, meaning neighbouring regions tend to have similar GDPPC values. The p-value 0.0002 is less than significant level 0.05, we can reject the null hypothesis of no spatial autocorrelation</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>bperm<span class="ot">=</span><span class="fu">geary.mc</span>(hunan<span class="sc">$</span>GDPPC, </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">listw=</span>rswm_q, </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">nsim=</span><span class="dv">999</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>bperm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Monte-Carlo simulation of Geary C
+
+data:  hunan$GDPPC 
+weights: rswm_q  
+number of simulations + 1: 1000 
+
+statistic = 0.69072, observed rank = 1, p-value = 0.001
+alternative hypothesis: greater</code></pre>
+</div>
+</div>
+</section>
+<section id="question-what-statistical-conclusion-can-you-draw-from-the-output-above-1" class="level4">
+<h4 class="anchored" data-anchor-id="question-what-statistical-conclusion-can-you-draw-from-the-output-above-1">Question: What statistical conclusion can you draw from the output above?</h4>
+<p>The observed Geary’s C value of 0.69072 indicates positive spatial autocorrelation (neighboring regions tend to have similar GDPPC values).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(bperm<span class="sc">$</span>res[<span class="dv">1</span><span class="sc">:</span><span class="dv">999</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.004402</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(bperm<span class="sc">$</span>res[<span class="dv">1</span><span class="sc">:</span><span class="dv">999</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.007436493</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(bperm<span class="sc">$</span>res[<span class="dv">1</span><span class="sc">:</span><span class="dv">999</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.7142  0.9502  1.0052  1.0044  1.0595  1.2722 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(bperm<span class="sc">$</span>res, <span class="at">freq=</span><span class="cn">TRUE</span>, <span class="at">breaks=</span><span class="dv">20</span>, <span class="at">xlab=</span><span class="st">"Simulated Geary c"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="dv">1</span>, <span class="at">col=</span><span class="st">"red"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_ex05_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="question-what-statistical-observation-can-you-draw-from-the-output" class="level4">
+<h4 class="anchored" data-anchor-id="question-what-statistical-observation-can-you-draw-from-the-output">Question: What statistical observation can you draw from the output?</h4>
+<p>The distribution centers around 1, which is expected because Geary’s C equals 1 when there is no spatial autocorrelation (randomness). The histogram shows that the observed Geary’s C statistic (around 0.69) is much lower than the expected value under randomness (centered around 1), indicating positive spatial autocorrelation.</p>
+</section>
+</section>
+<section id="spatial-correlogram" class="level3">
+<h3 class="anchored" data-anchor-id="spatial-correlogram">Spatial Correlogram</h3>
+<p>It is a plot of the spatial autocorrelation coefficient on the y-axis and the distance (or spatial lag) on the x-axis.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>MI_corr <span class="ot">&lt;-</span> <span class="fu">sp.correlogram</span>(wm_q, </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                          hunan<span class="sc">$</span>GDPPC, </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">order=</span><span class="dv">6</span>, </span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">method=</span><span class="st">"I"</span>, </span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">style=</span><span class="st">"W"</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(MI_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_ex05_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(MI_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatial correlogram for hunan$GDPPC 
+method: Moran's I
+         estimate expectation   variance standard deviate Pr(I) two sided    
+1 (88)  0.3007500  -0.0114943  0.0043484           4.7351       2.189e-06 ***
+2 (88)  0.2060084  -0.0114943  0.0020962           4.7505       2.029e-06 ***
+3 (88)  0.0668273  -0.0114943  0.0014602           2.0496        0.040400 *  
+4 (88)  0.0299470  -0.0114943  0.0011717           1.2107        0.226015    
+5 (88) -0.1530471  -0.0114943  0.0012440          -4.0134       5.984e-05 ***
+6 (88) -0.1187070  -0.0114943  0.0016791          -2.6164        0.008886 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<section id="question-what-statistical-observation-can-you-draw-from-the-plot-above" class="level4">
+<h4 class="anchored" data-anchor-id="question-what-statistical-observation-can-you-draw-from-the-plot-above">Question: What statistical observation can you draw from the plot above?</h4>
+<p>Lag 1 has the highest Moran’s value (0.3007500)</p>
+<p>Lags 1, 2, 3, 5, and 6 have significant Moran’s I values, meaning the spatial autocorrelation at these distances is statistically significant and not random.</p>
+<p>Lag 4 has a positive Moran’s I value (0.0299470), but it is not statistically significant, suggesting that the spatial autocorrelation at this distance is weak and might be due to random variation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>GC_corr <span class="ot">&lt;-</span> <span class="fu">sp.correlogram</span>(wm_q, </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>                          hunan<span class="sc">$</span>GDPPC, </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">order=</span><span class="dv">6</span>, </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>                          <span class="at">method=</span><span class="st">"C"</span>, </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>                          <span class="at">style=</span><span class="st">"W"</span>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(GC_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_ex05_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(GC_corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatial correlogram for hunan$GDPPC 
+method: Geary's C
+        estimate expectation  variance standard deviate Pr(I) two sided    
+1 (88) 0.6907223   1.0000000 0.0073364          -3.6108       0.0003052 ***
+2 (88) 0.7630197   1.0000000 0.0049126          -3.3811       0.0007220 ***
+3 (88) 0.9397299   1.0000000 0.0049005          -0.8610       0.3892612    
+4 (88) 1.0098462   1.0000000 0.0039631           0.1564       0.8757128    
+5 (88) 1.2008204   1.0000000 0.0035568           3.3673       0.0007592 ***
+6 (88) 1.0773386   1.0000000 0.0058042           1.0151       0.3100407    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="question-what-statistical-observation-can-you-draw-from-the-plot-above-1" class="level4">
+<h4 class="anchored" data-anchor-id="question-what-statistical-observation-can-you-draw-from-the-plot-above-1">Question: What statistical observation can you draw from the plot above?</h4>
+<p>Lags 1, 2, and 5 have statistically significant Geary’s C values, meaning the spatial autocorrelation at these distances is strong and not random.<br>
+Lag 1 and 2: Positive spatial autocorrelation (clusters of similar values).<br>
+Lag 5: Negative spatial autocorrelation (dissimilar values are neighbors).<br>
+Lags 3, 4, and 6 are not statistically significant, indicating weak or random spatial autocorrelation at these distances.</p>
 
 
+</section>
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

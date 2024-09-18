@@ -1,12 +1,9 @@
 ---
 title: "Hands-on_ex05"
+author: "Ng Meng Ye"
 ---
 
-
-If development are evenly distributed geographically?
-No -> is there sign of spatial clustering?
-Yes -> where are these clusters?
-
+If development are evenly distributed geographically? No -\> is there sign of spatial clustering? Yes -\> where are these clusters?
 
 ```{r}
 
@@ -28,7 +25,8 @@ hunan <- left_join(hunan,hunan2012) %>%
   select(1:4, 7, 15)
 ```
 
-equal interval = equal range of values quantile = equal number of observations
+equal interval = equal range of values\
+quantile = equal number of observations
 
 ```{r}
 equal <- tm_shape(hunan) +
@@ -57,7 +55,9 @@ wm_q <- poly2nb(hunan,
 summary(wm_q)
 ```
 
-s0: sum of all weights in the spatial weights matrix s1: sum of squared weights for each region's links. rows sums s2: sum of squared weights of all the elements in the weights matrix
+s0: sum of all weights in the spatial weights matrix\
+s1: sum of squared weights for each region's links. rows sums\
+s2: sum of squared weights of all the elements in the weights matrix
 
 ```{r}
 rswm_q <- nb2listw(wm_q, 
@@ -65,20 +65,22 @@ rswm_q <- nb2listw(wm_q,
                    zero.policy = TRUE)
 rswm_q
 ```
-##Moran's I
+
+## Moran's I
+
 ```{r}
 moran.test(hunan$GDPPC, 
            listw=rswm_q, 
            zero.policy = TRUE, 
            na.action=na.omit)
 ```
-Null Hypothesis (H0): The GDPPC values are evenly distributed geographically, with no spatial autocorrelation (random pattern).
+
+Null Hypothesis (H0): The GDPPC values are evenly distributed geographically, with no spatial autocorrelation (random pattern).\
 Alternative Hypothesis (H1): The GDPPC values are not evenly distributed geographically, indicating positive spatial autocorrelation (clusters of similar values).
 
-p-value < 0.05, we reject null hypothesis (H0). 
+p-value \< 0.05, we reject null hypothesis (H0).
 
 Standard deviate (Z value) = 4.7351, positive: clustered, observations tend to be similar
-
 
 ```{r}
 set.seed(1234)
@@ -89,31 +91,35 @@ bperm= moran.mc(hunan$GDPPC,
                 na.action=na.omit)
 bperm
 ```
-The Monte Carlo simulation you ran provides a way to assess the significance of the observed Moran's I value. 
+
+The Monte Carlo simulation you ran provides a way to assess the significance of the observed Moran's I value.
 
 We reject the null hypothesis and conclude that there is significant positive spatial autocorrelation in the GDPPC values across the regions in the hunan dataset.
 
-##Visualize Monte Carlo Moran's I
+### Visualize Monte Carlo Moran's I
 
 res = expected value under random spatial distribution, close to orginal expectation -0.011494253
 
 The observed Moran's I statistic (0.300749970) being significantly different from the expected value under randomness (-0.01504572) indicates that there is spatial autocorrelation in your data.
 
-Why Calculate This Mean?
-Calculating the mean of the simulated Moran's I values helps to understand the distribution of Moran's I under the null hypothesis of spatial randomness. It gives you an idea of what the Moran's I would typically be if there were no spatial autocorrelation present in the data.
+Why Calculate This Mean? Calculating the mean of the simulated Moran's I values helps to understand the distribution of Moran's I under the null hypothesis of spatial randomness. It gives you an idea of what the Moran's I would typically be if there were no spatial autocorrelation present in the data.
 
 ```{r}
 mean(bperm$res[1:999])
 ```
+
 ```{r}
 var(bperm$res[1:999])
 ```
+
 ```{r}
 var(bperm$res[1:999])
 ```
+
 ```{r}
 summary(bperm$res[1:999])
 ```
+
 ```{r}
 hist(bperm$res, 
      freq=TRUE, 
@@ -122,6 +128,13 @@ hist(bperm$res,
 abline(v=0, 
        col="red") 
 ```
+
+#### Question: What statistical observation can you draw from the output above?
+
+The observed Moran's I value is much larger than the values expected under the null hypothesis (as seen in the histogram), provides a strong evidence that the data has significant positive spatial autocorrelation
+
+#### Challenge: Instead of using Base Graph to plot the values, plot the values by using ggplot2 package
+
 ```{r}
 library(ggplot2)
 
@@ -141,3 +154,92 @@ ggplot(moran_res_df, aes(x = simulated_moran)) +
 
 ```
 
+### Geary's C test
+
+like Moran's I, but it focuses more on detecting local differences or dissimilarities between neighbouring values on a map.
+
+```{r}
+geary.test(hunan$GDPPC, listw=rswm_q)
+```
+
+#### Question: What statistical conclusion can you draw from the output above?
+
+Geary C statistic 0.69 less than 1 indicates positive spatial autocorrelation, meaning neighbouring regions tend to have similar GDPPC values. The p-value 0.0002 is less than significant level 0.05, we can reject the null hypothesis of no spatial autocorrelation
+
+```{r}
+set.seed(1234)
+bperm=geary.mc(hunan$GDPPC, 
+               listw=rswm_q, 
+               nsim=999)
+bperm
+```
+
+#### Question: What statistical conclusion can you draw from the output above?
+
+The observed Geary's C value of 0.69072 indicates positive spatial autocorrelation (neighboring regions tend to have similar GDPPC values).
+
+```{r}
+mean(bperm$res[1:999])
+```
+
+```{r}
+var(bperm$res[1:999])
+```
+
+```{r}
+summary(bperm$res[1:999])
+```
+
+```{r}
+hist(bperm$res, freq=TRUE, breaks=20, xlab="Simulated Geary c")
+abline(v=1, col="red") 
+```
+
+#### Question: What statistical observation can you draw from the output?
+
+The distribution centers around 1, which is expected because Geary's C equals 1 when there is no spatial autocorrelation (randomness). The histogram shows that the observed Geary’s C statistic (around 0.69) is much lower than the expected value under randomness (centered around 1), indicating positive spatial autocorrelation.
+
+### Spatial Correlogram
+
+It is a plot of the spatial autocorrelation coefficient on the y-axis and the distance (or spatial lag) on the x-axis.
+
+```{r}
+MI_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order=6, 
+                          method="I", 
+                          style="W")
+plot(MI_corr)
+```
+
+```{r}
+print(MI_corr)
+```
+
+#### Question: What statistical observation can you draw from the plot above?
+
+Lag 1 has the highest Moran's value (0.3007500)
+
+Lags 1, 2, 3, 5, and 6 have significant Moran’s I values, meaning the spatial autocorrelation at these distances is statistically significant and not random.
+
+Lag 4 has a positive Moran's I value (0.0299470), but it is not statistically significant, suggesting that the spatial autocorrelation at this distance is weak and might be due to random variation.
+
+```{r}
+GC_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order=6, 
+                          method="C", 
+                          style="W")
+plot(GC_corr)
+```
+
+```{r}
+print(GC_corr)
+```
+
+#### Question: What statistical observation can you draw from the plot above?
+
+Lags 1, 2, and 5 have statistically significant Geary’s C values, meaning the spatial autocorrelation at these distances is strong and not random.\
+Lag 1 and 2: Positive spatial autocorrelation (clusters of similar values).\
+Lag 5: Negative spatial autocorrelation (dissimilar values are neighbors).\
+Lags 3, 4, and 6 are not statistically significant, indicating weak or random spatial autocorrelation at these distances.

@@ -1,5 +1,5 @@
 ---
-title: "in-class exercise 04"
+title: "In-class exercise 04"
 author: "Ng Meng Ye"
 ---
 
@@ -7,30 +7,31 @@ author: "Ng Meng Ye"
 pacman::p_load(sf,spdep,tmap,tidyverse,knitr,GWmodel,ggstatsplot)
 ```
 
+no need to perform transform to projected coordinate system ideally we should have the projection it is polygon instead of multipolygon, no island
 
-no need to perform transform to projected coordinate system
-ideally we should have the projection
-it is polygon instead of multipolygon, no island
 ```{r}
 hunan_sf <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex04/data/geospatial",
                  layer = "Hunan")
 ```
+
 please dont use read.csv which is base R
+
 ```{r}
 hunan2012 <- read_csv("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex04/data/aspatial/Hunan_2012.csv")
 ```
-combine spatial and aspatial data using left_join
-in reality, need to have common identifier, the values must be identical
-cannot be one lowercase and other is uppercase, the code chunk can use by
+
+combine spatial and aspatial data using left_join in reality, need to have common identifier, the values must be identical cannot be one lowercase and other is uppercase, the code chunk can use by
 
 ```{r}
 hunan_sf <- left_join(hunan_sf,hunan2012)
 hunan_sf <- select(hunan_sf,1:3,7,15,16,31,32)
 ```
+
 ```{r}
 wm_q <- poly2nb(hunan_sf)
 summary(wm_q)
 ```
+
 convert sf to sp because of GWmodel
 
 ```{r}
@@ -38,13 +39,7 @@ hunan_sp <- hunan_sf %>%
   as_Spatial()
 ```
 
-
-Determine adaptive bandwith using bw.gwr, linear regression model
-dependent and independent variables.
-abitrary number = 1 which is independent variable, just to provide the lrm requirements
-adaptive false = fixed bandwidth
-kernel = not much effect, can use others
-longlat = T, great circle calculation, convert to km
+Determine adaptive bandwith using bw.gwr, linear regression model dependent and independent variables. abitrary number = 1 which is independent variable, just to provide the lrm requirements adaptive false = fixed bandwidth kernel = not much effect, can use others longlat = T, great circle calculation, convert to km
 
 ```{r}
 bw_CV <- bw.gwr(GDPPC ~ 1,
@@ -54,9 +49,11 @@ bw_CV <- bw.gwr(GDPPC ~ 1,
               kernel = "bisquare",
               longlat = T)
 ```
+
 ```{r}
 bw_CV
 ```
+
 ```{r}
 bw_AIC <- bw.gwr(GDPPC ~ 1,
               data = hunan_sp,
@@ -65,12 +62,12 @@ bw_AIC <- bw.gwr(GDPPC ~ 1,
               kernel = "bisquare",
               longlat = T)
 ```
+
 ```{r}
 bw_AIC
 ```
-22 means optimum number of neighbours
-the bandwidth is in kilometre, 
-adaptive is always the best
+
+22 means optimum number of neighbours the bandwidth is in kilometre, adaptive is always the best
 
 ```{r}
 bw_AIC2 <- bw.gwr(GDPPC ~ 1,
@@ -81,9 +78,11 @@ bw_AIC2 <- bw.gwr(GDPPC ~ 1,
               longlat = T)
 
 ```
+
 ```{r}
 bw_AIC2
 ```
+
 ```{r}
 bw_CV2 <- bw.gwr(GDPPC ~ 1,
               data = hunan_sp,
@@ -92,11 +91,13 @@ bw_CV2 <- bw.gwr(GDPPC ~ 1,
               kernel = "bisquare",
               longlat = T)
 ```
+
 ```{r}
 bw_CV2
 ```
 
 make sure kernel, adaptive and longlat is the same as the bw requirement
+
 ```{r}
 gwstat <- gwss(data=hunan_sp,
                vars = "GDPPC",
@@ -107,36 +108,32 @@ gwstat <- gwss(data=hunan_sp,
 
 ```
 
+SDF= spatial data frame LM = local mean every 22 neighbours, calculate the local mean
 
-SDF= spatial data frame
-LM = local mean
-every 22 neighbours, calculate the local mean
-
-LSD = standard deviation
-88 area = 88 standard deviation
+LSD = standard deviation 88 area = 88 standard deviation
 
 LSKe = standard estimate
 
 LCV = correlation variance
 
 all take 22 neighbours, from the bandwidth
+
 ```{r}
 gwstat
 ```
+
 ```{r}
 gwstat_df <- as.data.frame(gwstat$SDF)
 ```
-gwstat dont have common identifier
-use cbind because the sequence is the same as gwstat and hunan_sf
-as long no sorting is used, can just cbind, because it just append blindly
 
+gwstat dont have common identifier use cbind because the sequence is the same as gwstat and hunan_sf as long no sorting is used, can just cbind, because it just append blindly
 
 ```{r}
 hunan_gstat <- cbind(hunan_sf,gwstat_df)
 ```
 
-
 n = 5, classes
+
 ```{r}
 tm_shape(hunan_gstat) + 
   tm_fill("GDPPC_LM",
@@ -151,5 +148,63 @@ tm_shape(hunan_gstat) +
             legend.width = 0.4,
             frame = TRUE)
 ```
+```{r}
+ggscatterstats(
+  data = hunan2012, 
+  x = Agri, 
+  y = GDPPC,
+  xlab = "Gross Agriculture Output", ## label for the x-axis
+  ylab = "GDP per capita", 
+  label.var = County, 
+  label.expression = Agri > 10000 & GDPPC > 50000, 
+  point.label.args = list(alpha = 0.7, size = 4, color = "grey50"),
+  xfill = "#CC79A7", 
+  yfill = "#009E73", 
+  title = "Relationship between GDP PC and Gross Agriculture Output")
+```
+#### Business question: Is there any relationship between GDP per capita and Gross Industry Output?
 
+There is a moderate positive relationship between GDP per capita and Gross Agriculture Output in this dataset. This suggests that regions with higher agricultural output tend to have higher GDP per capita
+
+
+```{r}
+bw <- bw.gwr(GDPPC ~ GIO, 
+             data = hunan_sp, 
+             approach = "AICc", 
+             adaptive = TRUE)
+```
+```{r}
+gwstats <- gwss(hunan_sp, 
+                vars = c("GDPPC", "GIO"), 
+                bw = bw,
+                kernel = "bisquare",
+                adaptive = TRUE, 
+                longlat = T)
+```
+
+```{r}
+gwstat_df <- as.data.frame(gwstats$SDF) %>%
+  select(c(12,13)) %>%
+  rename(gwCorr = Corr_GDPPC.GIO,
+         gwSpearman = Spearman_rho_GDPPC.GIO)
+```
+
+```{r}
+hunan_Corr <- cbind(hunan_sf, gwstat_df)
+```
+
+```{r}
+tm_shape(hunan_Corr) +
+  tm_fill("gwSpearman",
+          n = 5,
+          style = "quantile") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Local Spearman Rho",
+            main.title.position = "center",
+            main.title.size = 1.2,
+            legend.text.size = 0.6,
+            legend.height = 1.50, 
+            legend.width = 1.50,
+            frame = TRUE)
+```
 

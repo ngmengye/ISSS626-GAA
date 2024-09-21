@@ -340,12 +340,12 @@ bangkok_lixels$density <- bangkok_lixels$density*1000
 
 ```{r}
 # Plot using tmap
-tmap_mode('view')
-tm_shape(bangkok_lixels) +
-  tm_lines(col = "density") +
-tm_shape(rdacc_bangkok) +
-  tm_dots()
-tmap_mode('plot')
+# tmap_mode('view')
+# tm_shape(bangkok_lixels) +
+#   tm_lines(col = "density") +
+# tm_shape(rdacc_bangkok) +
+#   tm_dots()
+# tmap_mode('plot')
 ```
 
 ### 5.2 Network KDE (NKDE) Analysis - Nonthaburi
@@ -406,12 +406,12 @@ nonthaburi_lixels$density <- nonthaburi_lixels$density*1000
 
 ```{r}
 # Plot using tmap
-tmap_mode('view')
-tm_shape(nonthaburi_lixels) +
-  tm_lines(col = "density") +
-tm_shape(rdacc_nonthaburi) +
-  tm_dots()
-tmap_mode('plot')
+# tmap_mode('view')
+# tm_shape(nonthaburi_lixels) +
+#   tm_lines(col = "density") +
+# tm_shape(rdacc_nonthaburi) +
+#   tm_dots()
+# tmap_mode('plot')
 ```
 
 ### 5.3 Network KDE (NKDE) Analysis - Nakhon Pathom
@@ -471,12 +471,12 @@ nakhonpathom_lixels$density <- nakhonpathom_lixels$density*1000
 
 ```{r}
 # Plot using tmap
-tmap_mode('view')
-tm_shape(nakhonpathom_lixels) +
-  tm_lines(col = "density") +
-tm_shape(rdacc_nakhonpathom) +
-  tm_dots()
-tmap_mode('plot')
+# tmap_mode('view')
+# tm_shape(nakhonpathom_lixels) +
+#   tm_lines(col = "density") +
+# tm_shape(rdacc_nakhonpathom) +
+#   tm_dots()
+# tmap_mode('plot')
 ```
 
 ### 5.4 Network KDE (NKDE) Analysis - Pathum Thani
@@ -537,12 +537,12 @@ pathumthani_lixels$density <- pathumthani_lixels$density*1000
 
 ```{r}
 # Plot using tmap
-tmap_mode('view')
-tm_shape(pathumthani_lixels) +
-  tm_lines(col = "density") +
-tm_shape(rdacc_pathumthani) +
-  tm_dots()
-tmap_mode('plot')
+# tmap_mode('view')
+# tm_shape(pathumthani_lixels) +
+#   tm_lines(col = "density") +
+# tm_shape(rdacc_pathumthani) +
+#   tm_dots()
+# tmap_mode('plot')
 ```
 ### 5.5 Network KDE (NKDE) Analysis - Samut Prakan
 
@@ -602,12 +602,12 @@ samutprakan_lixels$density <- samutprakan_lixels$density*1000
 
 ```{r}
 # Plot using tmap
-tmap_mode('view')
-tm_shape(samutprakan_lixels) +
-  tm_lines(col = "density") +
-tm_shape(rdacc_samutprakan) +
-  tm_dots()
-tmap_mode('plot')
+# tmap_mode('view')
+# tm_shape(samutprakan_lixels) +
+#   tm_lines(col = "density") +
+# tm_shape(rdacc_samutprakan) +
+#   tm_dots()
+# tmap_mode('plot')
 ```
 ### 5.6 Network KDE (NKDE) Analysis - Samut Sakhon
 
@@ -668,12 +668,12 @@ samutsakhon_lixels$density <- samutsakhon_lixels$density*1000
 
 ```{r}
 # Plot using tmap
-tmap_mode('view')
-tm_shape(samutsakhon_lixels) +
-  tm_lines(col = "density") +
-tm_shape(rdacc_samutsakhon) +
-  tm_dots()
-tmap_mode('plot')
+# tmap_mode('view')
+# tm_shape(samutsakhon_lixels) +
+#   tm_lines(col = "density") +
+# tm_shape(rdacc_samutsakhon) +
+#   tm_dots()
+# tmap_mode('plot')
 ```
 
 ## 6 Network Constrained G- and K-function Analysis

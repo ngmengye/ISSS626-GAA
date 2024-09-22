@@ -64,7 +64,7 @@ pacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools,spNetwork)
 
 #### 4.1.1 Importing Attribute Data into R
 
-We will import thai_road_accident_2019_2022.csv file into RStudio and save the file into an R dataframe called rdacc
+We will import thai_road_accident_2019_2022.csv file into RStudio and save the file into an R dataframe called `rdacc`
 
 ```{r}
 rdacc <- read_csv("C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data/aspatial/thai_road_accident_2019_2022.csv")
@@ -95,8 +95,6 @@ cat("Missing values in Longitude:", long_na, "(", round(long_na_pct, 2), "% )\n"
 The code chunk below converts `rdacc` data frame into a simple feature data frame by using `st_as_st()` of **sf** packages
 
 ```{r}
-# filter out NA or missing data of longitude and latitude
-# check how many missing values (make sure less than 25%)
 rdacc_sf <- rdacc %>% 
   filter(!is.na(longitude) & longitude != "",
          !is.na(latitude)& latitude != "") %>% 
@@ -106,26 +104,18 @@ rdacc_sf <- rdacc %>%
   st_transform(crs = 32647)
 ```
 
-```{r}
-# Count the occurrences of each value in the 'weather_condition' column
-table(rdacc_sf$weather_condition)
+The code chunk below shows that there are 81376 observations in `rdacc_sf`
 
+```{r}
+nrow(rdacc_sf)
 ```
 
-```{r}
-# Count the occurrences of each value in the 'weather_condition' column
-table(rdacc_sf$accident_type)
+To reduce the computational load and improve code execution speed, we should filter the `rdacc_sf` data to include only cases where the weather condition is clear and the accident type is rear-end collision.
 
-```
-
-Let's focus on accident where the weather condition is clear and the accident type is read-end collision.
+A high frequency of rear-end collisions under clear conditions may indicate potential issues with road design, traffic signal timing, or congestion, rather than being caused by weather-related factors.
 
 ```{r}
-# Filter data for clear weather and rear-end collision
-radcc_sf_2 <- rdacc_sf[rdacc_sf$weather_condition == "clear" & rdacc_sf$accident_type == "rear-end collision", ]
-
-# View the filtered data
-
+rdacc_sf_2 <- rdacc_sf[rdacc_sf$weather_condition == "clear" & rdacc_sf$accident_type == "rear-end collision", ]
 ```
 
 ::: callout-caution
@@ -139,13 +129,13 @@ radcc_sf_2 <- rdacc_sf[rdacc_sf$weather_condition == "clear" & rdacc_sf$accident
 We use `st_geometry` to display basic information of the feature class such as type of geometry. It looks like the plot is showing points scattered across a wide area, which suggests that your data includes locations outside the Bangkok Metropolitan Region (BMR).
 
 ```{r}
-plot(st_geometry(radcc_sf_2))
+plot(st_geometry(rdacc_sf_2))
 ```
 
 To focus only on data within the BMR, we need to filter the dataset for coordinates that fall within the region.
 
 ```{r}
-rdacc_bmr_sf <- radcc_sf_2 %>%
+rdacc_bmr_sf <- rdacc_sf_2 %>%
   filter(province_en %in% c("Bangkok", "Nonthaburi", "Nakhon Pathom", "Pathum Thani", "Samut Prakan", "Samut Sakhon"))
 ```
 
@@ -166,19 +156,27 @@ network <- st_read(dsn="C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data
                    layer="hotosm_tha_roads_lines_shp")
 ```
 
+The Coordinate Reference System, CRS is showing NA. Without a CRS, it's unclear how the coordinates relate to the earth, which can lead to errors when performing spatial analysis.
+
+Set the CRS of `network` to WGS 84 (EPSG: 4326).
+
 ```{r}
 network <- st_set_crs(network, 4326)
 ```
+
+Transform the CRS of `network` to UTM Zone 47N (EPSG: 32647).
 
 ```{r}
 network32647 <- st_transform(network,32647)
 ```
 
 ```{r}
-network32647
+st_geometry(network32647)
 ```
 
-To see the type of highway
+The code chunk above indicates `network32647` with CRS: WGS 84 / UTM zone 47N.
+
+There are 2792590 observations, let's check what the highway types available in the `network32647`.
 
 ```{r}
 unique_values <- unique(network32647$highway)
@@ -186,39 +184,30 @@ unique_values <- unique(network32647$highway)
 print(unique_values)
 ```
 
-According to [Highway classification on WikiProject Thailand](https://wiki.openstreetmap.org/wiki/WikiProject_Thailand#Highway_classification), we should only include urban and local road wide enough for motor cars:
+According to [Highway classification on WikiProject Thailand](https://wiki.openstreetmap.org/wiki/WikiProject_Thailand#Highway_classification), we should only include intercity roads:
 
 1 secondary\
-2 residential\
-3 secondary_link\
-4 service\
-5 tertiary\
-6 trunk\
-7 trunk_link\
-8 primary\
-9 primary_link\
-10 motorway_link\
-11 tertiary_link\
-12 motorway\
-13 road\
-14 living_street
+2 tertiary\
+3 trunk\
+4 primary\
+5 motorway\
+6 unclassified\
+
+Filter `network32647` data accordingly into a new dataset `filtered_network`
 
 ```{r}
 highway_types <- c(
 "secondary", "tertiary","trunk", "primary", "motorway", "unclassified"
 )
 
-# highway_types <- c(
-# "secondary", "residential", "secondary_link", "tertiary",
-# "trunk", "trunk_link", "primary", "primary_link", "motorway_link",
-# "tertiary_link", "motorway", "road", "living_street", "unclassified"
-# )
-
-
-#highway_types <- c("motorway")
-
 filtered_network <- network32647 %>%
   filter(highway %in% highway_types)
+```
+
+The `filtered_network` now has 203029 observations.
+
+```{r}
+nrow(filtered_network)
 ```
 
 ### 4.4 Thailand - Subnational Administrative Boundaries
@@ -232,18 +221,28 @@ thai_map <- st_read(dsn="C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/dat
                    layer="tha_admbnda_adm1_rtsd_20220121")
 ```
 
+Transform CRS of `thai_map` to UTM Zone 47N (EPSG: 32647) as dataset `thai_map_32647`.
+
 ```{r}
 thai_map_32647 <- st_transform(thai_map, crs = 32647)
 ```
 
+`thai_map_32647` shows projected CRS: WGS 84 / UTM zone 47N, same as `filtered_network`.
+
 ```{r}
-st_crs(thai_map_32647)
+st_geometry(thai_map_32647)
 ```
+
+The `thai_map_32647` dataset covers the entire Thailand region.
+
+For this study, we are specifically focusing on the Bangkok Metropolitan Region (BMR). Accordingly, we will filter the dataset to include only the BMR area."
 
 ```{r}
 thaiBMR <- thai_map_32647 %>%
   filter(ADM1_EN %in% c("Bangkok", "Nonthaburi", "Nakhon Pathom", "Pathum Thani", "Samut Prakan", "Samut Sakhon"))
 ```
+
+`ThaiBMR` dataset only consists of the 6 provinces in BMR.
 
 ```{r}
 thaiBMR
@@ -251,46 +250,49 @@ thaiBMR
 
 #### 4.4.2 Visualizing the Geospatial Data
 
-```{r}
-plot(st_geometry(thaiBMR))
-plot(rdacc_bmr_sf$geometry,add=T,col='red',pch = 19)
-```
+We will visual the distribution of road accidents in BMR below using the datasets `thaiBMR` and `rdacc_bmr_sf`.
 
 ```{r}
-# tmap_mode('view')
-# tm_shape(thaiBMR) + tm_polygons()+
-#   tm_shape(rdacc_bmr_sf$geometry) + 
-#   tm_dots()
-  
+plot(st_geometry(thaiBMR), col = "lightblue", main = "BMR with Road Accidents")
+
+plot(rdacc_bmr_sf$geometry, col = "red", pch = 19, add = TRUE)
+
 ```
+
+The `filtered_network` dataset covers all Thailand region. We can use `st_intersection()` function to find the geometric intersection of `thaiBMR`. The new dataset will be `BMR_network` that only consists BMR networks.
 
 ```{r}
 BMR_network <- st_intersection(filtered_network,thaiBMR)
-
 ```
 
+The `BMR_network` consists of 26725 observations.
+
 ```{r}
-# Plot the background (BMR and highways)
+st_geometry(BMR_network)
+```
+
+We visualize the distribution of the road accidents within the network in BMR using `BMR_network`, `thaiBMR` and `rdacc_bmr_sf`.
+
+```{r}
 plot(st_geometry(thaiBMR), col = "lightblue", main = "BMR with Highways")
 plot(st_geometry(BMR_network), col = "black", add = TRUE)
 
-# Add dots for road accidents with smaller size
 plot(rdacc_bmr_sf, add = TRUE, col = 'red', pch = 19, cex = 0.5)  # cex = 0.5 makes the dots smaller
-
 
 ```
 
+This map of the Bangkok Metropolitan Region (BMR) shows the distribution of `rear-end collisions` that occurred under `clear weather conditions`. The highlighted road network includes highways classified as secondary, tertiary, trunk, primary, motorway, and unclassified types.
+
 ## 5 Network Constrained Spatial Point Patterns Analysis
 
-### 5.1 Network KDE (NKDE) Analysis - Bangkok
+### 5.1 Bangkok NKDE Analysis
 
-#### 5.1.1 Preparing the lixels objects
+Preparing the lixels objects
 
 ```{r}
-# Filter for Bangkok only
+#| warning: false
 BMR_network_bangkok <- BMR_network[BMR_network$ADM1_EN == "Bangkok", ]
 
-# Cast to LINESTRING geometry
 BMR_network_bangkok_linestring <- st_cast(BMR_network_bangkok, "LINESTRING")
 ```
 
@@ -298,7 +300,7 @@ BMR_network_bangkok_linestring <- st_cast(BMR_network_bangkok, "LINESTRING")
 bangkok_lixels <- lixelize_lines(BMR_network_bangkok_linestring, 700, mindist = 375)
 ```
 
-#### 5.1.2 Generating the line centre points
+Generating the line centre points
 
 ```{r}
 bangkok_samples <- lines_center(bangkok_lixels) 
@@ -307,6 +309,8 @@ bangkok_samples <- lines_center(bangkok_lixels)
 ```{r}
 rdacc_bangkok <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Bangkok", ]
 ```
+
+We use `simple` method with big datasets.
 
 ```{r}
 densities <- nkde(BMR_network_bangkok_linestring, 
@@ -339,24 +343,17 @@ bangkok_lixels$density <- bangkok_lixels$density*1000
 ```
 
 ```{r}
-# Plot using tmap
-# tmap_mode('view')
-# tm_shape(bangkok_lixels) +
-#   tm_lines(col = "density") +
-# tm_shape(rdacc_bangkok) +
-#   tm_dots()
-# tmap_mode('plot')
+plot(st_geometry(bangkok_lixels), col = bangkok_lixels$density, main = "BMR Network with Density")
+col_range <- colorRampPalette(c("lightblue", "red"))(100) 
+plot(st_geometry(bangkok_lixels), col = col_range[cut(bangkok_lixels$density, breaks = 100)], main = "Bangkok NKDE Visualization")
 ```
 
-### 5.2 Network KDE (NKDE) Analysis - Nonthaburi
+### 5.2 Nonthaburi NKDE Analysis
 
-#### 5.2.1 Preparing the lixels objects
+Preparing the lixels objects
 
 ```{r}
-# Filter for Bangkok only
 BMR_network_nonthaburi <- BMR_network[BMR_network$ADM1_EN == "Nonthaburi", ]
-
-# Cast to LINESTRING geometry
 BMR_network_nonthaburi_linestring <- st_cast(BMR_network_nonthaburi, "LINESTRING")
 ```
 
@@ -364,7 +361,7 @@ BMR_network_nonthaburi_linestring <- st_cast(BMR_network_nonthaburi, "LINESTRING
 nonthaburi_lixels <- lixelize_lines(BMR_network_nonthaburi_linestring, 700, mindist = 375)
 ```
 
-#### 5.2.2 Generating the line centre points
+Generating the line centre points
 
 ```{r}
 nonthaburi_samples <- lines_center(nonthaburi_lixels) 
@@ -405,23 +402,19 @@ nonthaburi_lixels$density <- nonthaburi_lixels$density*1000
 ```
 
 ```{r}
-# Plot using tmap
-# tmap_mode('view')
-# tm_shape(nonthaburi_lixels) +
-#   tm_lines(col = "density") +
-# tm_shape(rdacc_nonthaburi) +
-#   tm_dots()
-# tmap_mode('plot')
+#| warning: false
+plot(st_geometry(nonthaburi_lixels), col = nonthaburi_lixels, main = "Nonthaburi NKDE Visualization")
+col_range <- colorRampPalette(c("lightblue", "red"))(100) 
+plot(st_geometry(nonthaburi_lixels), col = col_range[cut(nonthaburi_lixels$density, breaks = 100)], main = "Nonthaburi NKDE Visualization")
 ```
 
-### 5.3 Network KDE (NKDE) Analysis - Nakhon Pathom
+### 5.3 Nakhon Pathom NKDE Analysis
 
-#### 5.3.1 Preparing the lixels objects
+Preparing the lixels objects
+
 ```{r}
-# Filter for Bangkok only
+#| warning: false
 BMR_network_nakhonpathom <- BMR_network[BMR_network$ADM1_EN == "Nakhon Pathom", ]
-
-# Cast to LINESTRING geometry
 BMR_network_nakhonpathom_linestring <- st_cast(BMR_network_nakhonpathom, "LINESTRING")
 ```
 
@@ -429,7 +422,7 @@ BMR_network_nakhonpathom_linestring <- st_cast(BMR_network_nakhonpathom, "LINEST
 nakhonpathom_lixels <- lixelize_lines(BMR_network_nakhonpathom_linestring, 700, mindist = 375)
 ```
 
-#### 5.3.2 Generating the line centre points
+Generating the line centre points
 
 ```{r}
 nakhonpathom_samples <- lines_center(nakhonpathom_lixels) 
@@ -470,24 +463,18 @@ nakhonpathom_lixels$density <- nakhonpathom_lixels$density*1000
 ```
 
 ```{r}
-# Plot using tmap
-# tmap_mode('view')
-# tm_shape(nakhonpathom_lixels) +
-#   tm_lines(col = "density") +
-# tm_shape(rdacc_nakhonpathom) +
-#   tm_dots()
-# tmap_mode('plot')
+#| warning: false
+plot(st_geometry(nakhonpathom_lixels), col = nakhonpathom_lixels, main = "Nakhon Pathom NKDE Visualization")
+col_range <- colorRampPalette(c("lightblue", "red"))(100) 
+plot(st_geometry(nakhonpathom_lixels), col = col_range[cut(nakhonpathom_lixels$density, breaks = 100)], main = "Nakhon Pathom NKDE Visualization")
 ```
 
-### 5.4 Network KDE (NKDE) Analysis - Pathum Thani
+### 5.4 Pathum Thani NKDE Analysis
 
-#### 5.4.1 Preparing the lixels objects
+Preparing the lixels objects
 
 ```{r}
-# Filter for Bangkok only
 BMR_network_pathumthani <- BMR_network[BMR_network$ADM1_EN == "Pathum Thani", ]
-
-# Cast to LINESTRING geometry
 BMR_network_pathumthani_linestring <- st_cast(BMR_network_pathumthani, "LINESTRING")
 ```
 
@@ -495,7 +482,7 @@ BMR_network_pathumthani_linestring <- st_cast(BMR_network_pathumthani, "LINESTRI
 pathumthani_lixels <- lixelize_lines(BMR_network_pathumthani_linestring, 700, mindist = 375)
 ```
 
-#### 5.4.2 Generating the line centre points
+Generating the line centre points
 
 ```{r}
 pathumthani_samples <- lines_center(pathumthani_lixels) 
@@ -536,23 +523,18 @@ pathumthani_lixels$density <- pathumthani_lixels$density*1000
 ```
 
 ```{r}
-# Plot using tmap
-# tmap_mode('view')
-# tm_shape(pathumthani_lixels) +
-#   tm_lines(col = "density") +
-# tm_shape(rdacc_pathumthani) +
-#   tm_dots()
-# tmap_mode('plot')
+#| warning: false
+plot(st_geometry(pathumthani_lixels), col = pathumthani_lixels, main = "Pathum Thani NKDE Visualization")
+col_range <- colorRampPalette(c("lightblue", "red"))(100) 
+plot(st_geometry(pathumthani_lixels), col = col_range[cut(pathumthani_lixels$density, breaks = 100)], main = "Pathum Thani NKDE Visualization")
 ```
-### 5.5 Network KDE (NKDE) Analysis - Samut Prakan
 
-#### 5.5.1 Preparing the lixels objects
+### 5.5 Samut Prakan NKDE Analysis
+
+Preparing the lixels objects
 
 ```{r}
-# Filter for Bangkok only
 BMR_network_samutprakan <- BMR_network[BMR_network$ADM1_EN == "Samut Prakan", ]
-
-# Cast to LINESTRING geometry
 BMR_network_samutprakan_linestring <- st_cast(BMR_network_samutprakan, "LINESTRING")
 ```
 
@@ -560,7 +542,7 @@ BMR_network_samutprakan_linestring <- st_cast(BMR_network_samutprakan, "LINESTRI
 samutprakan_lixels <- lixelize_lines(BMR_network_samutprakan_linestring, 700, mindist = 375)
 ```
 
-#### 5.5.2 Generating the line centre points
+Generating the line centre points
 
 ```{r}
 samutprakan_samples <- lines_center(samutprakan_lixels) 
@@ -601,22 +583,19 @@ samutprakan_lixels$density <- samutprakan_lixels$density*1000
 ```
 
 ```{r}
-# Plot using tmap
-# tmap_mode('view')
-# tm_shape(samutprakan_lixels) +
-#   tm_lines(col = "density") +
-# tm_shape(rdacc_samutprakan) +
-#   tm_dots()
-# tmap_mode('plot')
+#| warning: false
+plot(st_geometry(samutprakan_lixels), col = samutprakan_lixels, main = "Samut Prakan NKDE Visualization")
+col_range <- colorRampPalette(c("lightblue", "red"))(100) 
+plot(st_geometry(samutprakan_lixels), col = col_range[cut(samutprakan_lixels$density, breaks = 100)], main = "Samut Prakan NKDE Visualization")
 ```
-### 5.6 Network KDE (NKDE) Analysis - Samut Sakhon
 
-#### 5.6.1 Preparing the lixels objects
+### 5.6 Samut Sakhon NKDE Analysis
+
+Preparing the lixels objects
+
 ```{r}
-# Filter for Bangkok only
+#| warning: false
 BMR_network_samutsakhon <- BMR_network[BMR_network$ADM1_EN == "Samut Sakhon", ]
-
-# Cast to LINESTRING geometry
 BMR_network_samutsakhon_linestring <- st_cast(BMR_network_samutsakhon, "LINESTRING")
 ```
 
@@ -624,7 +603,7 @@ BMR_network_samutsakhon_linestring <- st_cast(BMR_network_samutsakhon, "LINESTRI
 samutsakhon_lixels <- lixelize_lines(BMR_network_samutsakhon_linestring, 700, mindist = 375)
 ```
 
-#### 5.6.2 Generating the line centre points
+Generating the line centre points
 
 ```{r}
 samutsakhon_samples <- lines_center(samutsakhon_lixels) 
@@ -635,8 +614,6 @@ rdacc_samutsakhon <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Samut Sakhon", ]
 ```
 
 ```{r}
-
-
 densities <- nkde(BMR_network_samutsakhon_linestring, 
                   events = rdacc_samutsakhon,
                   w = rep(1, nrow(rdacc_samutsakhon)),
@@ -667,13 +644,10 @@ samutsakhon_lixels$density <- samutsakhon_lixels$density*1000
 ```
 
 ```{r}
-# Plot using tmap
-# tmap_mode('view')
-# tm_shape(samutsakhon_lixels) +
-#   tm_lines(col = "density") +
-# tm_shape(rdacc_samutsakhon) +
-#   tm_dots()
-# tmap_mode('plot')
+#| warning: false
+plot(st_geometry(samutsakhon_lixels), col = samutsakhon_lixels, main = "Samut Sakhon NKDE Visualization")
+col_range <- colorRampPalette(c("lightblue", "red"))(100) 
+plot(st_geometry(samutsakhon_lixels), col = col_range[cut(samutsakhon_lixels$density, breaks = 100)], main = "Samut Sakhon NKDE Visualization")
 ```
 
 ## 6 Network Constrained G- and K-function Analysis
@@ -681,7 +655,7 @@ samutsakhon_lixels$density <- samutsakhon_lixels$density*1000
 ### 6.1 Bangkok
 
 ```{r}
-set.seed(1234)
+#| warning: false
 kfun_rdacc_bangkok <- kfunctions(BMR_network_bangkok_linestring, 
                              rdacc_bangkok,
                              start = 0, 
@@ -698,8 +672,8 @@ kfun_rdacc_bangkok <- kfunctions(BMR_network_bangkok_linestring,
 ```{r}
 kfun_rdacc_bangkok$plotk + ggtitle("Bangkok")
 ```
-The blue line is above the dashed black line and confidence envelope for most of the plot, which suggests that road accidents in Bangkok are clustered rather than randomly distributed.
 
+The blue line is above the dashed black line and confidence envelope for most of the plot, which suggests that road accidents in Bangkok are clustered rather than randomly distributed.
 
 ### 6.2 Nonthaburi
 
@@ -720,8 +694,8 @@ kfun_rdacc_nonthaburi <- kfunctions(BMR_network_nonthaburi_linestring,
 ```{r}
 kfun_rdacc_nonthaburi$plotk+ ggtitle("Nonthaburi")
 ```
-Unlike in Bangkok (where we saw clear clustering), road accidents in Nonthaburi resemble regular pattern at the distance of 50 to 575m.
 
+Unlike in Bangkok (where we saw clear clustering), road accidents in Nonthaburi resemble regular pattern at the distance of 50 to 575m.
 
 ### 6.3 Nakhon Pathom
 
@@ -742,6 +716,7 @@ kfun_rdacc_nakhonpathom <- kfunctions(BMR_network_nakhonpathom_linestring,
 ```{r}
 kfun_rdacc_nakhonpathom$plotk + ggtitle("Nakhon Pathom")
 ```
+
 Road accidents in Nakhon Pathom resemble clustered pattern at the distance of 250 to 1000m.
 
 ### 6.4 Pathum Thani
@@ -763,6 +738,7 @@ kfun_rdacc_pathumthani <- kfunctions(BMR_network_pathumthani_linestring,
 ```{r}
 kfun_rdacc_pathumthani$plotk + ggtitle("Pathum Thani")
 ```
+
 Road accidents in Pathum Thani resemble clustered pattern at the distance of 0 to 1000m.
 
 ### 6.5 Samut Prakan
@@ -784,6 +760,7 @@ kfun_rdacc_samutprakan <- kfunctions(BMR_network_samutprakan_linestring,
 ```{r}
 kfun_rdacc_samutprakan$plotk + ggtitle("Samut Prakan")
 ```
+
 Road accidents in Samut Prakan resemble clustered pattern at the distance of 0 to 1000m.
 
 ### 6.6 Samut Sakhon
@@ -805,5 +782,5 @@ kfun_rdacc_samutsakhon <- kfunctions(BMR_network_samutsakhon_linestring,
 ```{r}
 kfun_rdacc_samutsakhon$plotk + ggtitle("Samut Sakhon")
 ```
-Road accidents in Samut Sakhon resemble clustered pattern at the distance of 0 to 1000m.
 
+Road accidents in Samut Sakhon resemble clustered pattern at the distance of 0 to 1000m.

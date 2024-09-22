@@ -262,6 +262,7 @@ plot(rdacc_bmr_sf$geometry, col = "red", pch = 19, add = TRUE)
 The `filtered_network` dataset covers all Thailand region. We can use `st_intersection()` function to find the geometric intersection of `thaiBMR`. The new dataset will be `BMR_network` that only consists BMR networks.
 
 ```{r}
+#| warning: false
 BMR_network <- st_intersection(filtered_network,thaiBMR)
 ```
 
@@ -274,10 +275,11 @@ st_geometry(BMR_network)
 We visualize the distribution of the road accidents within the network in BMR using `BMR_network`, `thaiBMR` and `rdacc_bmr_sf`.
 
 ```{r}
+#| warning: false
 plot(st_geometry(thaiBMR), col = "lightblue", main = "BMR with Highways")
 plot(st_geometry(BMR_network), col = "black", add = TRUE)
 
-plot(rdacc_bmr_sf, add = TRUE, col = 'red', pch = 19, cex = 0.5)  # cex = 0.5 makes the dots smaller
+plot(rdacc_bmr_sf, add = TRUE, col = 'red', pch = 19, cex = 0.5)  # cex = 0.5 
 
 ```
 
@@ -343,7 +345,6 @@ bangkok_lixels$density <- bangkok_lixels$density*1000
 ```
 
 ```{r}
-plot(st_geometry(bangkok_lixels), col = bangkok_lixels$density, main = "BMR Network with Density")
 col_range <- colorRampPalette(c("lightblue", "red"))(100) 
 plot(st_geometry(bangkok_lixels), col = col_range[cut(bangkok_lixels$density, breaks = 100)], main = "Bangkok NKDE Visualization")
 ```
@@ -403,7 +404,6 @@ nonthaburi_lixels$density <- nonthaburi_lixels$density*1000
 
 ```{r}
 #| warning: false
-plot(st_geometry(nonthaburi_lixels), col = nonthaburi_lixels, main = "Nonthaburi NKDE Visualization")
 col_range <- colorRampPalette(c("lightblue", "red"))(100) 
 plot(st_geometry(nonthaburi_lixels), col = col_range[cut(nonthaburi_lixels$density, breaks = 100)], main = "Nonthaburi NKDE Visualization")
 ```
@@ -464,7 +464,6 @@ nakhonpathom_lixels$density <- nakhonpathom_lixels$density*1000
 
 ```{r}
 #| warning: false
-plot(st_geometry(nakhonpathom_lixels), col = nakhonpathom_lixels, main = "Nakhon Pathom NKDE Visualization")
 col_range <- colorRampPalette(c("lightblue", "red"))(100) 
 plot(st_geometry(nakhonpathom_lixels), col = col_range[cut(nakhonpathom_lixels$density, breaks = 100)], main = "Nakhon Pathom NKDE Visualization")
 ```
@@ -524,7 +523,6 @@ pathumthani_lixels$density <- pathumthani_lixels$density*1000
 
 ```{r}
 #| warning: false
-plot(st_geometry(pathumthani_lixels), col = pathumthani_lixels, main = "Pathum Thani NKDE Visualization")
 col_range <- colorRampPalette(c("lightblue", "red"))(100) 
 plot(st_geometry(pathumthani_lixels), col = col_range[cut(pathumthani_lixels$density, breaks = 100)], main = "Pathum Thani NKDE Visualization")
 ```
@@ -584,7 +582,6 @@ samutprakan_lixels$density <- samutprakan_lixels$density*1000
 
 ```{r}
 #| warning: false
-plot(st_geometry(samutprakan_lixels), col = samutprakan_lixels, main = "Samut Prakan NKDE Visualization")
 col_range <- colorRampPalette(c("lightblue", "red"))(100) 
 plot(st_geometry(samutprakan_lixels), col = col_range[cut(samutprakan_lixels$density, breaks = 100)], main = "Samut Prakan NKDE Visualization")
 ```
@@ -645,7 +642,6 @@ samutsakhon_lixels$density <- samutsakhon_lixels$density*1000
 
 ```{r}
 #| warning: false
-plot(st_geometry(samutsakhon_lixels), col = samutsakhon_lixels, main = "Samut Sakhon NKDE Visualization")
 col_range <- colorRampPalette(c("lightblue", "red"))(100) 
 plot(st_geometry(samutsakhon_lixels), col = col_range[cut(samutsakhon_lixels$density, breaks = 100)], main = "Samut Sakhon NKDE Visualization")
 ```

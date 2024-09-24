@@ -1,0 +1,213 @@
+---
+title: "In-class_Ex05"
+author: "Ng Meng Ye"
+date: 23-09-2024 
+---
+
+Focus on sfdep, relevant to tidyverse approach
+
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse, sfdep)
+```
+
+```{r}
+hunan <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex05/data/geospatial",
+                 layer = "Hunan")
+```
+
+```{r}
+hunan2012 <- read_csv("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex04/data/aspatial/Hunan_2012.csv")
+```
+
+```{r}
+hunan_GDPPC <- left_join(hunan,hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+equal interval = equal range of values\
+quantile = equal number of observations
+
+```{r}
+equal <- tm_shape(hunan_GDPPC) +
+  tm_fill("GDPPC",
+          n = 5,
+          style = "equal") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Equal interval classification")
+
+quantile <- tm_shape(hunan_GDPPC) +
+  tm_fill("GDPPC",
+          n = 5,
+          style = "quantile") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Equal quantile classification")
+
+tmap_arrange(equal, 
+             quantile, 
+             asp=1, 
+             ncol=2)
+```
+
+## Queen's contiguity weights
+
+```{r}
+wm_q <- hunan_GDPPC %>%
+  mutate(nb=st_contiguity(geometry),
+         wt =st_weights(nb,
+                        style = "W"),
+         .before = 1)
+```
+
+W = row standardized weights 
+nb = every neighbours 
+wt = weights for each neighbours, 4 neighbours = 1/4
+
+island dont have neighbours, allow zero as lagged value to avoid missing value
+before = 1 brings the 2 new columns in front of the table
+
+```{r}
+wm_q
+```
+```{r}
+global_moran_test(wm_q$GDPPC,
+                        wm_q$nb,
+                        wm_q$wt)
+```
+p-value <0.05, reject null hypothesis. There are spatial autocorrelation either positive or negative.
+
+Moran I = 0.300749970 relative weak positive spatial autocorrelation
+
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q$GDPPC,
+                        wm_q$nb,
+                        wm_q$wt,
+                  nsim = 99)
+```
+p-value < 0, reject null hypothesis.
+statistic = 0.30075 = positive spatial 
+
+
+
+```{r}
+lisa <- wm_q %>%
+  mutate(local_moran=local_moran(
+    GDPPC, nb,wt,nsim=99),
+    .before = 1) %>%
+  unnest(local_moran)
+```
+unnest = tibble data frame, instead of object class in spdep
+
+eii = expected
+var = variance
+p = value
+p_sim = simulated value
+
+mean vs median = 
+
+
+```{r}
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_fill("ii") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "local Moran's I of GDPPC",
+    main.title.size = 1
+  )
+```
+```{r}
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_fill("p_ii_sim") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "local Moran's I of GDPPC",
+    main.title.size = 1
+  )
+```
+```{r}
+tmap_mode("plot")
+map1 <- tm_shape(lisa) +
+  tm_fill("ii") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "local Moran's I of GDPPC",
+    main.title.size = 1
+  )
+
+map2 <- tm_shape(lisa) +
+  tm_fill("p_ii", breaks = c(0,0.001,0.01,0.05,1),labels = c("0.001","0.01","0.05","Not Sig")) +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "p-value of Moran's I of GDPPC",
+    main.title.size = 1
+  )
+
+tmap_arrange(map1,map2,ncol=2)
+```
+
+not all p_ii significant
+
+```{r}
+lisa_sig <- lisa %>%
+  filter(p_ii < 0.05)
+tmap_mode('plot')
+tm_shape(lisa)+
+  tm_polygons()+
+  tm_borders(alpha = 0.05)+
+tm_shape(lisa_sig) + 
+    tm_fill("mean") +
+    tm_borders(alpha = 0.4)
+  
+```
+the low-low shows that its neighbours are low value
+
+
+
+```{r}
+wm_idw <- hunan_GDPPC %>%
+  mutate(nb= st_contiguity(geometry),
+         wts = st_inverse_distance(nb,geometry,scale= 1,alpha=1),
+         .before = 1)
+```
+
+
+```{r}
+HCSA <- wm_idw %>%
+  mutate(local_Gi = local_gstar_perm(
+    GDPPC, nb, wt, nsim = 99),
+        .before = 1) %>%
+  unnest(local_Gi)
+
+HCSA
+```
+
+
+```{r}
+tmap_mode("plot")
+tm_shape(HCSA) +
+  tm_fill("p_sim") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8))
+```
+
+```{r}
+HCSA_sig <- HCSA %>%
+  filter(p_sim < 0.05)
+tmap_mode('plot')
+tm_shape(HCSA)+
+  tm_polygons()+
+  tm_borders(alpha = 0.05)+
+tm_shape(HCSA_sig) + 
+    tm_fill("cluster") +
+    tm_borders(alpha = 0.4)
+```
+
+
+

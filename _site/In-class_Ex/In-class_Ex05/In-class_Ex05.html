@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Ng Meng Ye">
-<meta name="dcterms.date" content="2025-11-09">
 
 <title>ISSS626-GAA - In-class exercise 05</title>
 <style>
@@ -223,8 +222,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#queens-contiguity-weights" id="toc-queens-contiguity-weights" class="nav-link active" data-scroll-target="#queens-contiguity-weights">Queen’s contiguity weights</a>
+  <li><a href="#global-and-local-measures-of-spatial-autocorrelation-sfdep-methods" id="toc-global-and-local-measures-of-spatial-autocorrelation-sfdep-methods" class="nav-link active" data-scroll-target="#global-and-local-measures-of-spatial-autocorrelation-sfdep-methods">Global and Local Measures of Spatial Autocorrelation: sfdep methods</a>
   <ul class="collapse">
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">Getting started</a>
+  <ul class="collapse">
+  <li><a href="#loading-the-r-packages" id="toc-loading-the-r-packages" class="nav-link" data-scroll-target="#loading-the-r-packages">Loading the R packages</a></li>
+  <li><a href="#preparing-the-data" id="toc-preparing-the-data" class="nav-link" data-scroll-target="#preparing-the-data">Preparing the data</a></li>
+  <li><a href="#combining-both-data-fram-by-using-left-join" id="toc-combining-both-data-fram-by-using-left-join" class="nav-link" data-scroll-target="#combining-both-data-fram-by-using-left-join">Combining both data fram by using left join</a></li>
+  <li><a href="#plotting-a-choropleth-map" id="toc-plotting-a-choropleth-map" class="nav-link" data-scroll-target="#plotting-a-choropleth-map">Plotting a choropleth map</a></li>
+  </ul></li>
+  <li><a href="#global-measures-of-spatial-association" id="toc-global-measures-of-spatial-association" class="nav-link" data-scroll-target="#global-measures-of-spatial-association">Global Measures of Spatial Association</a>
+  <ul class="collapse">
+  <li><a href="#queens-contiguity-weights" id="toc-queens-contiguity-weights" class="nav-link" data-scroll-target="#queens-contiguity-weights">Queen’s contiguity weights</a></li>
   <li><a href="#performing-global-morans-i-test" id="toc-performing-global-morans-i-test" class="nav-link" data-scroll-target="#performing-global-morans-i-test">Performing Global Moran’s I test</a></li>
   <li><a href="#performing-global-morans-i-permutation-test" id="toc-performing-global-morans-i-permutation-test" class="nav-link" data-scroll-target="#performing-global-morans-i-permutation-test">Performing Global Moran’s I permutation test</a></li>
   </ul></li>
@@ -243,6 +252,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#visualising-p-value-of-hcsa" id="toc-visualising-p-value-of-hcsa" class="nav-link" data-scroll-target="#visualising-p-value-of-hcsa">Visualising p-value of HCSA</a></li>
   <li><a href="#visualising-local-hcsa" id="toc-visualising-local-hcsa" class="nav-link" data-scroll-target="#visualising-local-hcsa">Visualising local HCSA</a></li>
   <li><a href="#visualising-hot-spot-and-cold-spot-areas" id="toc-visualising-hot-spot-and-cold-spot-areas" class="nav-link" data-scroll-target="#visualising-hot-spot-and-cold-spot-areas">Visualising hot spot and cold spot areas</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -266,12 +276,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           </div>
   </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">November 9, 2025</p>
-    </div>
-  </div>
   
     
   </div>
@@ -281,10 +285,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Focus on sfdep, relevant to tidyverse approach</p>
+<section id="global-and-local-measures-of-spatial-autocorrelation-sfdep-methods" class="level1">
+<h1>Global and Local Measures of Spatial Autocorrelation: sfdep methods</h1>
+<section id="getting-started" class="level2">
+<h2 class="anchored" data-anchor-id="getting-started">Getting started</h2>
+<section id="loading-the-r-packages" class="level3">
+<h3 class="anchored" data-anchor-id="loading-the-r-packages">Loading the R packages</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spdep, tmap, tidyverse, sfdep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="preparing-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="preparing-the-data">Preparing the data</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>hunan <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex05/data/geospatial"</span>,</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">layer =</span> <span class="st">"Hunan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -312,6 +324,9 @@ dbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
 </div>
+</section>
+<section id="combining-both-data-fram-by-using-left-join" class="level3">
+<h3 class="anchored" data-anchor-id="combining-both-data-fram-by-using-left-join">Combining both data fram by using left join</h3>
 <p>all the rows from the first data frame <code>hunan</code> are kept. The result will contain all rows from <code>hunan</code>, along with matching data from <code>hunan2012</code></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>hunan_GDPPC <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hunan,hunan2012) <span class="sc">%&gt;%</span></span>
@@ -333,6 +348,9 @@ Caution
 <p>In order to retain the geospatial properties, the left data frame must the sf data.frame (i.e.&nbsp;hunan)</p>
 </div>
 </div>
+</section>
+<section id="plotting-a-choropleth-map" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-a-choropleth-map">Plotting a choropleth map</h3>
 <p>equal interval = equal range of values<br>
 quantile = equal number of observations</p>
 <div class="cell">
@@ -392,8 +410,12 @@ quantile = equal number of observations</p>
 </div>
 </div>
 </div>
-<section id="queens-contiguity-weights" class="level2">
-<h2 class="anchored" data-anchor-id="queens-contiguity-weights">Queen’s contiguity weights</h2>
+</section>
+</section>
+<section id="global-measures-of-spatial-association" class="level2">
+<h2 class="anchored" data-anchor-id="global-measures-of-spatial-association">Global Measures of Spatial Association</h2>
+<section id="queens-contiguity-weights" class="level3">
+<h3 class="anchored" data-anchor-id="queens-contiguity-weights">Queen’s contiguity weights</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> hunan_GDPPC <span class="sc">%&gt;%</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nb=</span><span class="fu">st_contiguity</span>(geometry),</span>
@@ -459,6 +481,7 @@ First 10 features:
 10 POLYGON ((113.1757 26.82734...</code></pre>
 </div>
 </div>
+</section>
 <section id="performing-global-morans-i-test" class="level3">
 <h3 class="anchored" data-anchor-id="performing-global-morans-i-test">Performing Global Moran’s I test</h3>
 <div class="cell">
@@ -825,6 +848,7 @@ tm_shape prior to each of them).</code></pre>
 </div>
 
 
+</section>
 </section>
 </section>
 

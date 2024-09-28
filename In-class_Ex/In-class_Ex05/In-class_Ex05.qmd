@@ -1,5 +1,5 @@
 ---
-title: "In-class_Ex05"
+title: "In-class exercise 05"
 author: "Ng Meng Ye"
 date: 23-09-2024 
 ---
@@ -19,10 +19,16 @@ hunan <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex05/
 hunan2012 <- read_csv("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex04/data/aspatial/Hunan_2012.csv")
 ```
 
+all the rows from the first data frame `hunan` are kept. The result will contain all rows from `hunan`, along with matching data from `hunan2012`
+
 ```{r}
 hunan_GDPPC <- left_join(hunan,hunan2012) %>%
   select(1:4, 7, 15)
 ```
+
+::: callout-caution
+In order to retain the geospatial properties, the left data frame must the sf data.frame (i.e. hunan)
+:::
 
 equal interval = equal range of values\
 quantile = equal number of observations
@@ -30,17 +36,19 @@ quantile = equal number of observations
 ```{r}
 equal <- tm_shape(hunan_GDPPC) +
   tm_fill("GDPPC",
-          n = 5,
+          title = "GDPPC by equal interval",
           style = "equal") +
   tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "Equal interval classification")
+  tm_layout(main.title = "Distribution of GDP per capita by county, Hunan Province",
+            main.title.size = 0.8)
 
 quantile <- tm_shape(hunan_GDPPC) +
   tm_fill("GDPPC",
-          n = 5,
+          title = "GDPPC by equal quantile",
           style = "quantile") +
   tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "Equal quantile classification")
+  tm_layout(main.title = "Distribution of GDP per capita by county, Hunan Province",
+            main.title.size = 0.8)
 
 tmap_arrange(equal, 
              quantile, 
@@ -48,35 +56,59 @@ tmap_arrange(equal,
              ncol=2)
 ```
 
+```{r}
+tmap_mode("plot")
+tm_shape(hunan_GDPPC) +
+  tm_fill("GDPPC", 
+          style = "quantile", 
+          palette = "Blues",
+          title = "GDPPC") +
+  tm_layout(main.title = "Distribution of GDP per capita by county, Hunan Province",
+            main.title.position = "center",
+            main.title.size = 0.6,
+            legend.height = 0.45, 
+            legend.width = 0.35,
+            frame = TRUE) +
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar() +
+  tm_grid(alpha =0.2)
+```
+
 ## Queen's contiguity weights
 
 ```{r}
 wm_q <- hunan_GDPPC %>%
   mutate(nb=st_contiguity(geometry),
-         wt =st_weights(nb,
+         wt=st_weights(nb,
                         style = "W"),
          .before = 1)
 ```
 
-W = row standardized weights 
-nb = every neighbours 
-wt = weights for each neighbours, 4 neighbours = 1/4
+W = row standardized weights nb = every neighbours wt = weights for each neighbours, 4 neighbours = 1/4
 
-island dont have neighbours, allow zero as lagged value to avoid missing value
-before = 1 brings the 2 new columns in front of the table
+island dont have neighbours, allow zero as lagged value to avoid missing value before = 1 brings the 2 new columns in front of the table
+
+if we use poly2nb, we will not get the simple feature
 
 ```{r}
 wm_q
 ```
+
+### Performing Global Moran's I test
+
 ```{r}
 global_moran_test(wm_q$GDPPC,
                         wm_q$nb,
-                        wm_q$wt)
+                        wm_q$wt,
+              )
 ```
-p-value <0.05, reject null hypothesis. There are spatial autocorrelation either positive or negative.
+
+p-value \<0.05, reject null hypothesis. There are spatial autocorrelation either positive or negative.
 
 Moran I = 0.300749970 relative weak positive spatial autocorrelation
 
+### Performing Global Moran's I permutation test
 
 ```{r}
 set.seed(1234)
@@ -85,10 +117,18 @@ global_moran_perm(wm_q$GDPPC,
                         wm_q$wt,
                   nsim = 99)
 ```
-p-value < 0, reject null hypothesis.
-statistic = 0.30075 = positive spatial 
 
+The statistical report on previous tab shows that the p-value is smaller than alpha value of 0.05. Hence, we have enough statistical evidence to reject the null hypothesis that the spatial distribution of GPD per capita are resemble random distribution (i.e. independent from spatial). Because the Moran’s I statistics is greater than 0. We can infer that the spatial distribution shows sign of clustering.
 
+::: callout-tip
+The number of simulation is always equal to nsim + 1. This means in nsim = 99, 100 simulation will be performed.
+:::
+
+## LISA map
+
+Outliers: High-Low & Low-High Clusters: High-High & Low-Low
+
+### Computing local Moran's I
 
 ```{r}
 lisa <- wm_q %>%
@@ -97,14 +137,20 @@ lisa <- wm_q %>%
     .before = 1) %>%
   unnest(local_moran)
 ```
-unnest = tibble data frame, instead of object class in spdep
 
-eii = expected
-var = variance
-p = value
-p_sim = simulated value
+Columns:
 
-mean vs median = 
+-   ii: local moran statistics, positive = clustering
+
+-   eii: expectation of local moran statistic under the assumption of spatial randomness
+
+-   var_ii: variance of local moran statistic, high = more psread out
+
+-   z_ii: standard deviate of local moran statistic, positive = cluster of similar values
+
+-   skewness: Positive = more extreme values above the mean
+
+-   kurtosis: High kurtosis = more extreme outlier
 
 
 ```{r}
@@ -118,6 +164,7 @@ tm_shape(lisa) +
     main.title.size = 1
   )
 ```
+### Visualising p-value of local Moran's I
 ```{r}
 tmap_mode("plot")
 tm_shape(lisa) +
@@ -129,6 +176,7 @@ tm_shape(lisa) +
     main.title.size = 1
   )
 ```
+### Visualising local Moran's I and p-value
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa) +
@@ -151,63 +199,92 @@ map2 <- tm_shape(lisa) +
 
 tmap_arrange(map1,map2,ncol=2)
 ```
-
-not all p_ii significant
-
+### Plotting LISA map
 ```{r}
-lisa_sig <- lisa %>%
-  filter(p_ii < 0.05)
-tmap_mode('plot')
-tm_shape(lisa)+
-  tm_polygons()+
-  tm_borders(alpha = 0.05)+
-tm_shape(lisa_sig) + 
-    tm_fill("mean") +
-    tm_borders(alpha = 0.4)
+lisa_sig <- lisa  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_sig) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4)
   
 ```
-the low-low shows that its neighbours are low value
+## Hot Spot and Cold Spot Area Analysis (HCSA)
 
+Use Getis to identify clusters of high values (hot spots) and low values (cold spots)
 
-
+### Computing local Gi* statistics
 ```{r}
 wm_idw <- hunan_GDPPC %>%
-  mutate(nb= st_contiguity(geometry),
-         wts = st_inverse_distance(nb,geometry,scale= 1,alpha=1),
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
          .before = 1)
 ```
-
-
+### Computing local Gi* statistics
 ```{r}
-HCSA <- wm_idw %>%
+HCSA <- wm_idw %>% 
   mutate(local_Gi = local_gstar_perm(
-    GDPPC, nb, wt, nsim = 99),
-        .before = 1) %>%
+    GDPPC, nb, wts, nsim = 99),
+         .before = 1) %>%
   unnest(local_Gi)
-
 HCSA
 ```
-
-
+### Visualising Gi*
 ```{r}
 tmap_mode("plot")
 tm_shape(HCSA) +
-  tm_fill("p_sim") +
+  tm_fill("gi_star") + 
   tm_borders(alpha = 0.5) +
   tm_view(set.zoom.limits = c(6,8))
 ```
+Dark green areas indicates strong positive spatial autocorrelation
+
+### Visualising p-value of HCSA
+```{r}
+tmap_mode("plot")
+tm_shape(HCSA) +
+  tm_fill("p_sim") + 
+  tm_borders(alpha = 0.5)
+```
+### Visualising local HCSA
 
 ```{r}
-HCSA_sig <- HCSA %>%
-  filter(p_sim < 0.05)
-tmap_mode('plot')
-tm_shape(HCSA)+
-  tm_polygons()+
-  tm_borders(alpha = 0.05)+
-tm_shape(HCSA_sig) + 
-    tm_fill("cluster") +
-    tm_borders(alpha = 0.4)
+tmap_mode("plot")
+map1 <- tm_shape(HCSA) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "Gi* of GDPPC",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(HCSA) +
+  tm_fill("p_value",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of Gi*",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
 ```
+### Visualising hot spot and cold spot areas
 
-
+```{r}
+HCSA_sig <- HCSA  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+tm_shape(HCSA) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4)
+```
 

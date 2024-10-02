@@ -8,6 +8,7 @@ author: "Ng Meng Ye"
 ## Getting started
 
 ### Loading the R packages
+
 ```{r}
 pacman::p_load(sf, spdep, tmap, tidyverse, sfdep)
 ```
@@ -22,7 +23,9 @@ hunan <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex05/
 ```{r}
 hunan2012 <- read_csv("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex04/data/aspatial/Hunan_2012.csv")
 ```
+
 ### Combining both data fram by using left join
+
 all the rows from the first data frame `hunan` are kept. The result will contain all rows from `hunan`, along with matching data from `hunan2012`
 
 ```{r}
@@ -160,7 +163,6 @@ Columns:
 
 -   kurtosis: High kurtosis = more extreme outlier
 
-
 ```{r}
 tmap_mode("plot")
 tm_shape(lisa) +
@@ -172,7 +174,9 @@ tm_shape(lisa) +
     main.title.size = 1
   )
 ```
+
 ### Visualising p-value of local Moran's I
+
 ```{r}
 tmap_mode("plot")
 tm_shape(lisa) +
@@ -184,7 +188,9 @@ tm_shape(lisa) +
     main.title.size = 1
   )
 ```
+
 ### Visualising local Moran's I and p-value
+
 ```{r}
 tmap_mode("plot")
 map1 <- tm_shape(lisa) +
@@ -207,7 +213,9 @@ map2 <- tm_shape(lisa) +
 
 tmap_arrange(map1,map2,ncol=2)
 ```
+
 ### Plotting LISA map
+
 ```{r}
 lisa_sig <- lisa  %>%
   filter(p_ii_sim < 0.05)
@@ -220,11 +228,13 @@ tm_shape(lisa_sig) +
   tm_borders(alpha = 0.4)
   
 ```
+
 ## Hot Spot and Cold Spot Area Analysis (HCSA)
 
 Use Getis to identify clusters of high values (hot spots) and low values (cold spots)
 
-### Computing local Gi* statistics
+### Computing local Gi\* statistics
+
 ```{r}
 wm_idw <- hunan_GDPPC %>%
   mutate(nb = include_self(
@@ -235,7 +245,9 @@ wm_idw <- hunan_GDPPC %>%
                               alpha = 1),
          .before = 1)
 ```
-### Computing local Gi* statistics
+
+### Computing local Gi\* statistics
+
 ```{r}
 HCSA <- wm_idw %>% 
   mutate(local_Gi = local_gstar_perm(
@@ -244,7 +256,9 @@ HCSA <- wm_idw %>%
   unnest(local_Gi)
 HCSA
 ```
-### Visualising Gi*
+
+### Visualising Gi\*
+
 ```{r}
 tmap_mode("plot")
 tm_shape(HCSA) +
@@ -252,15 +266,18 @@ tm_shape(HCSA) +
   tm_borders(alpha = 0.5) +
   tm_view(set.zoom.limits = c(6,8))
 ```
+
 Dark green areas indicates strong positive spatial autocorrelation
 
 ### Visualising p-value of HCSA
+
 ```{r}
 tmap_mode("plot")
 tm_shape(HCSA) +
   tm_fill("p_sim") + 
   tm_borders(alpha = 0.5)
 ```
+
 ### Visualising local HCSA
 
 ```{r}
@@ -282,6 +299,7 @@ map2 <- tm_shape(HCSA) +
 
 tmap_arrange(map1, map2, ncol = 2)
 ```
+
 ### Visualising hot spot and cold spot areas
 
 ```{r}
@@ -295,4 +313,3 @@ tm_shape(HCSA_sig) +
   tm_fill("cluster") + 
   tm_borders(alpha = 0.4)
 ```
-

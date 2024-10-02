@@ -1,0 +1,211 @@
+---
+title: "In-class Exercise 06"
+author: "Ng Meng Ye"
+---
+
+# Emerging Hot Spot Analysis
+
+Spatio-temporal refers anything that involves both space and time.
+Exploratory spatial data analysis
+
+Hotter, cooling or are they staying the same?
+
+1. Calculate Gi* for each time period
+2. Series of Gi* at each location is treated as a time-series
+3. Evaluate for a trend using the Mann-Kendall statistic
+4. Gi* and the Mann-Kendall are compared together to create 17 unique classifications.
+
+Gi* = identify hot and cold spots
+
+Mann-Kendall test
+1. non-parametric statistical test
+2. assesses whether the values in a time series follow a consistent upward or downward trend over time.
+3. 
+
+```{r}
+pacman::p_load(sf, tmap, tidyverse, sfdep, plotly, Kendall)
+```
+
+```{r}
+GDPPC <- read_csv("C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex06/data/aspatial/Hunan_GDPPC.csv")
+```
+
+```{r}
+hunan <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/In-class_Ex/In-class_Ex06/data/geospatial",
+                 layer = "Hunan")
+```
+
+numerical trend test: increasing or decreasing trend
+
+## Hot Spot and Cold Spot Area Analysis (HCSA)
+
+Use Getis to identify clusters of high values (hot spots) and low values (cold spots)
+
+### Computing local Gi\* statistics
+
+loc_col = space, time_Col = time cannot use original time field, it is in continuous time form
+
+it is not in integer (must be in integer)
+
+explicitly convert to integer, drop the time, to ensure continuous day, month, year. indicate number 1 as Jan, or year, must be in sequence, take note for take-home exercise 02 !!!!!!!
+
+Creating a time series cube
+Analyze how GDP per capita changes over both space and time
+Spacetime cube combines both dimensions to enable a deeper understanding of the dynamics of my data.
+
+```{r}
+GDPPC_st <- spacetime(GDPPC, hunan,
+                      .loc_col = "County",
+                      .time_col = "Year")
+```
+
+always 3 dimension, only spacetime does not apply to trajectory, forest fire, flood, phenomena like dynamic space we cannot apply it
+
+accident occurence can use
+
+```{r}
+is_spacetime_cube(GDPPC_st)
+```
+
+use inverse distance weight
+
+include self since we are using Gi star geometry = centroids
+
+distance decal = demand for certain services will reduce significantly
+
+to avoid sorting sequence using `set_nbs` and `set_wts`
+
+First we create a neighbor list ensuring that the self is included and then create the weights list from the new neighbors list.
+
+```{r}
+GDPPC_nb <- GDPPC_st %>% 
+  activate("geometry") %>% 
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wt = st_inverse_distance(nb,
+                             geometry,
+                             scale = 1,
+                             alpha = 1),
+    .before=1) %>% 
+  set_nbs("nb") %>% 
+  set_wts("wt")
+```
+
+use tidyr to unnest into a table data form
+
+We calculate the local Gi* using `local_gstar_perm` on the GDPPC column which creates a new data frame column called `gi_stars`
+```{r}
+gi_stars <- GDPPC_nb %>% 
+  group_by(Year) %>% 
+  mutate(gi_star = local_gstar_perm(
+    GDPPC, nb, wt)) %>% 
+  tidyr::unnest(gi_star)
+```
+
+2 types of analysis focus on individual area, MK test detect whether non-monotonic or sign of monotonic trend
+
+Evaluate a location for a trend 
+```{r}
+cbg <- gi_stars %>% 
+  ungroup() %>% #must ungroup because it is a cube
+  filter(County == "Changsha") |> #r version of %>%  = |>
+  select(County, Year, gi_star)
+```
+Plot the result using ggplot2 functions
+```{r}
+ggplot(data = cbg,
+       aes(x = Year,
+           y = gi_star))+
+  geom_line() +
+  theme_light()
+
+
+```
+Interatcive Mann-Kendall Plot
+```{r}
+p <- ggplot(data = cbg,
+       aes(x = Year,
+           y = gi_star))+
+  geom_line() +
+  theme_light()
+
+ggplotly(p)
+```
+
+Printing Mann-Kendall test report
+
+```{r}
+cbg %>% 
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr:: unnest_wider(mk)
+```
+
+Reject null hypothesis, tau 0.485, slight upward trend.
+
+positive negative and moderate trend for each for the graph
+
+Apply the Mann-Kendall test for trend detection on the Gi* values for each county over time.
+
+```{r}
+ehsa <- gi_stars %>% 
+  group_by(County) %>% #because 88 counties and observations
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr:: unnest_wider(mk)
+head(ehsa)
+```
+
+Sort the data based on the statistical significance and the strength of trends
+```{r}
+emerging <- ehsa %>% 
+  arrange(sl, abs(tau)) %>% 
+  slice(1:10)
+head(emerging)
+```
+
+Performing Emerging hotspot analysis of GDPPC
+```{r}
+ehsa <- emerging_hotspot_analysis(
+  x = GDPPC_st,
+  .var = "GDPPC",
+  k = 1,
+  nsim = 99
+)
+```
+
+kendall, without permutations
+
+emerging hotspot analysis run permutations
+
+```{r}
+ggplot(data=ehsa,
+       aes(x=classification)) +
+  geom_bar()
+```
+
+
+
+```{r}
+hunan_ehsa <- hunan %>% 
+  left_join(ehsa,
+            by = join_by(County == location))
+```
+
+EHSA Classes:
+
+
+
+```{r}
+ehsa_sig <- hunan_ehsa  %>%
+  filter(p_value < 0.05)
+tmap_mode("plot")
+tm_shape(hunan_ehsa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill("classification") + 
+  tm_borders(alpha = 0.4)
+```

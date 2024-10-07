@@ -1,34 +1,8 @@
 ---
 title: "Take-home Exercise 2: Discovering impacts of COVID-19 on Thailand tourism economy at the province level using spatial and spatio-temporal statistics"
 author: "Ng Meng Ye"
-date-modified:  "2024-09-21"
 date: 2024-10-12
 ---
-
-Notes:\
-Relatively small size data. Nothing to do with complexity
-
-You will attribute data, thin and long data, across different year, create table
-
-you got small islands, the centroid will go into the water
-
-from 2019-2023
-
-3 temporal temp: pre-covid, covid and post covid, dissect it
-
-spatial distribution: bangkok has the highest, the rest are quite same
-
-key indicators (more than 1 indicator, which are the measures , not just revenue)
-
-Hands-on exercise on Hunan got hints for indicators
-
-cross-sectional: pre, covid and post, space and time,
-
-G\* to detect hot and cold spot (days, month or week continuous)
-
-what is the constraint of the data to not allow you to make it continuous
-
-spacetime cube, space dimension data, focus on sfdep!!! refer to the articles
 
 ## 1 Overview
 
@@ -46,11 +20,18 @@ In view of this, we need to discover
 
 ### 2.2 The Study Area
 
-The focus of this study would in the Thailand, at the province level:
+The focus of this study would in the Thailand, at the province level.
 
 ## 3 Data Preparation
 
-### 3.1 Geospatial
+Setting the analytical tools.
+
+```{r}
+#| output: false
+pacman::p_load(sf,spNetwork,raster,spatstat,tmap,tidyverse,sp,maptools,spNetwork,knitr,ggplot2,dplyr,sfdep)
+```
+
+### 3.1 Data Preparation
 
 These data sets are in `shp` format
 
@@ -60,731 +41,623 @@ This data sets are in `csv` format
 
 -   Thailand Domestic Tourism Statistics, available publicly from [Kaggle](https://www.kaggle.com/datasets/thaweewatboy/thailand-domestic-tourism-statistics)
 
-```{r}
-#| output: false
-set.seed(1234)
-pacman::p_load(sf,raster,spatstat,tmap,tidyverse,sp,maptools,spNetwork)
-```
-
 ## 4 Data Wrangling
 
-### 4.1 Thailand Road Accident 2019-2022
+### 4.1 Thailand Road Accident 2019-2023
 
 #### 4.1.1 Importing Attribute Data into R
 
-We will import thai_road_accident_2019_2022.csv file into RStudio and save the file into an R dataframe called `rdacc`
+We will import thailand_domestic_tourism_2019_2023_ver2.csv file into RStudio and save the file into an R dataframe called `thaitour`
 
 ```{r}
-rdacc <- read_csv("C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data/aspatial/thai_road_accident_2019_2022.csv")
+thaitour <- read_csv("C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex02/data/aspatial/thailand_domestic_tourism_2019_2023_ver2.csv")
 ```
 
-#### 4.1.2 Filtering missing values
-
-To define the geometry of each point, we need to use the latitude and longitude coordinates. Before converting the data frame to an `sf` object, we need to ensure that there are no missing values in the latitude and longitude columns.
-
-Since only 359 out of 81,735 rows have missing values, it is reasonable to remove them.
-
 ```{r}
-lat_na <- sum(is.na(rdacc$latitude))
-long_na <- sum(is.na(rdacc$longitude))
-
-total_rows <- nrow(rdacc)
-
-lat_na_pct <- (lat_na / total_rows) * 100
-long_na_pct <- (long_na / total_rows) * 100
-
-cat("Missing values in Latitude:", lat_na, "(", round(lat_na_pct, 2), "% )\n")
-cat("Missing values in Longitude:", long_na, "(", round(long_na_pct, 2), "% )\n")
-
+head(thaitour)
 ```
 
-#### 4.1.3 Creating a simple feature data frame from an aspatial data frame
+Check if there are any missing values.
 
-The code chunk below converts `rdacc` data frame into a simple feature data frame by using `st_as_st()` of **sf** packages
-
 ```{r}
-rdacc_sf <- rdacc %>% 
-  filter(!is.na(longitude) & longitude != "",
-         !is.na(latitude)& latitude != "") %>% 
-  st_as_sf(coords = c(
-    "longitude", "latitude"),
-    crs = 4326) %>% 
-  st_transform(crs = 32647)
+sum(is.na(thaitour$value))
 ```
-
-The code chunk below shows that there are 81376 observations in `rdacc_sf`
 
+Check if the values in the variable column are balanced or equally represented.
+All variables have equal 3850 counts.
 ```{r}
-nrow(rdacc_sf)
+table(thaitour$variable)
 ```
 
-To reduce the computational load and improve code execution speed, we should filter the `rdacc_sf` data to include only cases where the weather condition is clear and the accident type is rear-end collision.
+### 4.2 Thailand - Subnational Administrative Boundaries
 
-A high frequency of rear-end collisions under clear conditions may indicate potential issues with road design, traffic signal timing, or congestion, rather than being caused by weather-related factors.
+We will import tha_admbnda_adm1_rtsd_20220121.csv file into RStudio and save the file into an R dataframe called `thailand`
 
 ```{r}
-rdacc_sf_2 <- rdacc_sf[rdacc_sf$weather_condition == "clear" & rdacc_sf$accident_type == "rear-end collision", ]
+thailand <-  st_read(dsn = "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex02/data/geospatial",
+                 layer = "tha_admbnda_adm1_rtsd_20220121")
 ```
-
-::: callout-caution
-### 4.2 Correcting the projection
-
-`EPSG: 4326` is wgs84 Geographic Coordinate System and `EPSG: 32647` refers to the WGS 84 / UTM zone 47N Projected Coordinate System, which is specifically used for areas in Thailand.
-:::
 
-#### 4.2.1 Plotting the Aspatial Data
-
-We use `st_geometry` to display basic information of the feature class such as type of geometry. It looks like the plot is showing points scattered across a wide area, which suggests that your data includes locations outside the Bangkok Metropolitan Region (BMR).
-
 ```{r}
-plot(st_geometry(rdacc_sf_2))
+thailand_32647 <- st_transform(thailand, crs = 32647)
 ```
 
-To focus only on data within the BMR, we need to filter the dataset for coordinates that fall within the region.
-
 ```{r}
-rdacc_bmr_sf <- rdacc_sf_2 %>%
-  filter(province_en %in% c("Bangkok", "Nonthaburi", "Nakhon Pathom", "Pathum Thani", "Samut Prakan", "Samut Sakhon"))
+st_geometry(thailand_32647)
 ```
-
-Our plot now shows road accident points within the Bangkok Metropolitan Region (BMR) overlaid on the road network. This looks much better than the previous scattered points across a broader region.
 
 ```{r}
-plot(st_geometry(rdacc_bmr_sf))
+plot(st_geometry(thailand_32647))
 ```
 
-### 4.3 Thailand Roads
+Keep the time series at month and year levels.
 
-#### 4.3.1 Importing Geospatial Data
-
-We will import `hotosm_tha_roads_lines` shapefile into RStudio as sf data frames.
-
 ```{r}
-network <- st_read(dsn="C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data/geospatial", 
-                   layer="hotosm_tha_roads_lines_shp")
-```
-
-The Coordinate Reference System, CRS is showing NA. Without a CRS, it's unclear how the coordinates relate to the earth, which can lead to errors when performing spatial analysis.
+# Load necessary libraries
+library(dplyr)
+library(lubridate)
 
-Set the CRS of `network` to WGS 84 (EPSG: 4326).
+# Create a new column with month and year in the format like 'Jan-2019'
+thaitour <- thaitour %>%
+  mutate(month_year = format(as.Date(date), "%b-%Y"))
 
-```{r}
-network <- st_set_crs(network, 4326)
-```
+# Filter the data to keep only 'no_tourist_all' and 'revenue_all'
+filtered_data <- thaitour %>%
+  filter(variable %in% c("no_tourist_all", "revenue_all")) %>%
+  select(province_eng, month_year, variable, value)
 
-Transform the CRS of `network` to UTM Zone 47N (EPSG: 32647).
+# View the filtered data
+print(filtered_data)
 
-```{r}
-network32647 <- st_transform(network,32647)
 ```
 
 ```{r}
-st_geometry(network32647)
-```
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(lubridate)
 
-The code chunk above indicates `network32647` with CRS: WGS 84 / UTM zone 47N.
+# Ensure 'filtered_data' has only 'revenue_all' and group by 'month_year'
+monthly_revenue <- filtered_data %>%
+  filter(variable == "revenue_all") %>%
+  group_by(month_year) %>%
+  summarise(total_revenue = sum(value, na.rm = TRUE))
 
-There are 2792590 observations, let's check what the highway types available in the `network32647`.
+# Convert 'month_year' to a date format (assuming the first day of each month)
+monthly_revenue <- monthly_revenue %>%
+  mutate(month_year_date = as.Date(paste0("01-", month_year), format = "%d-%b-%Y"))
 
-```{r}
-unique_values <- unique(network32647$highway)
+# Plot the total monthly revenue with proper sorting
+ggplot(monthly_revenue, aes(x = month_year_date, y = total_revenue)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Monthly Total Revenue from Tourism Industry, 2019-2023",
+       x = "Month-Year",
+       y = "Total Revenue") +
+  theme_minimal() +
+  scale_x_date(date_labels = "%b-%Y", date_breaks = "1 month") +  # Proper x-axis labels
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
 
-print(unique_values)
 ```
 
-According to [Highway classification on WikiProject Thailand](https://wiki.openstreetmap.org/wiki/WikiProject_Thailand#Highway_classification), we should only include intercity roads:
+To analyze the effects of the COVID-19 pandemic on tourism revenue, I have segmented the data into three distinct periods:
 
-1 secondary\
-2 tertiary\
-3 trunk\
-4 primary\
-5 motorway\
-6 unclassified\
+1.  Pre-COVID (Year 2019): This period represents normal tourism activity before the pandemic.
+2.  COVID Period (Year 2020 to September 2021): This period captures the time when the pandemic was at its peak, and international travel restrictions were in place, significantly affecting tourism.
+3.  Post-COVID (From October 2021 Onward): This period reflects the recovery phase as restrictions were lifted, and tourism began to recover.
 
-Filter `network32647` data accordingly into a new dataset `filtered_network`
+Using this segmentation, I will create a new dataset, `reshaped_data`, based on the `filtered_data`. This dataset will include these defined periods, which will later be joined with the `thailand_32647_sorted` dataset for further spatial analysis.
 
 ```{r}
-highway_types <- c(
-"secondary", "tertiary","trunk", "primary", "motorway", "unclassified"
-)
-
-filtered_network <- network32647 %>%
-  filter(highway %in% highway_types)
-```
 
-The `filtered_network` now has 203029 observations.
+# Convert the 'month_year' to a date-like format for easier processing
+# Load necessary libraries
+library(dplyr)
+library(lubridate)
 
-```{r}
-nrow(filtered_network)
-```
+# Convert the 'month_year' to a date-like format for easier processing
+filtered_data <- filtered_data %>%
+  mutate(month_year_date = parse_date_time(month_year, orders = "b-Y")) %>%
+  mutate(year = year(month_year_date),
+         month = month(month_year_date))
 
-### 4.4 Thailand - Subnational Administrative Boundaries
+# Classify the periods: Pre-COVID, COVID, and Post-COVID
+filtered_data <- filtered_data %>%
+  mutate(covid_period = case_when(
+    year == 2019 ~ "pre_covid",
+    year == 2020 | (year == 2021 & month <= 9) ~ "covid_period",
+    year >= 2021 & month > 9 ~ "post_covid"
+  ))
 
-#### 4.4.1 Importing Geospatial Data
+# Sum the values by province and covid_period for 'no_tourist_all' and 'revenue_all'
+reshaped_data <- filtered_data %>%
+  filter(variable %in% c("no_tourist_all", "revenue_all")) %>%
+  group_by(province_eng, covid_period, variable) %>%
+  summarise(total_value = sum(value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  unite("period_variable", covid_period, variable, sep = "_") %>%
+  pivot_wider(names_from = period_variable, values_from = total_value)
 
-Thailand administrative level 0 (country), 1 (province), 2 (district), and 3 (sub-district, tambon) boundaries. Since we focus on Bangkok Metropolitan Region, we should import level 1 (province) data. We will import `tha_admbnda_adm1_rtsd_20220121` shapefile into RStudio as sf data frames.
+# Calculate the total from 2019 to 2023 for each province and variable
+total_data <- filtered_data %>%
+  filter(variable %in% c("no_tourist_all", "revenue_all")) %>%
+  group_by(province_eng, variable) %>%
+  summarise(total_value = sum(value, na.rm = TRUE)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = variable, values_from = total_value, names_prefix = "total_")
 
-```{r}
-thai_map <- st_read(dsn="C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex01/data/geospatial", 
-                   layer="tha_admbnda_adm1_rtsd_20220121")
-```
+# Combine reshaped data with the total data
+reshaped_data <- left_join(reshaped_data, total_data, by = "province_eng")
 
-Transform CRS of `thai_map` to UTM Zone 47N (EPSG: 32647) as dataset `thai_map_32647`.
+# View the reshaped data
+print(reshaped_data)
 
-```{r}
-thai_map_32647 <- st_transform(thai_map, crs = 32647)
 ```
 
-`thai_map_32647` shows projected CRS: WGS 84 / UTM zone 47N, same as `filtered_network`.
-
 ```{r}
-st_geometry(thai_map_32647)
-```
+# Sort 'thailand_32647' by 'ADM1_EN' in alphabetical order
+thailand_32647_sorted <- thailand_32647 %>%
+  arrange(ADM1_EN)
 
-The `thai_map_32647` dataset covers the entire Thailand region.
+# Sort the 'reshaped_data' by 'province_eng' to ensure matching order
+reshaped_data_sorted <- reshaped_data %>%
+  arrange(province_eng)
 
-For this study, we are specifically focusing on the Bangkok Metropolitan Region (BMR). Accordingly, we will filter the dataset to include only the BMR area."
+# Create a comparison table with 'ADM1_EN' and 'province_eng' side by side
+comparison_table <- thailand_32647_sorted %>%
+  select(ADM1_EN) %>%
+  bind_cols(reshaped_data_sorted %>% select(province_eng))
 
-```{r}
-thaiBMR <- thai_map_32647 %>%
-  filter(ADM1_EN %in% c("Bangkok", "Nonthaburi", "Nakhon Pathom", "Pathum Thani", "Samut Prakan", "Samut Sakhon"))
 ```
+
+Based on the comparison table, we need to correct the value in ADM1_EN before we join both datasets.
 
-`ThaiBMR` dataset only consists of the 6 provinces in BMR.
+| Before           | After           |
+|------------------|-----------------|
+| Buri Ram         | Buriram         |
+| Chai Nat         | Chainat         |
+| Chon Buri        | Chonburi        |
+| Lop Buri         | Lopburi         |
+| Nong Bua Lam Phu | Nong Bua Lamphu |
+| Phangnga         | Phang Nga       |
+| Prachin Buri     | Prachinburi     |
+| Si Sa Ket        | Sisaket         |
 
 ```{r}
-thaiBMR
+# Replace specific values in the ADM1_EN column based on the mapping you provided
+thailand_32647_sorted <- thailand_32647_sorted %>%
+  mutate(ADM1_EN = case_when(
+    ADM1_EN == "Buri Ram" ~ "Buriram",
+    ADM1_EN == "Chai Nat" ~ "Chainat",
+    ADM1_EN == "Chon Buri" ~ "Chonburi",
+    ADM1_EN == "Lop Buri" ~ "Lopburi",
+    ADM1_EN == "Nong Bua Lam Phu" ~ "Nong Bua Lamphu",
+    ADM1_EN == "Phangnga" ~ "Phang Nga",
+    ADM1_EN == "Prachin Buri" ~ "Prachinburi",
+    ADM1_EN == "Si Sa Ket" ~ "Sisaket",
+    TRUE ~ ADM1_EN  # Keep all other values as they are
+  ))
+
+# View the updated table to ensure the replacements have been made
+print(thailand_32647_sorted)
 ```
 
-#### 4.4.2 Visualizing the Geospatial Data
 
-We will visual the distribution of road accidents in BMR below using the datasets `thaiBMR` and `rdacc_bmr_sf`.
 
 ```{r}
-plot(st_geometry(thaiBMR), col = "lightblue", main = "BMR with Road Accidents")
+# Perform the left join with 'reshaped_data' on 'ADM1_TH' and 'province_eng'
+thailand <- left_join(thailand_32647_sorted, reshaped_data_sorted, by = c("ADM1_EN" = "province_eng")) %>% 
+  select(1:3,17:27)
 
-plot(rdacc_bmr_sf$geometry, col = "red", pch = 19, add = TRUE)
+# View the merged data
+head(thailand)
 
 ```
+
+## 5 Exploratory Data Analysis
 
-The `filtered_network` dataset covers all Thailand region. We can use `st_intersection()` function to find the geometric intersection of `thaiBMR`. The new dataset will be `BMR_network` that only consists BMR networks.
+Generate the statistics summary of the variable.
 
 ```{r}
-#| warning: false
-BMR_network <- st_intersection(filtered_network,thaiBMR)
-```
+summary_by_variable <- thaitour %>%
+  group_by(variable) %>%
+  summarise(
+    count = n(),
+    mean = mean(value, na.rm = TRUE),
+    std = sd(value, na.rm = TRUE),
+    min = min(value, na.rm = TRUE),
+    Q1 = quantile(value, 0.25, na.rm = TRUE),
+    median = median(value, na.rm = TRUE),
+    Q3 = quantile(value, 0.75, na.rm = TRUE),
+    max = max(value, na.rm = TRUE)
+  )
 
-The `BMR_network` consists of 26725 observations.
+# Print the summary table
+print(summary_by_variable)
 
-```{r}
-st_geometry(BMR_network)
 ```
 
-We visualize the distribution of the road accidents within the network in BMR using `BMR_network`, `thaiBMR` and `rdacc_bmr_sf`.
+Generate the boxplot for the variables.
 
 ```{r}
-#| warning: false
-plot(st_geometry(thaiBMR), col = "lightblue", main = "BMR with Highways")
-plot(st_geometry(BMR_network), col = "black", add = TRUE)
+first_group <- thaitour %>%
+  filter(variable %in% c("no_tourist_all", "no_tourist_foreign", "no_tourist_stay", "ratio_tourist_stay"))
 
-plot(rdacc_bmr_sf, add = TRUE, col = 'red', pch = 19, cex = 0.5)  # cex = 0.5 
+ggplot(first_group, aes(x = variable, y = value)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplots for Tourist-Related Variables",
+       x = "Variable",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-```
-
-This map of the Bangkok Metropolitan Region (BMR) shows the distribution of `rear-end collisions` that occurred under `clear weather conditions`. The highlighted road network includes highways classified as secondary, tertiary, trunk, primary, motorway, and unclassified types.
+second_group <- thaitour %>%
+  filter(variable %in% c("revenue_all", "revenue_foreign", "revenue_thai"))
 
-## 5 Network Constrained Spatial Point Patterns Analysis
+ggplot(second_group, aes(x = variable, y = value)) +
+  geom_boxplot(fill = "lightgreen", color = "black") +
+  labs(title = "Boxplots for Revenue-Related Variables",
+       x = "Variable",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
 
-### 5.1 Bangkok NKDE Analysis
+```
 
-Preparing the lixels objects
+The current boxplot shows that the presence of outliers distorts the scale, making it difficult to observe the distribution of the data. To address this issue and better visualize the central tendency and spread of the data, I created another boxplot that excludes the outliers
 
 ```{r}
-#| warning: false
-BMR_network_bangkok <- BMR_network[BMR_network$ADM1_EN == "Bangkok", ]
+# First group: Tourist-related variables
+first_group <- thaitour %>%
+  filter(variable %in% c("no_tourist_all", "no_tourist_foreign", "no_tourist_stay", "ratio_tourist_stay"))
 
-BMR_network_bangkok_linestring <- st_cast(BMR_network_bangkok, "LINESTRING")
-```
+ggplot(first_group, aes(x = variable, y = value)) +
+  geom_boxplot(fill = "lightblue", color = "black", outlier.shape = NA) + 
+  coord_cartesian(ylim = c(0, 250000)) +# Remove outliers
+  labs(title = "Boxplots for Tourist-Related Variables",
+       x = "Variable",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-```{r}
-bangkok_lixels <- lixelize_lines(BMR_network_bangkok_linestring, 700, mindist = 375)
-```
+# Second group: Revenue-related variables
+second_group <- thaitour %>%
+  filter(variable %in% c("revenue_all", "revenue_foreign", "revenue_thai"))
 
-Generating the line centre points
+ggplot(second_group, aes(x = variable, y = value)) +
+  geom_boxplot(fill = "lightgreen", color = "black", outlier.shape = NA) +
+  coord_cartesian(ylim = c(0, 600000000))+
+  labs(title = "Boxplots for Revenue-Related Variables",
+       x = "Variable",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-```{r}
-bangkok_samples <- lines_center(bangkok_lixels) 
 ```
-
+Generate the boxplot of `no_tourist_all` and `revenue_all` by year.
 ```{r}
-rdacc_bangkok <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Bangkok", ]
-```
+# First, ensure that the year is extracted from the 'date' column
+thaitour <- thaitour %>%
+  mutate(year = as.numeric(format(as.Date(date), "%Y")))
 
-We use `simple` method with big datasets.
+# Filter for the variable 'no_tourist_all' for years 2019 to 2023
+data_no_tourist <- thaitour %>%
+  filter(variable == "no_tourist_all", year %in% c(2019, 2020, 2021, 2022, 2023))
 
-```{r}
-densities <- nkde(BMR_network_bangkok_linestring, 
-                  events = rdacc_bangkok,
-                  w = rep(1, nrow(rdacc_bangkok)),
-                  samples = bangkok_samples,
-                  kernel_name = "quartic",
-                  bw = 300, 
-                  div= "bw", 
-                  method = "simple", 
-                  digits = 1, 
-                  tol = 1,
-                  grid_shape = c(1,1), 
-                  max_depth = 8,
-                  agg = 5, 
-                  sparse = TRUE,
-                  verbose = FALSE)
+# Create a boxplot for 'no_tourist_all'
+ggplot(data_no_tourist, aes(x = factor(year), y = value)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(title = "Boxplot of No_Tourist_All by Year",
+       x = "Year",
+       y = "Number of Tourists (All)") +
+  theme_minimal()
 
-```
 
-```{r}
-bangkok_samples$density <- densities
-bangkok_lixels$density <- densities
-```
 
-```{r}
-# rescaling to help the mapping# rescaling to help the mapping
-bangkok_samples$density <- bangkok_samples$density*1000
-bangkok_lixels$density <- bangkok_lixels$density*1000
-```
+data_revenue <- thaitour %>%
+  filter(variable == "revenue_all", year %in% c(2019, 2020, 2021, 2022, 2023))
 
-```{r}
-col_range <- colorRampPalette(c("lightblue", "red"))(100) 
-plot(st_geometry(bangkok_lixels), col = col_range[cut(bangkok_lixels$density, breaks = 100)], main = "Bangkok NKDE Visualization")
+# Create a boxplot for 'revenue_all'
+ggplot(data_revenue, aes(x = factor(year), y = value)) +
+  geom_boxplot(fill = "lightgreen", color = "black") +
+  labs(title = "Boxplot of Revenue_All by Year",
+       x = "Year",
+       y = "Revenue (All)") +
+  theme_minimal()
 ```
 
-### 5.2 Nonthaburi NKDE Analysis
+The current boxplot shows that the presence of outliers distorts the scale, making it difficult to observe the distribution of the data. To address this issue and better visualize the central tendency and spread of the data, I created another boxplot that excludes the outliers.
 
-Preparing the lixels objects
-
-```{r}
-BMR_network_nonthaburi <- BMR_network[BMR_network$ADM1_EN == "Nonthaburi", ]
-BMR_network_nonthaburi_linestring <- st_cast(BMR_network_nonthaburi, "LINESTRING")
-```
-
 ```{r}
-nonthaburi_lixels <- lixelize_lines(BMR_network_nonthaburi_linestring, 700, mindist = 375)
-```
+thaitour <- thaitour %>%
+  mutate(year = as.numeric(format(as.Date(date), "%Y")))
 
-Generating the line centre points
+# Filter for 'no_tourist_all' variable for the years 2019 to 2023
+data_no_tourist <- thaitour %>%
+  filter(variable == "no_tourist_all", year %in% c(2019, 2020, 2021, 2022, 2023))
 
-```{r}
-nonthaburi_samples <- lines_center(nonthaburi_lixels) 
-```
+# Adjust the scale range for 'no_tourist_all' and create boxplot
+ggplot(data_no_tourist, aes(x = factor(year), y = value)) +
+  geom_boxplot(fill = "skyblue", color = "black", outlier.shape = NA) +
+  coord_cartesian(ylim = c(0, 400000)) +  # Adjust this range as necessary
+  labs(title = "Boxplot of No_Tourist_All by Year (Without Outliers)",
+       x = "Year",
+       y = "Number of Tourists (All)") +
+  theme_minimal()
 
-```{r}
-rdacc_nonthaburi <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Nonthaburi", ]
-```
+data_revenue <- thaitour %>%
+  filter(variable == "revenue_all", year %in% c(2019, 2020, 2021, 2022, 2023))
 
-```{r}
-densities <- nkde(BMR_network_nonthaburi_linestring, 
-                  events = rdacc_nonthaburi,
-                  w = rep(1, nrow(rdacc_nonthaburi)),
-                  samples = nonthaburi_samples,
-                  kernel_name = "quartic",
-                  bw = 300, 
-                  div= "bw", 
-                  method = "simple", 
-                  digits = 1, 
-                  tol = 1,
-                  grid_shape = c(1,1), 
-                  max_depth = 8,
-                  agg = 5, 
-                  sparse = TRUE,
-                  verbose = FALSE)
+# Adjust the scale range for 'revenue_all' and create boxplot
+ggplot(data_revenue, aes(x = factor(year), y = value)) +
+  geom_boxplot(fill = "lightgreen", color = "black", outlier.shape = NA) +
+  coord_cartesian(ylim = c(0, 1300000000)) +  # Adjust this range as necessary
+  labs(title = "Boxplot of Revenue_All by Year (Without Outliers)",
+       x = "Year",
+       y = "Revenue (All)") +
+  theme_minimal()
 
 ```
 
-```{r}
-nonthaburi_samples$density <- densities
-nonthaburi_lixels$density <- densities
-```
 
-```{r}
-# rescaling to help the mapping# rescaling to help the mapping
-nonthaburi_samples$density <- nonthaburi_samples$density*1000
-nonthaburi_lixels$density <- nonthaburi_lixels$density*1000
-```
+Plot the horizontal bar chart that shows the total revenue by province in 2019.
 
 ```{r}
-#| warning: false
-col_range <- colorRampPalette(c("lightblue", "red"))(100) 
-plot(st_geometry(nonthaburi_lixels), col = col_range[cut(nonthaburi_lixels$density, breaks = 100)], main = "Nonthaburi NKDE Visualization")
-```
+# Ensure filtered_data has only 'revenue_all' and is filtered for 2019
+bar_data <- filtered_data %>%
+  filter(variable == "revenue_all" & grepl("2019", month_year)) %>%
+  select(province_eng, value) %>%
+  group_by(province_eng) %>%
+  summarise(total_revenue_2019 = sum(value, na.rm = TRUE))
 
-### 5.3 Nakhon Pathom NKDE Analysis
+# Create a horizontal bar chart with provinces ordered by total revenue in descending order
+ggplot(bar_data, aes(x = total_revenue_2019, y = reorder(province_eng, total_revenue_2019))) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Total Revenue by Province in 2019",
+       x = "Total Revenue",
+       y = "Province") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 8))  # Adjust font size of y-axis labels
 
-Preparing the lixels objects
+# Save the plot with increased dimensions
+ggsave("total_revenue_2019.png", width = 10, height = 15)
 
-```{r}
-#| warning: false
-BMR_network_nakhonpathom <- BMR_network[BMR_network$ADM1_EN == "Nakhon Pathom", ]
-BMR_network_nakhonpathom_linestring <- st_cast(BMR_network_nakhonpathom, "LINESTRING")
-```
 
-```{r}
-nakhonpathom_lixels <- lixelize_lines(BMR_network_nakhonpathom_linestring, 700, mindist = 375)
 ```
 
-Generating the line centre points
+![](total_revenue_2019.png) Plot the horizontal bar chart that shows the total tourists by province in 2019.
 
 ```{r}
-nakhonpathom_samples <- lines_center(nakhonpathom_lixels) 
-```
+# Assuming reshaped_data is already created with 2019_revenue_all as one of the columns
+bar_data <- reshaped_data %>%
+  select(province_eng, `covid_period_no_tourist_all`)
 
-```{r}
-rdacc_nakhonpathom <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Nakhon Pathom", ]
-```
+# Create a horizontal bar chart with provinces ordered by revenue in descending order
+ggplot(bar_data, aes(x = `covid_period_no_tourist_all`, y = reorder(province_eng, `covid_period_no_tourist_all`))) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Total Tourists by Province in 2019",
+       x = "Total Revenue",
+       y = "Province") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 8))  # Adjust font size of y-axis labels
 
-```{r}
-densities <- nkde(BMR_network_nakhonpathom_linestring, 
-                  events = rdacc_nakhonpathom,
-                  w = rep(1, nrow(rdacc_nakhonpathom)),
-                  samples = nakhonpathom_samples,
-                  kernel_name = "quartic",
-                  bw = 300, 
-                  div= "bw", 
-                  method = "simple", 
-                  digits = 1, 
-                  tol = 1,
-                  grid_shape = c(1,1), 
-                  max_depth = 8,
-                  agg = 5, 
-                  sparse = TRUE,
-                  verbose = FALSE)
+# Save the plot with increased dimensions
+ggsave("total_tourist_2019.png", width = 10, height = 15)
 
 ```
+![](total_tourist_2019.png){fig-align="center"}
 
 ```{r}
-nakhonpathom_samples$density <- densities
-nakhonpathom_lixels$density <- densities
-```
+basemap <- tm_shape(thailand) +
+  tm_polygons() +
+  tm_text("ADM1_EN", size=0.5)
 
-```{r}
-# rescaling to help the mapping# rescaling to help the mapping
-nakhonpathom_samples$density <- nakhonpathom_samples$density*1000
-nakhonpathom_lixels$density <- nakhonpathom_lixels$density*1000
+revenue <- qtm(thailand, "covid_period_no_tourist_all")
+tmap_arrange(basemap, revenue, asp=1, ncol=2)
 ```
 
+Plot choropleth map to see the distribution of tourism revenue
 ```{r}
-#| warning: false
-col_range <- colorRampPalette(c("lightblue", "red"))(100) 
-plot(st_geometry(nakhonpathom_lixels), col = col_range[cut(nakhonpathom_lixels$density, breaks = 100)], main = "Nakhon Pathom NKDE Visualization")
-```
-
-### 5.4 Pathum Thani NKDE Analysis
+equal <- tm_shape(thailand) +
+  tm_fill("total_revenue_all",
+          title = "Revenue by equal interval",
+          style = "equal") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Distribution of tourism revenue by province in Thailand",
+            main.title.size = 0.8)
 
-Preparing the lixels objects
+quantile <- tm_shape(thailand) +
+  tm_fill("total_revenue_all",
+          title = "Revenue by equal quantile",
+          style = "quantile") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Distribution of tourism revenue by province in Thailand",
+            main.title.size = 0.8)
 
-```{r}
-BMR_network_pathumthani <- BMR_network[BMR_network$ADM1_EN == "Pathum Thani", ]
-BMR_network_pathumthani_linestring <- st_cast(BMR_network_pathumthani, "LINESTRING")
+tmap_arrange(equal, 
+             quantile, 
+             asp=1, 
+             ncol=2)
 ```
 
-```{r}
-pathumthani_lixels <- lixelize_lines(BMR_network_pathumthani_linestring, 700, mindist = 375)
-```
 
-Generating the line centre points
+Plot choropleth map to see the distribution of tourism receipt
 
 ```{r}
-pathumthani_samples <- lines_center(pathumthani_lixels) 
-```
+equal <- tm_shape(thailand) +
+  tm_fill("total_no_tourist_all",
+          title = "Tourist receipt by equal interval",
+          style = "equal") +
+  tm_borders(alpha = 0.5)+
+  tm_layout(main.title = "Distribution of tourist by province in Thailand",
+            main.title.size = 0.8)
 
-```{r}
-rdacc_pathumthani <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Pathum Thani", ]
+quantile <- tm_shape(thailand) +
+  tm_fill("total_no_tourist_all",
+          title = "Tourist receipt  by equal quantile",
+          style = "quantile") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "Distribution of tourist by province in Thailand",
+            main.title.size = 0.8)
+
+tmap_arrange(equal, 
+             quantile, 
+             asp=1, 
+             ncol=2)
 ```
 
-```{r}
-densities <- nkde(BMR_network_pathumthani_linestring, 
-                  events = rdacc_pathumthani,
-                  w = rep(1, nrow(rdacc_pathumthani)),
-                  samples = pathumthani_samples,
-                  kernel_name = "quartic",
-                  bw = 300, 
-                  div= "bw", 
-                  method = "simple", 
-                  digits = 1, 
-                  tol = 1,
-                  grid_shape = c(1,1), 
-                  max_depth = 8,
-                  agg = 5, 
-                  sparse = TRUE,
-                  verbose = FALSE)
+## 6 Global Spatial Autocorrelation Analysis
 
-```
+### Derive Queen's contiguity weights: sfdep methods
 
+The code chunk below is used to compute Queen contiguity weight matrix.
 ```{r}
-pathumthani_samples$density <- densities
-pathumthani_lixels$density <- densities
+# Load necessary libraries
+wm_q <- thailand %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W",
+                         allow_zero=TRUE),
+         .before = 1) 
+
 ```
 
 ```{r}
-# rescaling to help the mapping# rescaling to help the mapping
-pathumthani_samples$density <- pathumthani_samples$density*1000
-pathumthani_lixels$density <- pathumthani_lixels$density*1000
+wm_q
 ```
+Based on `wm_q`, Phuket has zero neighbours as shown below because it is an island.
 
 ```{r}
-#| warning: false
-col_range <- colorRampPalette(c("lightblue", "red"))(100) 
-plot(st_geometry(pathumthani_lixels), col = col_range[cut(pathumthani_lixels$density, breaks = 100)], main = "Pathum Thani NKDE Visualization")
+wm_q$ADM1_EN[[48]]
 ```
-
-### 5.5 Samut Prakan NKDE Analysis
 
-Preparing the lixels objects
 
 ```{r}
-BMR_network_samutprakan <- BMR_network[BMR_network$ADM1_EN == "Samut Prakan", ]
-BMR_network_samutprakan_linestring <- st_cast(BMR_network_samutprakan, "LINESTRING")
+wm_q$nb[[48]]
 ```
-
+Use tmap to view the Phuket location
 ```{r}
-samutprakan_lixels <- lixelize_lines(BMR_network_samutprakan_linestring, 700, mindist = 375)
-```
+# Set tmap to interactive mode ('view')
+tmap_mode('view')
 
-Generating the line centre points
-
-```{r}
-samutprakan_samples <- lines_center(samutprakan_lixels) 
+# Plot the geometry and add province names
+tm_shape(thailand) + 
+  tm_polygons() +
+  tm_text("ADM1_EN", size = 0.7)  # Adjust size as necessary
 ```
 
+Use tmap to view Phuket boundary.
 ```{r}
-rdacc_samutprakan <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Samut Prakan", ]
-```
+library(tmap)
+library(dplyr)
 
-```{r}
-densities <- nkde(BMR_network_samutprakan_linestring, 
-                  events = rdacc_samutprakan,
-                  w = rep(1, nrow(rdacc_samutprakan)),
-                  samples = samutprakan_samples,
-                  kernel_name = "quartic",
-                  bw = 300, 
-                  div= "bw", 
-                  method = "simple", 
-                  digits = 1, 
-                  tol = 1,
-                  grid_shape = c(1,1), 
-                  max_depth = 8,
-                  agg = 5, 
-                  sparse = TRUE,
-                  verbose = FALSE)
+# Filter the thailand dataset to keep only the row for Phuket
+phuket <- thailand %>%
+  filter(ADM1_EN == "Phuket")
 
-```
+# Set tmap to interactive mode ('view')
+tmap_mode('view')
 
-```{r}
-samutprakan_samples$density <- densities
-samutprakan_lixels$density <- densities
-```
+# Plot only Phuket
+tm_shape(phuket) + 
+  tm_polygons() +
+  tm_text("ADM1_EN", size = 1.2)  # Show province name if desired
 
-```{r}
-# rescaling to help the mapping# rescaling to help the mapping
-samutprakan_samples$density <- samutprakan_samples$density*1000
-samutprakan_lixels$density <- samutprakan_lixels$density*1000
 ```
 
 ```{r}
-#| warning: false
-col_range <- colorRampPalette(c("lightblue", "red"))(100) 
-plot(st_geometry(samutprakan_lixels), col = col_range[cut(samutprakan_lixels$density, breaks = 100)], main = "Samut Prakan NKDE Visualization")
+tmap_mode('plot')
 ```
 
-### 5.6 Samut Sakhon NKDE Analysis
+Use spdep to identify the neighbours list of Phuket
 
-Preparing the lixels objects
-
 ```{r}
-#| warning: false
-BMR_network_samutsakhon <- BMR_network[BMR_network$ADM1_EN == "Samut Sakhon", ]
-BMR_network_samutsakhon_linestring <- st_cast(BMR_network_samutsakhon, "LINESTRING")
+longitude <- map_dbl(thailand$geometry, ~st_centroid(.x)[[1]])
 ```
 
 ```{r}
-samutsakhon_lixels <- lixelize_lines(BMR_network_samutsakhon_linestring, 700, mindist = 375)
+latitude <- map_dbl(thailand$geometry, ~st_centroid(.x)[[2]])
 ```
-
-Generating the line centre points
 
 ```{r}
-samutsakhon_samples <- lines_center(samutsakhon_lixels) 
+coords <- cbind(longitude, latitude)
 ```
 
 ```{r}
-rdacc_samutsakhon <- rdacc_bmr_sf[rdacc_bmr_sf$province_en == "Samut Sakhon", ]
+head(coords)
 ```
-
 ```{r}
-densities <- nkde(BMR_network_samutsakhon_linestring, 
-                  events = rdacc_samutsakhon,
-                  w = rep(1, nrow(rdacc_samutsakhon)),
-                  samples = samutsakhon_samples,
-                  kernel_name = "quartic",
-                  bw = 300, 
-                  div= "bw", 
-                  method = "simple", 
-                  digits = 1, 
-                  tol = 1,
-                  grid_shape = c(1,1), 
-                  max_depth = 8,
-                  agg = 5, 
-                  sparse = TRUE,
-                  verbose = FALSE)
+library(spdep)
 
+k1 <- knn2nb(knearneigh(coords))
+k1dists <- unlist(nbdists(k1, coords))
+summary(k1dists)
 ```
+The summary report shows that the largest first nearest neighbour distance is 11.0987 km
 
 ```{r}
-samutsakhon_samples$density <- densities
-samutsakhon_lixels$density <- densities
+wm_d120000 <- dnearneigh(coords, 0, 120000)
+wm_d120000
 ```
 
 ```{r}
-# rescaling to help the mapping# rescaling to help the mapping
-samutsakhon_samples$density <- samutsakhon_samples$density*1000
-samutsakhon_lixels$density <- samutsakhon_lixels$density*1000
+str(wm_d120000)
 ```
-
 ```{r}
-#| warning: false
-col_range <- colorRampPalette(c("lightblue", "red"))(100) 
-plot(st_geometry(samutsakhon_lixels), col = col_range[cut(samutsakhon_lixels$density, breaks = 100)], main = "Samut Sakhon NKDE Visualization")
+table(thailand$ADM1_EN, card(wm_d120000))
 ```
-
-## 6 Network Constrained G- and K-function Analysis
-
-### 6.1 Bangkok
-
 ```{r}
-#| warning: false
-kfun_rdacc_bangkok <- kfunctions(BMR_network_bangkok_linestring, 
-                             rdacc_bangkok,
-                             start = 0, 
-                             end = 1000, 
-                             step = 50, 
-                             width = 50, 
-                             nsim = 50, 
-                             resolution = 50,
-                             verbose = FALSE, 
-                             conf_int = 0.05,
-                             agg = 10)
+n_comp <- n.comp.nb(wm_d120000)
+n_comp$nc
 ```
-
 ```{r}
-kfun_rdacc_bangkok$plotk + ggtitle("Bangkok")
+table(n_comp$comp.id)
 ```
-
-The blue line is above the dashed black line and confidence envelope for most of the plot, which suggests that road accidents in Bangkok are clustered rather than randomly distributed.
-
-### 6.2 Nonthaburi
-
 ```{r}
-kfun_rdacc_nonthaburi <- kfunctions(BMR_network_nonthaburi_linestring, 
-                             rdacc_nonthaburi,
-                             start = 0, 
-                             end = 1000, 
-                             step = 50, 
-                             width = 50, 
-                             nsim = 50, 
-                             resolution = 50,
-                             verbose = FALSE, 
-                             conf_int = 0.05,
-                             agg = 320)
+plot(thailand$geometry, border="lightgrey")
+plot(wm_d120000, coords, add=TRUE)
+plot(k1, coords, add=TRUE, col="red", length=0.08)
 ```
+Find neighbor list and weights for Phuket, First we identify the index of Phuket.
 
 ```{r}
-kfun_rdacc_nonthaburi$plotk+ ggtitle("Nonthaburi")
-```
-
-Unlike in Bangkok (where we saw clear clustering), road accidents in Nonthaburi resemble regular pattern at the distance of 50 to 575m.
-
-### 6.3 Nakhon Pathom
+# Find the index of Phuket
+phuket_index <- which(wm_q$ADM1_EN == "Phuket")
+print(phuket_index)
 
-```{r}
-kfun_rdacc_nakhonpathom <- kfunctions(BMR_network_nakhonpathom_linestring, 
-                             rdacc_nakhonpathom,
-                             start = 0, 
-                             end = 1000, 
-                             step = 50, 
-                             width = 50, 
-                             nsim = 50, 
-                             resolution = 50,
-                             verbose = FALSE, 
-                             conf_int = 0.05,
-                             agg = 170)
 ```
-
+Identify the neighbor list for Phuket, Based on the results, there 2 two neighbours.
 ```{r}
-kfun_rdacc_nakhonpathom$plotk + ggtitle("Nakhon Pathom")
-```
-
-Road accidents in Nakhon Pathom resemble clustered pattern at the distance of 250 to 1000m.
+# Access the neighbor list for Phuket
+phuket_nb <- wm_d120000[[phuket_index]]
+print(phuket_nb)
 
-### 6.4 Pathum Thani
+```
+We modify Phuket weight matrix and neighbour list in `wm_q`. Since we are using row standardized W matrix, the weights would be 0.5.
 
+Define Phuket's neighbors (Krabi and Phang Nga) based on distance
 ```{r}
-kfun_rdacc_pathumthani <- kfunctions(BMR_network_pathumthani_linestring, 
-                             rdacc_pathumthani,
-                             start = 0, 
-                             end = 1000, 
-                             step = 50, 
-                             width = 50, 
-                             nsim = 50, 
-                             resolution = 50,
-                             verbose = FALSE, 
-                             conf_int = 0.05,
-                             agg = 10)
+phuket_nb <- c(18, 39)  # Neighbors: Krabi and Phang Nga
 ```
 
+Define row-standardized weights (0.5 for each neighbor)
 ```{r}
-kfun_rdacc_pathumthani$plotk + ggtitle("Pathum Thani")
+phuket_wt <- c(0.5, 0.5)  # Row-standardized weights for two neighbors
 ```
-
-Road accidents in Pathum Thani resemble clustered pattern at the distance of 0 to 1000m.
 
-### 6.5 Samut Prakan
-
+Update the wm_q sf object with these neighbors and weights for Phuket
 ```{r}
-kfun_rdacc_samutprakan <- kfunctions(BMR_network_samutprakan_linestring, 
-                             rdacc_samutprakan,
-                             start = 0, 
-                             end = 1000, 
-                             step = 50, 
-                             width = 50, 
-                             nsim = 50, 
-                             resolution = 50,
-                             verbose = FALSE, 
-                             conf_int = 0.05,
-                             agg = 10)
+wm_q$nb[[48]] <- phuket_nb  # Assign the neighbors to Phuket
+wm_q$wt[[48]] <- phuket_wt  # Assign the row-standardized weights
 ```
 
+Verify the updated values for Phuket
 ```{r}
-kfun_rdacc_samutprakan$plotk + ggtitle("Samut Prakan")
+print(wm_q$nb[[48]])
+print(wm_q$wt[[48]])
 ```
 
-Road accidents in Samut Prakan resemble clustered pattern at the distance of 0 to 1000m.
 
-### 6.6 Samut Sakhon
 
-```{r}
-kfun_rdacc_samutsakhon <- kfunctions(BMR_network_samutsakhon_linestring, 
-                             rdacc_samutsakhon,
-                             start = 0, 
-                             end = 1000, 
-                             step = 50, 
-                             width = 50, 
-                             nsim = 50, 
-                             resolution = 50,
-                             verbose = FALSE, 
-                             conf_int = 0.05,
-                             agg = 10)
-```
 
-```{r}
-kfun_rdacc_samutsakhon$plotk + ggtitle("Samut Sakhon")
-```
+
 
-Road accidents in Samut Sakhon resemble clustered pattern at the distance of 0 to 1000m.

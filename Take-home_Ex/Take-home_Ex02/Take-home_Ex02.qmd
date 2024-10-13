@@ -784,7 +784,8 @@ tmap_mode("plot")
 ```
 Visualizing local Moran's I statistics
 ```{r}
-
+#| warning: false
+#| message: false
 map1 <- tm_shape(lisa_tourist) +
   tm_fill("ii") +
   tm_borders(alpha = 0.5) +
@@ -812,6 +813,8 @@ tmap_mode("plot")
 ```
 
 ```{r}
+#| warning: false
+#| message: false
 map1 <- tm_shape(lisa_tourist) +
   tm_fill("p_ii_sim") +
   tm_borders(alpha = 0.5) +
@@ -841,6 +844,8 @@ tmap_mode("plot")
 ```
 
 ```{r}
+#| warning: false
+#| message: false
 map1 <- tm_shape(lisa_tourist) +
   tm_fill("ii") +
   tm_borders(alpha = 0.5) +
@@ -874,6 +879,8 @@ tmap_mode("plot")
 ```
 
 ```{r}
+#| warning: false
+#| message: false
 map1 <- tm_shape(lisa_revenue) +
   tm_fill("ii") +
   tm_borders(alpha = 0.5) +
@@ -909,6 +916,8 @@ tmap_mode("plot")
 ```
 
 ```{r}
+#| warning: false
+#| message: false
 map1 <- tm_shape(lisa_tourist) +
   tm_polygons() +
   tm_borders(alpha = 0.5) +
@@ -975,6 +984,9 @@ Visualizing Gi*
 tmap_mode("plot")
 ```
 ```{r}
+
+#| warning: false
+#| message: false
 map1 <- tm_shape(HCSA_tourist) +
   tm_fill("gi_star") + 
   tm_borders(alpha = 0.5) +
@@ -1006,6 +1018,9 @@ tmap_mode("plot")
 ```
 
 ```{r}
+
+#| warning: false
+#| message: false
 map1 <- tm_shape(HCSA_tourist) +
   tm_fill("p_sim") + 
   tm_borders(alpha = 0.5) +
@@ -1054,6 +1069,9 @@ map2 <- tm_shape(HCSA_tourist) +
 tmap_arrange(map1, map2, ncol = 2)
 ```
 ```{r}
+
+#| warning: false
+#| message: false
 map1 <- tm_shape(HCSA_revenue) +
   tm_fill("gi_star") + 
   tm_borders(alpha = 0.5) +
@@ -1206,6 +1224,8 @@ Computing Computing Gi*
 Deriving the spatial weights
 
 ```{r}
+#| warning: false
+#| message: false
 tourist_pre_covid_nb <- tourist_pre_covid_st %>%
   activate("geometry") %>%
   mutate(nb = include_self(
@@ -1291,6 +1311,9 @@ cbg_tourist_post_covid <- gi_stars_post_covid %>%
 
 Plot the result using `ggplot2` functions
 ```{r}
+
+#| warning: false
+#| message: false
 library(patchwork)
 # Create the three ggplots
 plot1 <- ggplot(data = cbg_tourist_pre_covid,
@@ -1441,6 +1464,8 @@ tourist_post_covid_ehsa <- thailand_32647_sorted %>%
 
 
 ```{r}
+#| warning: false
+#| message: false
 ehsa_tourist_pre_covid_sig <- tourist_pre_covid_ehsa%>%
   filter(p_value < 0.05)
 
@@ -1455,6 +1480,8 @@ tmap_mode("plot")
 Visualizing EHSA
 
 ```{r}
+#| warning: false
+#| message: false
 map1 <- tm_shape(tourist_pre_covid_ehsa) +
   tm_polygons() +
   tm_borders(alpha = 0.5) +

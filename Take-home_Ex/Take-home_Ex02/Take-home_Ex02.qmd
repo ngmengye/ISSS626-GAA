@@ -28,7 +28,7 @@ Setting the analytical tools.
 
 ```{r}
 #| output: false
-pacman::p_load(sf,spNetwork,raster,spatstat,tmap,tidyverse,sp,maptools,spNetwork,knitr,ggplot2,dplyr,sfdep)
+pacman::p_load(sf,spNetwork,raster,spatstat,tmap,tidyverse,sp,maptools,spNetwork,knitr,ggplot2,sfdep)
 ```
 
 ### 3.1 Data Preparation
@@ -63,8 +63,8 @@ Check if there are any missing values.
 sum(is.na(thaitour$value))
 ```
 
-Check if the values in the variable column are balanced or equally represented.
-All variables have equal 3850 counts.
+Check if the values in the variable column are balanced or equally represented. All variables have equal 3850 counts.
+
 ```{r}
 table(thaitour$variable)
 ```
@@ -93,8 +93,7 @@ plot(st_geometry(thailand_32647))
 Keep the time series at month and year levels.
 
 ```{r}
-# Load necessary libraries
-library(dplyr)
+
 library(lubridate)
 
 # Create a new column with month and year in the format like 'Jan-2019'
@@ -104,7 +103,7 @@ thaitour <- thaitour %>%
 # Filter the data to keep only 'no_tourist_all' and 'revenue_all'
 filtered_data <- thaitour %>%
   filter(variable %in% c("no_tourist_all", "revenue_all")) %>%
-  select(province_eng, month_year, variable, value)
+  dplyr::select(province_eng, month_year, variable, value)
 
 # View the filtered data
 print(filtered_data)
@@ -113,7 +112,6 @@ print(filtered_data)
 
 ```{r}
 # Load necessary libraries
-library(dplyr)
 library(ggplot2)
 library(lubridate)
 
@@ -149,9 +147,6 @@ Using this segmentation, I will create a new dataset, `reshaped_data`, based on 
 
 ```{r}
 
-# Convert the 'month_year' to a date-like format for easier processing
-# Load necessary libraries
-library(dplyr)
 library(lubridate)
 
 # Convert the 'month_year' to a date-like format for easier processing
@@ -165,8 +160,9 @@ filtered_data <- filtered_data %>%
   mutate(covid_period = case_when(
     year == 2019 ~ "pre_covid",
     year == 2020 | (year == 2021 & month <= 9) ~ "covid_period",
-    year >= 2021 & month > 9 ~ "post_covid"
+    (year >= 2021 & month > 9) | year >= 2022 ~ "post_covid"
   ))
+
 
 # Sum the values by province and covid_period for 'no_tourist_all' and 'revenue_all'
 reshaped_data <- filtered_data %>%
@@ -204,8 +200,8 @@ reshaped_data_sorted <- reshaped_data %>%
 
 # Create a comparison table with 'ADM1_EN' and 'province_eng' side by side
 comparison_table <- thailand_32647_sorted %>%
-  select(ADM1_EN) %>%
-  bind_cols(reshaped_data_sorted %>% select(province_eng))
+  dplyr::select(ADM1_EN) %>%
+  bind_cols(reshaped_data_sorted %>% dplyr::select(province_eng))
 
 ```
 
@@ -243,15 +239,17 @@ print(thailand_32647_sorted)
 
 
 
+
 ```{r}
 # Perform the left join with 'reshaped_data' on 'ADM1_TH' and 'province_eng'
 thailand <- left_join(thailand_32647_sorted, reshaped_data_sorted, by = c("ADM1_EN" = "province_eng")) %>% 
-  select(1:3,17:27)
+  dplyr::select(1:3,17:25)
 
 # View the merged data
 head(thailand)
-
 ```
+
+
 
 ## 5 Exploratory Data Analysis
 
@@ -333,7 +331,9 @@ ggplot(second_group, aes(x = variable, y = value)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+
 Generate the boxplot of `no_tourist_all` and `revenue_all` by year.
+
 ```{r}
 # First, ensure that the year is extracted from the 'date' column
 thaitour <- thaitour %>%
@@ -398,14 +398,13 @@ ggplot(data_revenue, aes(x = factor(year), y = value)) +
 
 ```
 
-
 Plot the horizontal bar chart that shows the total revenue by province in 2019.
 
 ```{r}
 # Ensure filtered_data has only 'revenue_all' and is filtered for 2019
 bar_data <- filtered_data %>%
   filter(variable == "revenue_all" & grepl("2019", month_year)) %>%
-  select(province_eng, value) %>%
+  dplyr::select(province_eng, value) %>%
   group_by(province_eng) %>%
   summarise(total_revenue_2019 = sum(value, na.rm = TRUE))
 
@@ -429,7 +428,7 @@ ggsave("total_revenue_2019.png", width = 10, height = 15)
 ```{r}
 # Assuming reshaped_data is already created with 2019_revenue_all as one of the columns
 bar_data <- reshaped_data %>%
-  select(province_eng, `covid_period_no_tourist_all`)
+  dplyr::select(province_eng, `covid_period_no_tourist_all`)
 
 # Create a horizontal bar chart with provinces ordered by revenue in descending order
 ggplot(bar_data, aes(x = `covid_period_no_tourist_all`, y = reorder(province_eng, `covid_period_no_tourist_all`))) +
@@ -444,6 +443,7 @@ ggplot(bar_data, aes(x = `covid_period_no_tourist_all`, y = reorder(province_eng
 ggsave("total_tourist_2019.png", width = 10, height = 15)
 
 ```
+
 ![](total_tourist_2019.png){fig-align="center"}
 
 ```{r}
@@ -456,6 +456,7 @@ tmap_arrange(basemap, revenue, asp=1, ncol=2)
 ```
 
 Plot choropleth map to see the distribution of tourism revenue
+
 ```{r}
 equal <- tm_shape(thailand) +
   tm_fill("total_revenue_all",
@@ -478,7 +479,6 @@ tmap_arrange(equal,
              asp=1, 
              ncol=2)
 ```
-
 
 Plot choropleth map to see the distribution of tourism receipt
 
@@ -510,6 +510,7 @@ tmap_arrange(equal,
 ### Derive Queen's contiguity weights: sfdep methods
 
 The code chunk below is used to compute Queen contiguity weight matrix.
+
 ```{r}
 # Load necessary libraries
 wm_q <- thailand %>%
@@ -524,17 +525,19 @@ wm_q <- thailand %>%
 ```{r}
 wm_q
 ```
+
 Based on `wm_q`, Phuket has zero neighbours as shown below because it is an island.
 
 ```{r}
 wm_q$ADM1_EN[[48]]
 ```
 
-
 ```{r}
 wm_q$nb[[48]]
 ```
+
 Use tmap to view the Phuket location
+
 ```{r}
 # Set tmap to interactive mode ('view')
 tmap_mode('view')
@@ -546,6 +549,7 @@ tm_shape(thailand) +
 ```
 
 Use tmap to view Phuket boundary.
+
 ```{r}
 library(tmap)
 library(dplyr)
@@ -585,6 +589,7 @@ coords <- cbind(longitude, latitude)
 ```{r}
 head(coords)
 ```
+
 ```{r}
 library(spdep)
 
@@ -592,6 +597,7 @@ k1 <- knn2nb(knearneigh(coords))
 k1dists <- unlist(nbdists(k1, coords))
 summary(k1dists)
 ```
+
 The summary report shows that the largest first nearest neighbour distance is 11.0987 km
 
 ```{r}
@@ -602,21 +608,26 @@ wm_d120000
 ```{r}
 str(wm_d120000)
 ```
+
 ```{r}
 table(thailand$ADM1_EN, card(wm_d120000))
 ```
+
 ```{r}
 n_comp <- n.comp.nb(wm_d120000)
 n_comp$nc
 ```
+
 ```{r}
 table(n_comp$comp.id)
 ```
+
 ```{r}
 plot(thailand$geometry, border="lightgrey")
 plot(wm_d120000, coords, add=TRUE)
 plot(k1, coords, add=TRUE, col="red", length=0.08)
 ```
+
 Find neighbor list and weights for Phuket, First we identify the index of Phuket.
 
 ```{r}
@@ -625,39 +636,853 @@ phuket_index <- which(wm_q$ADM1_EN == "Phuket")
 print(phuket_index)
 
 ```
+
 Identify the neighbor list for Phuket, Based on the results, there 2 two neighbours.
+
 ```{r}
 # Access the neighbor list for Phuket
 phuket_nb <- wm_d120000[[phuket_index]]
 print(phuket_nb)
 
 ```
+
 We modify Phuket weight matrix and neighbour list in `wm_q`. Since we are using row standardized W matrix, the weights would be 0.5.
 
 Define Phuket's neighbors (Krabi and Phang Nga) based on distance
+
 ```{r}
 phuket_nb <- c(18, 39)  # Neighbors: Krabi and Phang Nga
 ```
 
 Define row-standardized weights (0.5 for each neighbor)
+
 ```{r}
 phuket_wt <- c(0.5, 0.5)  # Row-standardized weights for two neighbors
 ```
 
 Update the wm_q sf object with these neighbors and weights for Phuket
+
 ```{r}
 wm_q$nb[[48]] <- phuket_nb  # Assign the neighbors to Phuket
 wm_q$wt[[48]] <- phuket_wt  # Assign the row-standardized weights
 ```
 
 Verify the updated values for Phuket
+
 ```{r}
 print(wm_q$nb[[48]])
 print(wm_q$wt[[48]])
 ```
 
+Check the structure of the neighbors list for the first few regions. It shows that 'nb' is integer vector of indices.
+
+```{r}
+# Check the structure of the neighbors list for the first few regions
+str(wm_q$nb[1:5])
+```
+
+Check the structure of the weights list for the first few regions. It shows that 'wt' is numeric vector of weights.
+
+```{r}
+str(wm_q$wt[1:5])
+```
+
+Ensure that 'nb' for Phuket is an integer vector of indices (neighbors) and 'wt' for Phuket is a numeric vector of weights
+
+```{r}
+wm_q$nb[[48]] <- as.integer(c(18, 39))  
+
+wm_q$wt[[48]] <- as.numeric(c(0.5, 0.5)) 
+```
+
+### Performing Global Moran's I test
+
+Perform Global Moran's I test for total_no_tourist_all
+
+```{r}
+global_moran_test(wm_q$total_no_tourist_all,
+                        wm_q$nb,
+                        wm_q$wt,
+              )
+```
+
+Hypotheses for Moran's I test:\
+Null Hypothesis (H0): There is no spatial autocorrelation. The spatial pattern of the variable is random.\
+Alternative Hypothesis (H1): There is positive spatial autocorrelation. Neighboring regions have similar values.
+
+In this case, the Moran's I statistic is −0.001656396 which is very close to zero. This suggests that there is no significant spatial autocorrelation in the variable `total_no_tourist_all`
+
+p-value: The p-value is 0.4067, which is greater than the typical significance level (0.05). This means we **fail to reject the null hypothesis**. In other words, there is **no evidence of significant spatial autocorrelation** in the data.
+
+Perform Global Moran's I test for total_revenue_all
+
+```{r}
+global_moran_test(wm_q$total_revenue_all,
+                        wm_q$nb,
+                        wm_q$wt,
+              )
+```
+
+Hypotheses for Moran's I test:\
+Null Hypothesis (H0): There is no spatial autocorrelation. The spatial pattern of the variable is random.\
+Alternative Hypothesis (H1): There is positive spatial autocorrelation. Neighboring regions have similar values.
+
+Moran's I statistic: The Moran's I value of −0.0224 is close to zero. This suggests that there is no significant spatial autocorrelation in the variable `total_revenue_all`, meaning that the values across different regions are distributed randomly.
+
+p-value: The p-value is 0.5754, which is greater than the typical significance level (0.05). This means we **fail to reject the null hypothesis**. In other words, there is **no evidence of significant spatial autocorrelation** in the data.
+
+Perform Global Moran's I permutation test for variable `total_no_tourist_all`
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q$total_no_tourist_all,
+                        wm_q$nb,
+                        wm_q$wt,
+                  nsim = 99)
+```
+
+The Monte-Carlo simulation of Moran’s I test confirms the previous result that there is **no significant spatial autocorrelation** in the `total_no_tourist_all` variable.
+
+Perform Global Moran's I permutation test for variable `total_revenue_all`
+
+```{r}
+set.seed(1234)
+global_moran_perm(wm_q$total_revenue_all,
+                        wm_q$nb,
+                        wm_q$wt,
+                  nsim = 99)
+```
+
+The Monte-Carlo simulation of Moran’s I test confirms the previous result that there is **no significant spatial autocorrelation** in the `total_revenue_all` variable.
+
+##7 Local Spatial Autocorrelation
+
+### LISA Map
+
+Computing local Moran's I of variable `total_no_tourist_all`
+
+```{r}
+lisa_tourist <- wm_q %>%
+  mutate(local_moran=local_moran(
+    total_no_tourist_all, nb,wt,nsim=99),
+    .before = 1) %>%
+  unnest(local_moran)
+```
+
+Computing local Moran's I of variable `total_revenue_all`
+
+```{r}
+lisa_revenue <- wm_q %>%
+  mutate(local_moran=local_moran(
+    total_revenue_all, nb,wt,nsim=99),
+    .before = 1) %>%
+  unnest(local_moran)
+```
+
+```{r}
+tmap_mode("plot")
+```
+Visualizing local Moran's I statistics
+```{r}
+
+map1 <- tm_shape(lisa_tourist) +
+  tm_fill("ii") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "local Moran's I of total tourist",
+    main.title.size = 0.8
+  )
+
+map2 <- tm_shape(lisa_revenue) +
+  tm_fill("ii") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "local Moran's I of total revenue",
+    main.title.size = 0.8
+  )
+tmap_arrange(map1,map2,ncol=2)
+
+```
+Visualizing p-value of local Moran's I
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+map1 <- tm_shape(lisa_tourist) +
+  tm_fill("p_ii_sim") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "p-value of Moran's I of total tourist",
+    main.title.size = 0.5
+  )
+
+map2 <- tm_shape(lisa_revenue) +
+  tm_fill("p_ii_sim") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "p-value of Moran's I of total revenue",
+    main.title.size = 0.5
+  )
+
+tmap_arrange(map1,map2,ncol=2)
+
+```
+
+Visualizing local Moran's I and p-value of variable `total_no_tourist_all`
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+map1 <- tm_shape(lisa_tourist) +
+  tm_fill("ii") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "local Moran's I of total tourist",
+    main.title.size = 1
+  )
+
+map2 <- tm_shape(lisa_tourist) +
+  tm_fill("p_ii", breaks = c(0,0.001,0.01,0.05,1),labels = c("0.001","0.01","0.05","Not Sig")) +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "p-value of Moran's I of total tourist",
+    main.title.size = 1
+  )
+
+tmap_arrange(map1,map2,ncol=2)
+```
+
+Bangkok and its neighboring regions show significant negative spatial autocorrelation, meaning Bangkok's total revenue is much higher than nearby provinces. This clustering is statistically significant.
+
+In most other regions (in red on the p-value map), the spatial autocorrelation is not statistically significant, meaning that no strong clustering patterns of total revenue are detected in these areas.
+
+
+Visualizing local Moran's I and p-value of variable `total_revenue_all`
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+map1 <- tm_shape(lisa_revenue) +
+  tm_fill("ii") +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "local Moran's I of total revenue",
+    main.title.size = 1
+  )
+
+map2 <- tm_shape(lisa_revenue) +
+  tm_fill("p_ii", breaks = c(0,0.001,0.01,0.05,1),labels = c("0.001","0.01","0.05","Not Sig")) +
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) + 
+  tm_layout(
+    main.title = "p-value of Moran's I of total revenue",
+    main.title.size = 1
+  )
+
+tmap_arrange(map1,map2,ncol=2)
+```
+Plotting LISA map for both variable `total_no_tourist_all` and `total_revenue_all`
+
+
+```{r}
+lisa_tourist_sig <- lisa_tourist  %>%
+  filter(p_ii_sim < 0.05)
+```
+
+```{r}
+lisa_revenue_sig <- lisa_revenue  %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+```
+
+```{r}
+map1 <- tm_shape(lisa_tourist) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_tourist_sig) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4) +
+    tm_layout(
+    main.title = "LISA of total tourist",
+    main.title.size = 1
+  )
+
+map2 <- tm_shape(lisa_revenue) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(lisa_revenue_sig) +
+  tm_fill("mean") + 
+  tm_borders(alpha = 0.4) + tm_layout(
+    main.title = "LISA of total revenue",
+    main.title.size = 1
+  )
+
+tmap_arrange(map1,map2,ncol=2)
+
+```
+High-High (Red): These are areas where high values are surrounded by high values (spatial clustering of high values). \
+Low-Low (Blue-Green): These areas have low values surrounded by other low values (spatial clustering of low values).\
+Low-High (Pink): Areas with low values surrounded by high values (spatial outliers).
+
+### Hot Spot and Cold Spot Area Analysis (HCSA)
+
+Computing local GI* statistics
+```{r}
+wm_idw <- thailand %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wts = st_inverse_distance(nb, 
+                              geometry, 
+                              scale = 1,
+                              alpha = 1),
+         .before = 1)
+```
+Computing local GI* statistics of variable `total_no_tourist_all`
+```{r}
+HCSA_tourist <- wm_idw %>% 
+  mutate(local_Gi = local_gstar_perm(
+    total_no_tourist_all, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA_tourist
+```
+
+Computing local GI* statistics of variable `total_revenue`
+```{r}
+HCSA_revenue <- wm_idw %>% 
+  mutate(local_Gi = local_gstar_perm(
+    total_revenue_all, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+HCSA_revenue
+```
+Visualizing Gi*
+
+```{r}
+tmap_mode("plot")
+```
+```{r}
+map1 <- tm_shape(HCSA_tourist) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+    tm_borders(alpha = 0.4) + tm_layout(
+    main.title = "Total tourist",
+    main.title.size = 1
+  )
+
+
+map2 <- tm_shape(HCSA_revenue) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8))+
+    tm_borders(alpha = 0.4) + tm_layout(
+    main.title = "Total revenue",
+    main.title.size = 1
+  )
+
+tmap_arrange(map1,map2,ncol=2)
+
+```
+Gi-star values range from low to high. High values indicate spatial clustering of high values (hot spots), and low values indicate spatial clustering of low values (cold spots).
+
+Visualizing p-value of HCSA
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+map1 <- tm_shape(HCSA_tourist) +
+  tm_fill("p_sim") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+    tm_borders(alpha = 0.4) + tm_layout(
+    main.title = "Total tourist",
+    main.title.size = 1
+  )
+
+
+map2 <- tm_shape(HCSA_revenue) +
+  tm_fill("p_sim") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8))+
+    tm_borders(alpha = 0.4) + tm_layout(
+    main.title = "Total revenue",
+    main.title.size = 1
+  )
+
+tmap_arrange(map1,map2,ncol=2)
+```
+Low p-values indicating significant clustering of high or low values (either a hotspot or cold spot).
+
+Visualizing local HCSA
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+map1 <- tm_shape(HCSA_tourist) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "Gi* of total revenue",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(HCSA_tourist) +
+  tm_fill("p_value",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of Gi*",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+```{r}
+map1 <- tm_shape(HCSA_revenue) +
+  tm_fill("gi_star") + 
+  tm_borders(alpha = 0.5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(main.title = "Gi* of total revenue",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(HCSA_revenue) +
+  tm_fill("p_value",
+          breaks = c(0, 0.001, 0.01, 0.05, 1),
+              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+  tm_borders(alpha = 0.5) +
+  tm_layout(main.title = "p-value of Gi*",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+
+Visualizing hot spot and cold spot areas
+
+```{r}
+HCSA_sig_tourist <- HCSA_tourist  %>%
+  filter(p_sim < 0.05)
+```
+```{r}
+HCSA_sig_revenue <- HCSA_revenue  %>%
+  filter(p_sim < 0.05)
+tmap_mode("plot")
+```
+
+```{r}
+map1 <- tm_shape(HCSA_tourist) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig_tourist) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4) +
+  tm_layout(main.title = "Hot spot and cold spot areas of tourist",
+            main.title.size = 0.8)
+
+map2 <- tm_shape(HCSA_revenue) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(HCSA_sig_revenue) +
+  tm_fill("cluster") + 
+  tm_borders(alpha = 0.4) +
+  tm_layout(main.title = "Hot spot and cold spot areas of revenue",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+These regions represent coldspots. A coldspot indicates significant clustering of low values. These areas tend to have lower activity or lower values for the measured variable.
+
+## 8 Emerging Hot Spot Analysis
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, plotly, tidyverse,Kendall)
+```
+
+### Data Wrangling
+Segregate attribute data into 3 periods: Pre-covid, covid_period, post_covid
+
+Change the **month_year** in `filtered_data` as integer in the new column **month_year_numeric**
+```{r}
+# Create a new column with format 'YYYYMM' as an integer
+filtered_data <- filtered_data %>%
+  mutate(month_year_numeric = as.integer(format(as.Date(month_year_date), "%Y%m")))
+
+# View the updated data
+head(filtered_data)
+```
+
+Rename the column **province_eng** to **ADM1_EN**
+
+```{r}
+# Rename 'province_eng' to 'ADM1_EN'
+filtered_data <- filtered_data %>%
+  rename(ADM1_EN = province_eng)
+
+# View the updated dataset
+head(filtered_data)
+```
+
+Filter the data based on **no_tourist_all** and **revenue_all**
+Create the time series cube
+```{r}
+tourist_pre_covid <- filtered_data %>%
+  filter(variable == "no_tourist_all", covid_period == "pre_covid")
+
+tourist_covid_period <- filtered_data %>%
+  filter(variable == "no_tourist_all", covid_period == "covid_period")
+
+tourist_post_covid <- filtered_data %>%
+  filter(variable == "no_tourist_all", covid_period == "post_covid")
+
+# Revenue-related datasets
+revenue_pre_covid <- filtered_data %>%
+  filter(variable == "revenue_all", covid_period == "pre_covid")
+
+revenue_covid_period <- filtered_data %>%
+  filter(variable == "revenue_all", covid_period == "covid_period")
+
+revenue_post_covid <- filtered_data %>%
+  filter(variable == "revenue_all", covid_period == "post_covid")
+
+
+```
+
+```{r}
+tourist_pre_covid_st <- spacetime(tourist_pre_covid, thailand_32647_sorted,
+                      .loc_col = "ADM1_EN",
+                      .time_col = "month_year_numeric")
+
+tourist_covid_period_st <- spacetime(tourist_covid_period, thailand_32647_sorted,
+                      .loc_col = "ADM1_EN",
+                      .time_col = "month_year_numeric")
+
+tourist_post_covid_st <- spacetime(tourist_post_covid, thailand_32647_sorted,
+                      .loc_col = "ADM1_EN",
+                      .time_col = "month_year_numeric")
+
+is_spacetime_cube(tourist_pre_covid_st)
+is_spacetime_cube(tourist_covid_period_st)
+is_spacetime_cube(tourist_post_covid_st)
+
+```
+```{r}
+revenue_pre_covid_st <- spacetime(revenue_pre_covid, thailand_32647_sorted,
+                      .loc_col = "ADM1_EN",
+                      .time_col = "month_year_numeric")
+
+revenue_covid_period_st <- spacetime(revenue_covid_period, thailand_32647_sorted,
+                      .loc_col = "ADM1_EN",
+                      .time_col = "month_year_numeric")
+
+revenue_post_covid_st <- spacetime(revenue_post_covid, thailand_32647_sorted,
+                      .loc_col = "ADM1_EN",
+                      .time_col = "month_year_numeric")
+
+is_spacetime_cube(revenue_pre_covid_st)
+is_spacetime_cube(revenue_covid_period_st)
+is_spacetime_cube(revenue_post_covid_st)
+```
+
+### Emerging Hot Spot Analysis: Tourist Variable 
+
+Computing Computing Gi*
+
+Deriving the spatial weights
+
+```{r}
+tourist_pre_covid_nb <- tourist_pre_covid_st %>%
+  activate("geometry") %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wt = st_inverse_distance(nb, 
+                             geometry, 
+                             scale = 1,
+                             alpha = 1),
+    .before = 1) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+
+tourist_covid_period_nb <- tourist_covid_period_st %>%
+  activate("geometry") %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wt = st_inverse_distance(nb, 
+                             geometry, 
+                             scale = 1,
+                             alpha = 1),
+    .before = 1) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+
+tourist_post_covid_nb <- tourist_post_covid_st %>%
+  activate("geometry") %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wt = st_inverse_distance(nb, 
+                             geometry, 
+                             scale = 1,
+                             alpha = 1),
+    .before = 1) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
 
 
 
+```
+Manually calculate the local GI* for each location
+
+```{r}
+gi_stars_tourist_pre_covid <- tourist_pre_covid_nb %>% 
+  group_by(month_year_numeric) %>% 
+  mutate(gi_star = local_gstar_perm(
+    value, nb, wt)) %>% 
+  tidyr::unnest(gi_star)
+
+gi_stars_tourist_covid_period <- tourist_covid_period_nb %>% 
+  group_by(month_year_numeric) %>% 
+  mutate(gi_star = local_gstar_perm(
+    value, nb, wt)) %>% 
+  tidyr::unnest(gi_star)
+
+gi_stars_post_covid <- tourist_post_covid_nb %>% 
+  group_by(month_year_numeric) %>% 
+  mutate(gi_star = local_gstar_perm(
+    value, nb, wt)) %>% 
+  tidyr::unnest(gi_star)
+
+```
+
+Evaluate a location for a trend
+```{r}
+cbg_tourist_pre_covid <- gi_stars_tourist_pre_covid %>% 
+  ungroup() %>% #must ungroup because it is a cube
+  filter(ADM1_EN == "Bangkok") |> #r version of %>%  = |>
+  dplyr::select(ADM1_EN, month_year_numeric, gi_star)
 
 
+cbg_tourist_covid_period <- gi_stars_tourist_covid_period %>% 
+  ungroup() %>% #must ungroup because it is a cube
+  filter(ADM1_EN == "Bangkok") |> #r version of %>%  = |>
+  dplyr::select(ADM1_EN, month_year_numeric, gi_star)
+
+cbg_tourist_post_covid <- gi_stars_post_covid %>% 
+  ungroup() %>% #must ungroup because it is a cube
+  filter(ADM1_EN == "Bangkok") |> #r version of %>%  = |>
+  dplyr::select(ADM1_EN, month_year_numeric, gi_star)
+
+
+```
+
+Plot the result using `ggplot2` functions
+```{r}
+library(patchwork)
+# Create the three ggplots
+plot1 <- ggplot(data = cbg_tourist_pre_covid,
+                aes(x = month_year_numeric, y = gi_star)) +
+  geom_line() +
+  theme_light() +
+  labs(title = "Pre-COVID")
+
+plot2 <- ggplot(data = cbg_tourist_covid_period,
+                aes(x = month_year_numeric, y = gi_star)) +
+  geom_line() +
+  theme_light() +
+  labs(title = "COVID Period")
+
+plot3 <- ggplot(data = cbg_tourist_post_covid,
+                aes(x = month_year_numeric, y = gi_star)) +
+  geom_line() +
+  theme_light() +
+  labs(title = "Post-COVID")
+
+# Combine the three plots side by side using patchwork
+```
+
+
+```{r}
+plot1 / plot2 / plot3
+```
+
+Printing Mann-Kendall test report
+
+Null Hypothesis (H₀): There is no trend in the data (no significant increase or decrease over time).
+Alternative Hypothesis (H₁): There is a trend in the data (either an increasing or decreasing trend over time).
+
+```{r}
+cbg_tourist_pre_covid %>% 
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr:: unnest_wider(mk)
+```
+p-value = 0.537: This means that the trend is not statistically significant. A high p-value suggests that the null hypothesis (no trend) cannot be rejected. Therefore, we conclude that the weak negative trend observed is likely due to chance.
+
+```{r}
+cbg_tourist_covid_period %>% 
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr:: unnest_wider(mk)
+```
+Since the p-value is less than 0.05, this suggests that the trend is statistically significant. We can reject the null hypothesis of no trend and conclude that the negative trend observed in the data is statistically significant.
+
+```{r}
+cbg_tourist_post_covid %>% 
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr:: unnest_wider(mk)
+```
+The p-value is very small, well below 0.05, which indicates that the trend is highly statistically significant. We can confidently reject the null hypothesis of no trend and conclude that the positive trend observed in the data is statistically significant.
+
+
+Apply the Mann-Kendall test for trend detection on the Gi* values for each province over time.
+
+```{r}
+ehsa_tourist_pre_covid <- gi_stars_tourist_pre_covid %>% 
+  group_by(ADM1_EN) %>% #because 88 counties and observations
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr:: unnest_wider(mk)
+head(ehsa_tourist_pre_covid)
+```
+
+Sort the data based on the statistical significance and the strength of trends
+```{r}
+emerging_tourist_pre_covid <- ehsa_tourist_pre_covid %>% 
+  arrange(sl, abs(tau)) %>% 
+  slice(1:10)
+head(emerging_tourist_pre_covid)
+```
+Perform Emerging hotspot analysis of tourist
+```{r}
+ehsa_tourist_pre_covid <- emerging_hotspot_analysis(
+  x = tourist_pre_covid_st,
+  .var = "value",
+  k = 1,
+  nsim = 99
+)
+
+
+ehsa_tourist_covid_period <- emerging_hotspot_analysis(
+  x = tourist_covid_period_st,
+  .var = "value",
+  k = 1,
+  nsim = 99
+)
+
+
+ehsa_tourist_post_covid <- emerging_hotspot_analysis(
+  x = tourist_post_covid_st,
+  .var = "value",
+  k = 1,
+  nsim = 99
+)
+```
+
+Plot the classifications
+```{r}
+plot1 <- ggplot(data=ehsa_tourist_pre_covid,
+       aes(x=classification)) +
+  geom_bar()+
+  theme_light() +
+  labs(title = "Pre-COVID")
+
+plot2 <- ggplot(data=ehsa_tourist_covid_period,
+       aes(x=classification)) +
+  geom_bar()+
+  theme_light() +
+  labs(title = "COVID Period")
+
+plot3 <- ggplot(data=ehsa_tourist_post_covid,
+       aes(x=classification)) +
+  geom_bar()+
+  theme_light() +
+  labs(title = "Post COVID")
+```
+```{r}
+plot1 / plot2 / plot3
+```
+
+Join both `thailand_32647_sorted` and `ehsa` to visualize the geographic distribution of EHSA classes.
+```{r}
+tourist_pre_covid_ehsa <- thailand_32647_sorted %>% 
+  left_join(ehsa_tourist_pre_covid,
+            by = join_by(ADM1_EN == location))
+
+
+tourist_covid_period_ehsa <- thailand_32647_sorted %>% 
+  left_join(ehsa_tourist_covid_period,
+            by = join_by(ADM1_EN == location))
+
+tourist_post_covid_ehsa <- thailand_32647_sorted %>% 
+  left_join(ehsa_tourist_post_covid,
+            by = join_by(ADM1_EN == location))
+
+```
+
+
+
+```{r}
+ehsa_tourist_pre_covid_sig <- tourist_pre_covid_ehsa%>%
+  filter(p_value < 0.05)
+
+ehsa_tourist_covid_period_sig <- tourist_covid_period_ehsa%>%
+  filter(p_value < 0.05)
+
+ehsa_tourist_post_covid_sig <- tourist_post_covid_ehsa%>%
+  filter(p_value < 0.05)
+
+tmap_mode("plot")
+```
+Visualizing EHSA
+
+```{r}
+map1 <- tm_shape(tourist_pre_covid_ehsa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(ehsa_tourist_pre_covid_sig) +
+  tm_fill("classification")+
+  tm_borders(alpha = 0.4)+
+  tm_layout(main.title = "Pre-covid",
+            main.title.size = 0.8)
+  
+map2 <- tm_shape(tourist_covid_period_ehsa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(ehsa_tourist_covid_period_sig) +
+  tm_fill("classification") + 
+  tm_borders(alpha = 0.4) + 
+  tm_layout(main.title = "Covid period",
+            main.title.size = 0.8)
+
+
+map3 <- tm_shape(tourist_post_covid_ehsa) +
+  tm_polygons() +
+  tm_borders(alpha = 0.5) +
+tm_shape(ehsa_tourist_post_covid_sig) +
+  tm_fill("classification") + 
+  tm_borders(alpha = 0.4) +
+  tm_layout(main.title = "Post-covid",
+            main.title.size = 0.8)
+
+tmap_arrange(map1, map2,map3, ncol = 3)
+
+```

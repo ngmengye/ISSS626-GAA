@@ -1,0 +1,315 @@
+---
+title: "In-class Exercise 07"
+author: "Ng Meng Ye"
+---
+
+# Geographically Weighted Regression
+
+### 
+
+```{r}
+pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary,ggstatsplot)
+```
+
+URA Master Plan 2014’s planning subzone boundaries
+
+```{r}
+mpsz = st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex07/data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
+```
+
+```{r}
+mpsz_svy21 <- st_transform(mpsz, 3414)
+```
+
+```{r}
+st_crs(mpsz_svy21)
+```
+
+```{r}
+st_bbox(mpsz_svy21) #view extent
+```
+
+```{r}
+condo_resale = read_csv("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex07/data/aspatial/Condo_resale_2015.csv")
+```
+
+```{r}
+glimpse(condo_resale)
+```
+
+```{r}
+head(condo_resale$LONGITUDE) #see the data in XCOORD column
+```
+
+North side of equatorial
+
+```{r}
+head(condo_resale$LATITUDE) #see the data in YCOORD column
+```
+
+```{r}
+summary(condo_resale)
+
+```
+
+need to assign
+
+```{r}
+condo_resale_sf <- st_as_sf(condo_resale,
+                            coords = c("LONGITUDE", "LATITUDE"),
+                            crs=4326) %>%
+  st_transform(crs=3414)
+```
+
+```{r}
+head(condo_resale_sf)
+```
+In hands-on exercise,we use corrplot to check multicollinearity, but it runs correlation first
+
+Here we use ggstatplot, only one line of code
+
+```{r}
+ggcorrmat(condo_resale[,5:23])
+```
+perform VIF to check multicollinearity
+
+```{r}
+condo.mlr <- lm(formula = SELLING_PRICE ~ AREA_SQM + AGE    + 
+                  PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+                  PROX_URA_GROWTH_AREA + PROX_HAWKER_MARKET + PROX_KINDERGARTEN + 
+                  PROX_MRT  + PROX_PARK + PROX_PRIMARY_SCH + 
+                  PROX_TOP_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_SUPERMARKET + 
+                  PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD+LEASEHOLD_99YR, 
+                data=condo_resale_sf)
+summary(condo.mlr)
+```
+lm = object class in R
+fitted values = estimated selling price
+
+
+use olsrr to perform regression model, can use to perform stepwise regression, directly consume lm object
+
+```{r}
+ols_regress(condo.mlr)
+```
+
+should perform this to exclude those not significant variable
+
+```{r}
+ols_vif_tol(condo.mlr)
+```
+only few are greater than 0.5
+
+forward stepwise regression,
+put in 1 after 1
+
+
+```{r}
+condo_fw_mlr <- ols_step_forward_p(
+  condo.mlr,
+  p_val = 0.05,
+  details = FALSE
+)
+```
+
+```{r}
+plot(condo_fw_mlr)
+```
+```{r}
+ggcoefstats(condo.mlr,
+            sort = "ascending")
+```
+backward stepwise regression
+put in everything first, move out one after another
+
+```{r}
+ols_plot_resid_fit(condo_fw_mlr$model)
+```
+hover around the red line, conform the assumption, most
+
+```{r}
+ols_plot_resid_hist(condo_fw_mlr$model)
+```
+
+```{r}
+ols_test_normality(condo_fw_mlr$model)
+```
+### Test for Spatial Autocorrelation
+
+```{r}
+mlr_output <- as.data.frame(condo_fw_mlr$model$residuals) %>% 
+  rename('FW_MLR_RES'='condo_fw_mlr$model$residuals')
+```
+
+```{r}
+condo_resale_sf <- cbind(condo_resale_sf,
+                         mlr_output$FW_MLR_RES) %>% 
+  rename('MLR_RES' = 'mlr_output.FW_MLR_RES')
+```
+
+```{r}
+tmap_mode('view')
+tm_shape(mpsz)+
+  tmap_options(check.and.fix = TRUE) +
+  tm_polygons(alpha = 0.4) + 
+tm_shape(condo_resale_sf) +
+  tm_dots(col = "MLR_RES",
+          alpha = 0.5,
+          style = "quantile")
+tmap_mode("plot")
+```
+
+### Spatial stationary test
+
+```{r}
+library(sfdep)
+condo_resale_sf <- condo_resale_sf %>% 
+  mutate(nb=st_knn(geometry, k=6,
+                   longlat=FALSE),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1)
+```
+
+```{r}
+global_moran_perm(condo_resale_sf$MLR_RES,
+                  condo_resale_sf$nb,
+                  condo_resale_sf$wt,
+                  alternative = "two.sided",
+                  nsim=99)
+```
+### Building Fixed Bandwidth GWR model
+
+```{r}
+bw.fixed <- bw.gwr(formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+                            PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE + 
+                            PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK + 
+                            PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                          data=condo_resale_sf, 
+                          kernel = 'gaussian', 
+                          adaptive= FALSE, 
+                          longlat = FALSE)
+```
+```{r}
+gwr_fixed <- gwr.basic(formula = SELLING_PRICE ~ AREA_SQM + 
+                         AGE    + PROX_CBD + PROX_CHILDCARE + 
+                         PROX_ELDERLYCARE   +PROX_URA_GROWTH_AREA + 
+                         PROX_MRT   + PROX_PARK + PROX_PRIMARY_SCH +
+                         PROX_SHOPPING_MALL + PROX_BUS_STOP + 
+                         NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                       data=condo_resale_sf, 
+                       bw=bw.fixed, 
+                       kernel = 'gaussian', 
+                       longlat = FALSE)
+```
+
+```{r}
+gwr_fixed
+```
+The report shows that the AICc of the gwr is 42263.61 which is significantly smaller than the global multiple linear regression model of 42967.1.
+
+
+
+### Building Adaptive Bandwidth GWR model
+```{r}
+bw_adaptive <- bw.gwr(formula = SELLING_PRICE ~ AREA_SQM + AGE  + 
+                        PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE    + 
+                        PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK + 
+                        PROX_PRIMARY_SCH + PROX_SHOPPING_MALL   + PROX_BUS_STOP + 
+                        NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                      data=condo_resale_sf, 
+                      approach="CV", 
+                      kernel="gaussian", 
+                      adaptive=TRUE, 
+                      longlat=FALSE)
+```
+30 is the recommended data points to be used
+
+
+```{r}
+gwr.adaptive <- gwr.basic(formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+                            PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE + 
+                            PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK + 
+                            PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_BUS_STOP + 
+                            NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                          data=condo_resale_sf, bw=bw.fixed, 
+                          kernel = 'gaussian', 
+                          longlat = FALSE)
+```
+
+```{r}
+gwr.adaptive
+```
+Converting SDF into sf data.frame
+
+```{r}
+gwr_adaptive_output <- as.data.frame(
+  gwr.adaptive$SDF) %>% 
+  select(-c(2:15)
+)
+```
+
+```{r}
+gwr_sf_adaptive <- cbind(condo_resale_sf,
+                         gwr_adaptive_output)
+```
+
+```{r}
+glimpse(gwr_sf_adaptive)
+```
+```{r}
+summary(gwr.adaptive$SDF$yhat)
+```
+### Visualize local R2
+
+```{r}
+tmap_mode("view")
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz)+
+  tm_polygons(alpha = 0.1) +
+tm_shape(gwr_sf_adaptive) +  
+  tm_dots(col = "Local_R2",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+```
+```{r}
+tmap_mode("plot")
+```
+### Visualizing coefficient estimates
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+tmap_mode("view")
+AREA_SQM_SE <- tm_shape(mpsz)+
+  tm_polygons(alpha = 0.1) +
+tm_shape(gwr_sf_adaptive) +  
+  tm_dots(col = "AREA_SQM_SE",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+
+AREA_SQM_TV <- tm_shape(mpsz)+
+  tm_polygons(alpha = 0.1) +
+tm_shape(gwr_sf_adaptive) +  
+  tm_dots(col = "AREA_SQM_TV",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+
+tmap_arrange(AREA_SQM_SE, AREA_SQM_TV, 
+             asp=1, ncol=2,
+             sync = TRUE)
+```
+### By URA Planning Region
+
+```{r}
+tm_shape(mpsz[mpsz$REGION_N=="CENTRAL REGION", ])+
+  tm_polygons()+
+tm_shape(gwr_sf_adaptive) + 
+  tm_bubbles(col = "Local_R2",
+           size = 0.15,
+           border.col = "gray60",
+           border.lwd = 1)
+```
+

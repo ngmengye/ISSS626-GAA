@@ -20,7 +20,9 @@ website:
           - text: "Hands-on Exercise 6"
             href: "Hands-on_exercise/Hands-on_ex06/Hands-on_ex06.html" 
           - text: "Hands-on Exercise 7"
-            href: "Hands-on_exercise/Hands-on_ex07/Hands-on_ex07.html" 
+            href: "Hands-on_exercise/Hands-on_ex07/Hands-on_ex07.html"
+          - text: "Hands-on Exercise 8"
+            href: "Hands-on_exercise/Hands-on_ex08/Hands-on_ex08.html" 
       - text: "In-class Exercise"  # New menu for In-class exercises
         menu:
           - text: "In-class Exercise 1"

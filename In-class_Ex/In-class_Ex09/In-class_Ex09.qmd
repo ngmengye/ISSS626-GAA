@@ -1,0 +1,270 @@
+---
+title: "In-class Exercise 09"
+author: "Ng Meng Ye"
+---
+
+# Modelling Geographic of Accessibility
+
+The formula developed to measure accessibility is a variation of the gravitational principle and states that the accessibility to an activity is directly proportional to the size of the activity and inversely proportional to the distance to the location of the activity.
+
+Quantifying movement opportunity.
+
+-   Distance
+
+-   Time
+
+-   Cost distance between 2 locations
+
+Why Model Geography of Accessibility?
+
+1.  Which areas are underserved by healthcare facilities or schools?
+2.  How accessible are job opportunities from different residential areas?
+3.  What is the impact of public transportation on accessibility?
+
+**Distance friction**
+
+As the distance between two points increases, the likelihood of interaction between them decreases.
+
+**The Geographical Unit**
+
+Regular-shaped geometries such as squares, hexagons, and triangles reduce bias, improve comparability, minimize edge effects, and facilitate efficient computation, making them ideal for spatial analysis tasks, especially when compared to irregular polygons.
+
+![](images/clipboard-1101386184.png){fig-align="center"}
+
+### Example Application:
+
+-   **Potential Model**: If you're calculating accessibility to multiple hospitals in a city, you'd estimate the "potential" of each hospital's influence based on its capacity (e.g., number of beds) and the distance from the person’s home to each hospital.
+
+-   **Modified Potential Formula**: You modify the basic potential model by incorporating the difficulty of travel. For instance, hospitals located far away would have exponentially reduced influence due to longer travel times, which is captured by the distance friction coefficient.
+
+![](images/clipboard-1771672292.png){fig-align="center"}
+
+![](images/clipboard-1177737031.png){fig-align="center"}
+
+### Example:
+
+-   **2SFCA**: Let’s say we are analyzing access to healthcare in a region. We first calculate the provider-to-population ratio for each hospital within a certain distance, then calculate accessibility at the population points based on the proximity to these hospitals.
+
+-   **E2SFCA**: If we want to improve the model, we apply a weight based on distance so that hospitals closer to a population are weighted more than farther ones.
+
+-   **SAM**: Finally, we can use SAM for a general accessibility measure with a continuous decay function that decreases the weight of more distant hospitals.
+
+### The data
+
+```{r}
+pacman::p_load(SpatialAcc, sf, tidyverse, 
+               tmap, ggstatsplot)
+```
+
+
+```{r}
+eldercare <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex09/data/geospatial",
+                     layer = "ELDERCARE") %>%
+  st_transform(crs = 3414)
+```
+```{r}
+CHAS <- st_read("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex09/data/aspatial/CHASClinics.kml") %>%
+  st_transform(crs = 3414)
+```
+Next, st_buffer() of sf package is used to create a buffer of 1km around each eldercare features
+```{r}
+buffer_1km <- st_buffer(eldercare, 
+                        dist = 1000)
+```
+
+The code chunk below is used to plot the newly created buffers and the CHAS clinics.
+```{r}
+tmap_mode("view")
+tm_shape(buffer_1km) +
+  tm_polygons() +
+tm_shape(CHAS) +
+  tm_dots()
+```
+Lastly, the code chunk below is used to count the number of CHAS clinics with 1km of each eldercare centre.
+
+```{r}
+buffer_1km$pts_count <- lengths(
+  st_intersects(buffer_1km, CHAS))
+```
+
+
+# Geospatial Data Wrangling
+
+## Importing geospatial data
+
+Import MP14_SUBZONE_NO_SEA_PL
+
+hexagons = A 250m radius hexagons GIS data.
+
+ELDERCARE = GIS data showing location of eldercare service.
+
+```{r}
+mpsz <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex09/data/geospatial", layer = "MP14_SUBZONE_NO_SEA_PL")
+```
+
+```{r}
+hexagons <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex09/data/geospatial", layer = "hexagons") 
+```
+
+```{r}
+eldercare <- st_read(dsn = "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex09/data/geospatial", layer = "ELDERCARE") 
+```
+
+## Updating CRS information
+
+```{r}
+mpsz <- st_transform(mpsz, 3414)
+eldercare <- st_transform(eldercare, 3414)
+hexagons <- st_transform(hexagons, 3414)
+```
+
+Verify the newly transformed **mpsz_svy21**
+
+```{r}
+st_crs(mpsz)
+```
+
+## Cleaning and updating attribute fields of the geospatial data
+
+Add `capacity` field nto the data table of `eldercare`
+
+```{r}
+eldercare <- eldercare %>%
+  select(fid, ADDRESSPOS) %>%
+  mutate(capacity = 100)
+```
+
+The `eldercare` now contains: fid, ADDRESSPOS, geometry and capacity fields.
+
+Add `hexagons` field into the data table of `hexagons`
+
+```{r}
+hexagons <- hexagons %>%
+  select(fid) %>%
+  mutate(demand = 100)
+```
+
+The `hexagons` now contains: fid, geometry and demand fields.
+
+::: callout-note
+Notice that for the purpose of this hands-on exercise, a constant value of 100 is used. In practice, actual demand of the hexagon and capacity of the eldercare centre should be used.
+:::
+
+# Aspatial Data Handling and Wrangling
+
+## Importing Distance Matrix
+
+`ODMatrix`: a distance matrix in csv format. There are six fields 1. origin_id: unique id values of the origin. 2. destination_id: unique id values of the destination. 3. entry_cost: the perpendicular distance between the **origins** and the nearest road 4. network_cost: the actual network distance from the **origins** and **destination**. 5. exit_cost: the perpendicular distance between the **destination** and the nearest road 6. total_cost: the summation of `entry_cost`, `network_cost`, and `exit_cost`.
+
+::: callout-note
+All the values of the cost related fields are in **metres**.
+:::
+
+```{r}
+ODMatrix <- read_csv("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex09/data/aspatial/OD_Matrix.csv", skip = 0)
+```
+
+Transform O-D matrix from a thin format into a fat format
+
+```{r}
+distmat <- ODMatrix %>%
+  select(origin_id, destination_id, total_cost) %>%
+  spread(destination_id, total_cost)%>%
+  select(c(-c('origin_id')))
+```
+
+::: callout-note
+Currently, the distance is measured in metre because SVY21 projected coordinate system is used. The code chunk below will be used to convert the unit f measurement from metre to kilometre.
+:::
+
+```{r}
+distmat_km <- as.matrix(distmat/1000)
+```
+
+# Modelling and Visualizing Accessiblity using Hansen method
+
+## Computing Hansen's accessibility
+
+ac(p, n, D, d0, power=2, family="SAM")
+
+p = demand n = supply D = a matrix of quantity separating the demand from the supply
+
+```{r}
+acc_Hansen <- data.frame(ac(hexagons$demand,
+                            eldercare$capacity,
+                            distmat_km, 
+                            #d0 = 50,
+                            power = 2, 
+                            family = "Hansen"))
+```
+
+Rename default field name to `accHansen`
+
+```{r}
+colnames(acc_Hansen) <- "accHansen"
+```
+
+```{r}
+acc_Hansen <- tibble::as_tibble(acc_Hansen)
+```
+
+```{r}
+hexagon_Hansen <- bind_cols(hexagons, acc_Hansen)
+```
+
+# Visualizing Hansen' accessibility
+
+## Extracting map extend
+
+Extract the extend of `hexagons` sf data frame
+
+```{r}
+mapex <- st_bbox(hexagons)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(hexagon_Hansen,
+         bbox = mapex) + 
+  tm_fill(col = "accHansen",
+          n = 10,
+          style = "quantile",
+          border.col = "black",
+          border.lwd = 1) +
+tm_shape(eldercare) +
+  tm_symbols(size = 0.1) +
+  tm_layout(main.title = "Accessibility to eldercare: Hansen method",
+            main.title.position = "center",
+            main.title.size = 2,
+            legend.outside = FALSE,
+            legend.height = 0.45, 
+            legend.width = 3.0,
+            legend.format = list(digits = 6),
+            legend.position = c("right", "top"),
+            frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scale_bar(width = 0.15) +
+  tm_grid(lwd = 0.1, alpha = 0.5)
+```
+
+::: callout-note
+A high Hansen accessibility value indicates strong access to services or amenities within a region.
+:::
+
+## Statistical graphic visualization
+
+Add the planning region filed into `hexagon_Hansen` sf data frame
+
+```{r}
+hexagon_Hansen <- st_join(hexagon_Hansen, mpsz, 
+                          join = st_intersects)
+```
+
+```{r}
+ggbetweenstats(
+  data = hexagon_Hansen,
+  x = REGION_N,
+  y = accHansen,
+  type = "p")
+```
+

@@ -19,18 +19,23 @@ pacman::p_load(sf, spdep, GWmodel, SpatialML,
 ```
 
 
-
 Read the input data sets. It is in **simple feature data frame**.
 
 
 ```{r}
-mdata <- read_rds("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex08/data/mdata.rds")
+mdata <- read_rds("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex08/data/mdata.rds") %>% st_jitter(amount = 2)
 ```
 
+results = round up if amount is too small
+all geometry will change, no just overlapped point
+you can check the difference before and after.
+
+6 digits postal code, one building can have multiple points. 
+
+GWR cannot use same data point.
 
 
-Split into training and test data, 65% for training, 35% for test
-`initial_split()` of **rsample**
+Split into training and test data, 65% for training, 35% for test `initial_split()` of **rsample**
 
 
 ```{r}
@@ -47,8 +52,8 @@ write_rds(test_data, "C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex08/da
 ```
 
 
-
 ### Examine sign of multicollinearity
+
 
 ```{r}
 mdata_nogeo <- mdata %>%
@@ -61,6 +66,7 @@ corrplot::corrplot(cor(mdata_nogeo[, 2:17]),
                    method = "number", 
                    type = "upper")
 ```
+
 
 No sign of multicolinearity, correlation value = 0.8
 
@@ -86,8 +92,8 @@ price_mlr <- lm(resale_price ~ floor_area_sqm +
 summary(price_mlr)
 ```
 
-Residuals = differences between the actual resale prices and the predicted resale prices by the model
-Median residual is close to 0, which suggests that the model doesnt have systematic bias in its predictions.
+
+Residuals = differences between the actual resale prices and the predicted resale prices by the model Median residual is close to 0, which suggests that the model doesnt have systematic bias in its predictions.
 
 Estimate = coefficient = 2780.70 SGD resale price increase for every additional square meter in floor area.
 
@@ -110,7 +116,6 @@ train_data_sp
 ```
 
 
-
 Computing adaptive bandwidth
 
 
@@ -128,6 +133,7 @@ bw_adaptive <- bw.gwr(resale_price ~ floor_area_sqm +
                   adaptive=TRUE,
                   longlat=FALSE)
 ```
+
 
 40 neighbour points = optimal
 
@@ -176,6 +182,7 @@ gwr_adaptive <- read_rds("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex0
 gwr_adaptive
 ```
 
+
 Convert the test data from sf data.frame to SpatialPointDataFrame
 
 
@@ -183,6 +190,7 @@ Convert the test data from sf data.frame to SpatialPointDataFrame
 test_data_sp <- as_Spatial(test_data)
 test_data_sp
 ```
+
 
 Computing adaptive bandwidth for the test data
 
@@ -201,6 +209,7 @@ gwr_bw_test_adaptive <- bw.gwr(resale_price ~ floor_area_sqm +
                   adaptive=TRUE,
                   longlat=FALSE)
 ```
+
 
 Computing predicted values of the test data
 
@@ -275,11 +284,10 @@ rf <- read_rds("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex08/data/rf.
 rf
 ```
 
-Mtry = The number of predictor variables randomly chosen for consideration at each split in a tree.
-Mtry of 3 means that 3 variables are randomly selected at each split to determine the best split.
 
-Target node size: 5, min number of observations allowed in a terminal node of a tree.
-Here it indicates that each final node in the tree will have at least 5 observations.
+Mtry = The number of predictor variables randomly chosen for consideration at each split in a tree. Mtry of 3 means that 3 variables are randomly selected at each split to determine the best split.
+
+Target node size: 5, min number of observations allowed in a terminal node of a tree. Here it indicates that each final node in the tree will have at least 5 observations.
 
 variance importance mode: no additional variable importance metrics are reported in this output.
 
@@ -290,7 +298,6 @@ Out-of-bad(OOB)Prediction Error (MSE): Means Squared Error = 728602496 based on 
 R-squared (OOB) = explain 95% of the variance in the resale prices, which indicates a very strong fit.
 
 ### Calibrating Geographical Random Forest Model using `grf()` of **SpatialML** package
-
 
 
 ```{r}
@@ -307,6 +314,7 @@ R-squared (OOB) = explain 95% of the variance in the resale prices, which indica
 #                      coords=coords_train)
 ```
 
+
 Save the model output
 
 
@@ -317,12 +325,14 @@ Save the model output
 
 Retrieve the save model
 
+
 ```{r}
 # gwRF_adaptive <- read_rds("C:/ngmengye/ISSS626-GAA/Hands-on_exercise/Hands-on_ex08/data/gwRF_adaptive.rds")
 ```
 
 
 ### Predicting the test data
+
 
 ```{r}
 test_data <- cbind(test_data, coords_test) %>%
@@ -340,7 +350,6 @@ test_data <- cbind(test_data, coords_test) %>%
 
 
 Save the output into rds file
-
 
 
 ```{r}

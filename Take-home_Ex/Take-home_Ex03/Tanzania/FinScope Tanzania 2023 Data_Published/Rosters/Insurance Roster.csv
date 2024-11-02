@@ -1,0 +1,1059 @@
+SN,Insurance_id,ins3_2,ins3_3,ins3_4
+1,National health insurance fund (NHIF),Someone else's insurance, ,No
+1,Private health insurance,Own insurance,Insurance broker/agent,No
+10,National health insurance fund (NHIF),Own insurance,Employer,No
+11,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+14,National health insurance fund (NHIF),Own insurance,Employer,No
+16,National health insurance fund (NHIF),Own insurance,Employer,No
+21,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+25,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+49,National health insurance fund (NHIF),Own insurance,Employer,Yes
+75,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+84,Private health insurance,Own insurance,Hospital/health centre,No
+101,TIKA (Tiba Kwa Kadi),Own insurance,Hospital/health centre,Yes
+104,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+110,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+128,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+129,Community health insurance (CHF),Own insurance,Hospital/health centre,Don't know
+131,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+142,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+158,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+167,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+168,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+203,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+205,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+229,National health insurance fund (NHIF),Own insurance,Employer,Yes
+236,Community health insurance (CHF),Own insurance,Employer,Yes
+247,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+260,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+268,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+272,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+276,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+278,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+280,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+287,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+296,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+322,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+340,National health insurance fund (NHIF),Own insurance,Employer,Yes
+341,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+347,Motorcycle insurance,Someone else's insurance, ,Yes
+350,Community health insurance (CHF),Own insurance,Employer,Yes
+354,National health insurance fund (NHIF),Someone else's insurance, ,Don't know
+355,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+374,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+377,National health insurance fund (NHIF),Own insurance,Employer,Yes
+387,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+396,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+401,Motor vehicle insurance,Someone else's insurance, ,Yes
+401,National health insurance fund (NHIF),Own insurance,Employer,Yes
+404,Any other insurance product not mentioned here?,Own insurance,Employer,Yes
+408,National health insurance fund (NHIF),Own insurance,Employer,Yes
+432,National health insurance fund (NHIF),Own insurance,Employer,Yes
+435,Private health insurance,Someone else's insurance, ,Yes
+436,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+439,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+446,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+448,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+452,Ushirika afya,Own insurance,Insurance broker/agent,Yes
+459,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+462,National health insurance fund (NHIF),Own insurance,Employer,Yes
+468,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+499,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+504,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+508,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+519,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+519,National health insurance fund (NHIF),Own insurance,Employer,Yes
+568,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+570,National health insurance fund (NHIF),Own insurance,Employer,Yes
+573,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+576,Ushirika afya,Own insurance,Bank,No
+576,Motorcycle insurance,Own insurance,Bank,No
+576,Motor vehicle insurance,Own insurance,Bank,No
+589,National health insurance fund (NHIF),Own insurance,Bank,No
+604,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+607,National health insurance fund (NHIF),Own insurance,Employer,Yes
+608,National health insurance fund (NHIF),Own insurance,Employer,No
+611,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+613,National health insurance fund (NHIF),Own insurance,Employer,Yes
+621,National health insurance fund (NHIF),Own insurance,Bank,No
+626,National health insurance fund (NHIF),Own insurance,Employer,Yes
+669,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+683,Building insurance,Own insurance,Bank,No
+697,National health insurance fund (NHIF),Own insurance,Don't know,No
+704,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+712,National health insurance fund (NHIF),Own insurance,Employer,No
+713,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+715,National health insurance fund (NHIF),Own insurance,Don't know,Don't know
+719,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Don't know
+724,National health insurance fund (NHIF),Own insurance,Employer,No
+732,National health insurance fund (NHIF),Own insurance,Employer,Yes
+733,National health insurance fund (NHIF),Own insurance,Don't know,Don't know
+739,Private health insurance,Own insurance,Insurance broker/agent,Yes
+749,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+766,National health insurance fund (NHIF),Own insurance,Don't know,Don't know
+776,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+777,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+788,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+792,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+796,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+844,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+874,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Yes
+880,National health insurance fund (NHIF),Someone else's insurance, ,No
+921,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+927,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Yes
+938,National health insurance fund (NHIF),Own insurance,Employer,Yes
+944,Community health insurance (CHF),Own insurance,Input suppler,Yes
+946,National health insurance fund (NHIF),Own insurance,Employer,No
+958,National health insurance fund (NHIF),Own insurance,Employer,No
+967,Private health insurance,Own insurance,Hospital/health centre,Yes
+991,National health insurance fund (NHIF),Own insurance,Employer,No
+992,National health insurance fund (NHIF),Own insurance,Employer,No
+992,Motor vehicle insurance,Someone else's insurance, ,Yes
+1038,National health insurance fund (NHIF),Own insurance,Employer,Yes
+1043,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Yes
+1051,Private health insurance,Own insurance,Insurance broker/agent,Yes
+1065,National health insurance fund (NHIF),Own insurance,Employer,No
+1068,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+1104,National health insurance fund (NHIF),Someone else's insurance, ,No
+1129,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+1130,Community health insurance (CHF),Own insurance,Input suppler,No
+1137,National health insurance fund (NHIF),Own insurance,Employer,Yes
+1154,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+1156,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+1160,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+1172,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1178,Private health insurance,Own insurance,Insurance broker/agent,Yes
+1185,Community health insurance (CHF),Own insurance,Employer,Yes
+1199,Community health insurance (CHF),Own insurance,Input suppler,Yes
+1228,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1237,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+1261,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1269,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1292,National health insurance fund (NHIF),Own insurance,Employer,Yes
+1300,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1322,Community health insurance (CHF),Own insurance,Input suppler,Yes
+1441,National health insurance fund (NHIF),Own insurance,Employer,Yes
+1469,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+1484,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1497,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+1508,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+1518,National health insurance fund (NHIF),Own insurance,Employer,Yes
+1518,Motor vehicle insurance,Someone else's insurance, ,Yes
+1529,Any other insurance product not mentioned here?,Own insurance,Employer,Yes
+1540,TIKA (Tiba Kwa Kadi),Own insurance,Hospital/health centre,Yes
+1542,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1555,Private health insurance,Own insurance,Mobile phone,Don't know
+1569,National health insurance fund (NHIF),Own insurance,Employer,No
+1589,TIKA (Tiba Kwa Kadi),Own insurance,Employer,Don't know
+1590,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+1591,National health insurance fund (NHIF),Own insurance,Employer,No
+1596,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Yes
+1617,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+1617,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+1661,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+1697,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1700,Community health insurance (CHF),Someone else's insurance, ,Yes
+1712,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1715,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1739,National health insurance fund (NHIF),Own insurance,Employer,No
+1743,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1760,Community health insurance (CHF),Own insurance,Hospital/health centre,No
+1781,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+1794,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1805,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1807,Community health insurance (CHF),Own insurance,Input suppler,Yes
+1823,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1827,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+1851,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+1856,National health insurance fund (NHIF),Own insurance,Employer,No
+1867,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+1926,National health insurance fund (NHIF),Someone else's insurance, ,No
+1927,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1942,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1984,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+1989,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+2014,National health insurance fund (NHIF),Own insurance,Employer,No
+2022,National health insurance fund (NHIF),Someone else's insurance, ,No
+2036,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2037,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2052,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+2062,National health insurance fund (NHIF),Own insurance,Employer,No
+2154,National health insurance fund (NHIF),Own insurance,Employer,Yes
+2155,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+2160,Personal accident insurance,Own insurance,Mobile phone,Don't know
+2170,Any other insurance product not mentioned here?,Own insurance,Hospital/health centre,Yes
+2176,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+2183,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+2197,Any other insurance product not mentioned here?,Own insurance,Hospital/health centre,Yes
+2198,Any other insurance product not mentioned here?,Own insurance,Hospital/health centre,Yes
+2202,National health insurance fund (NHIF),Own insurance,Employer,No
+2212,National health insurance fund (NHIF),Own insurance,Employer,Yes
+2212,Private health insurance,Own insurance,Employer,Yes
+2221,Private health insurance,Own insurance,Hospital/health centre,Yes
+2229,Any other insurance product not mentioned here?,Own insurance,Hospital/health centre,Yes
+2232,National health insurance fund (NHIF),Own insurance,Employer,Yes
+2233,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2256,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+2284,National health insurance fund (NHIF),Own insurance,Employer,No
+2303,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+2307,Any other insurance product not mentioned here?,Own insurance,Hospital/health centre,Yes
+2313,Community health insurance (CHF),Someone else's insurance, ,Yes
+2314,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+2328,National health insurance fund (NHIF),Own insurance,Employer,No
+2331,National health insurance fund (NHIF),Own insurance,Employer,No
+2336,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2348,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2364,National health insurance fund (NHIF),Own insurance,Employer,No
+2376,National health insurance fund (NHIF),Own insurance,Employer,No
+2388,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+2396,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+2399,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2402,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2407,National health insurance fund (NHIF),Own insurance,Employer,Yes
+2411,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+2413,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2415,Motorcycle insurance,Own insurance,Employer,Yes
+2415,National health insurance fund (NHIF),Own insurance,Employer,No
+2421,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2422,TIKA (Tiba Kwa Kadi),Own insurance,Insurance broker/agent,Don't know
+2429,TIKA (Tiba Kwa Kadi),Own insurance,Hospital/health centre,Yes
+2446,Private health insurance,Own insurance,Insurance broker/agent,Yes
+2472,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+2479,National health insurance fund (NHIF),Own insurance,Employer,No
+2479,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+2491,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+2503,National health insurance fund (NHIF),Own insurance,Employer,Yes
+2504,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2513,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2523,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+2541,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+2549,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+2555,Community health insurance (CHF),Someone else's insurance, ,Yes
+2559,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2574,Community health insurance (CHF),Own insurance,Input suppler,Don't know
+2576,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+2584,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+2590,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+2592,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2596,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+2602,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+2609,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2611,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2624,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Don't know
+2632,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+2634,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+2636,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+2643,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+2665,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2673,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2689,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+2695,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+2705,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+2719,Community health insurance (CHF),Own insurance,Input suppler,Yes
+2727,TIKA (Tiba Kwa Kadi),Own insurance,Hospital/health centre,Yes
+2728,Community health insurance (CHF),Own insurance,Input suppler,Yes
+2759,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+2798,National health insurance fund (NHIF),Own insurance,Employer,Yes
+2802,Private health insurance,Own insurance,Insurance broker/agent,Yes
+2821,National health insurance fund (NHIF),Own insurance,Employer,Yes
+2850,National health insurance fund (NHIF),Own insurance,Employer,No
+2889,Community health insurance (CHF),Someone else's insurance, ,Yes
+2895,National health insurance fund (NHIF),Someone else's insurance, ,No
+2903,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+2928,National health insurance fund (NHIF),Own insurance,Employer,No
+2939,National health insurance fund (NHIF),Own insurance,Employer,Yes
+3202,Any other insurance product not mentioned here?,Own insurance,Mobile phone,Yes
+3219,TIKA (Tiba Kwa Kadi),Own insurance,Employer,Yes
+3227,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+3285,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3313,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3320,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+3327,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3362,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3363,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3366,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+3371,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+3374,National health insurance fund (NHIF),Own insurance,Employer,No
+3380,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+3388,National health insurance fund (NHIF),Own insurance,Employer,No
+3405,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+3420,TIKA (Tiba Kwa Kadi),Own insurance,Hospital/health centre,Yes
+3460,Private health insurance,Own insurance,Mobile phone,Yes
+3463,National health insurance fund (NHIF),Own insurance,Employer,Yes
+3472,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+3479,National health insurance fund (NHIF),Own insurance,Don't know,No
+3480,TIKA (Tiba Kwa Kadi),Own insurance,Hospital/health centre,No
+3512,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+3521,Community health insurance (CHF),Own insurance,Hospital/health centre,No
+3543,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+3550,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3552,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+3570,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3571,Community health insurance (CHF),Own insurance,Hospital/health centre,No
+3585,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+3613,National health insurance fund (NHIF),Own insurance,Employer,Yes
+3613,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+3630,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+3631,National health insurance fund (NHIF),Own insurance,Employer,No
+3632,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+3706,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3761,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3771,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+3775,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3786,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+3802,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Yes
+3812,National health insurance fund (NHIF),Own insurance,Employer,No
+3820,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+3824,Community health insurance (CHF),Own insurance,Hospital/health centre,Don't know
+3836,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3846,National health insurance fund (NHIF),Own insurance,Employer,No
+3847,Community health insurance (CHF),Own insurance,Hospital/health centre,No
+3852,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+3860,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+3904,Community health insurance (CHF),Someone else's insurance, ,Yes
+3912,National health insurance fund (NHIF),Someone else's insurance, ,No
+3949,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+3954,National health insurance fund (NHIF),Own insurance,Employer,No
+3959,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+3960,National health insurance fund (NHIF),Own insurance,Employer,No
+3999,National health insurance fund (NHIF),Own insurance,Input suppler,No
+4029,National health insurance fund (NHIF),Own insurance,Employer,No
+4070,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+4075,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+4109,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+4155,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+4171,National health insurance fund (NHIF),Own insurance,Employer,No
+4188,Motorcycle insurance,Own insurance,Insurance broker/agent,No
+4188,National health insurance fund (NHIF),Own insurance,Employer,No
+4205,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+4246,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4290,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+4292,National health insurance fund (NHIF),Own insurance,Employer,No
+4312,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4330,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+4345,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+4353,Motorcycle insurance,Someone else's insurance, ,Yes
+4357,TIKA (Tiba Kwa Kadi),Own insurance,Input suppler,Yes
+4364,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4368,Motor vehicle insurance,Someone else's insurance, ,No
+4368,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4392,Motorcycle insurance,Someone else's insurance, ,Yes
+4397,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+4404,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4422,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+4439,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4480,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+4488,Motorcycle insurance,Someone else's insurance, ,Yes
+4492,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4498,Community health insurance (CHF),Own insurance,Hospital/health centre,No
+4501,Motorcycle insurance,Someone else's insurance, ,Yes
+4501,Any other insurance product not mentioned here?,Someone else's insurance, ,Yes
+4519,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4526,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+4537,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+4603,National health insurance fund (NHIF),Own insurance,Employer,Yes
+4604,National health insurance fund (NHIF),Someone else's insurance, ,No
+4650,Social Health Insurance Benefit (SHIB),Own insurance,Input suppler,Yes
+4670,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+4700,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+4705,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+4730,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+4731,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+4743,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+4767,National health insurance fund (NHIF),Own insurance,Input suppler,No
+4780,National health insurance fund (NHIF),Own insurance,Input suppler,Don't know
+4796,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+4835,Community health insurance (CHF),Own insurance,Hospital/health centre,Don't know
+4900,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+4928,Community health insurance (CHF),Own insurance,Insurance broker/agent,No
+4932,Community health insurance (CHF),Own insurance,Input suppler,Yes
+4972,Private health insurance,Own insurance,Insurance broker/agent,No
+4973,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+4991,Community health insurance (CHF),Own insurance,Input suppler,Yes
+4993,Social Health Insurance Benefit (SHIB),Own insurance,Insurance broker/agent,Yes
+4995,Community health insurance (CHF),Own insurance,Input suppler,Don't know
+5007,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+5008,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+5021,Any other insurance product not mentioned here?,Own insurance,Employer,Yes
+5029,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5032,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+5041,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+5049,Ushirika afya,Own insurance,Input suppler,Don't know
+5052,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+5059,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5099,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+5107,Motorcycle insurance,Someone else's insurance, ,Yes
+5110,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5112,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5118,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5148,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5161,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+5164,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5165,National health insurance fund (NHIF),Someone else's insurance, ,Don't know
+5167,National health insurance fund (NHIF),Someone else's insurance, ,Don't know
+5195,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5224,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5226,National health insurance fund (NHIF),Own insurance,Employer,No
+5248,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5259,Community health insurance (CHF),Someone else's insurance, ,Yes
+5264,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5276,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+5322,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5324,National health insurance fund (NHIF),Own insurance,Employer,Yes
+5355,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+5368,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+5382,Community health insurance (CHF),Own insurance,Employer,Yes
+5383,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5397,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+5443,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+5450,National health insurance fund (NHIF),Own insurance,Employer,No
+5457,Community health insurance (CHF),Own insurance,Employer,No
+5466,National health insurance fund (NHIF),Own insurance,Employer,No
+5473,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+5483,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+5546,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+5548,National health insurance fund (NHIF),Own insurance,Employer,Yes
+5631,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+5634,National health insurance fund (NHIF),Own insurance,Employer,No
+5640,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+5651,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+5651,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+5657,National health insurance fund (NHIF),Own insurance,Employer,No
+5661,Community health insurance (CHF),Own insurance,Input suppler,Yes
+5707,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5712,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5843,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5847,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+5850,National health insurance fund (NHIF),Own insurance,Employer,Yes
+5869,National health insurance fund (NHIF),Own insurance,Employer,No
+5892,National health insurance fund (NHIF),Own insurance,Employer,No
+5932,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5954,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+5972,National health insurance fund (NHIF),Own insurance,Employer,No
+5981,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+5983,Any other insurance product not mentioned here?,Own insurance,Hospital/health centre,Yes
+6038,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+6058,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+6116,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6136,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+6168,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6183,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+6189,Life insurance,Own insurance,Insurance broker/agent,No
+6224,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6274,Funeral cover,Own insurance,Employer,Don't know
+6294,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6318,Motorcycle insurance,Someone else's insurance, ,Yes
+6319,National health insurance fund (NHIF),Own insurance,Employer,No
+6336,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6380,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+6391,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+6424,Motorcycle insurance,Someone else's insurance, ,Yes
+6424,Motor vehicle insurance,Someone else's insurance, ,Yes
+6430,Motor vehicle insurance,Someone else's insurance, ,Yes
+6449,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+6454,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+6466,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+6480,Private health insurance,Own insurance,Insurance broker/agent,Yes
+6480,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6623,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+6629,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6629,National health insurance fund (NHIF),Own insurance,Employer,No
+6634,National health insurance fund (NHIF),Own insurance,Input suppler,Don't know
+6638,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6638,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6651,Motorcycle insurance,Own insurance,Insurance broker/agent,No
+6653,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+6654,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6655,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+6656,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+6662,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6667,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6668,National health insurance fund (NHIF),Own insurance,Employer,No
+6669,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6671,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6671,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+6676,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+6683,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+6685,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6686,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6696,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6702,National health insurance fund (NHIF),Own insurance,Input suppler,No
+6704,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6704,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6707,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6708,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6710,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+6714,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6714,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6716,National health insurance fund (NHIF),Own insurance,Employer,No
+6722,National health insurance fund (NHIF),Own insurance,Input suppler,Don't know
+6725,National health insurance fund (NHIF),Own insurance,Employer,No
+6725,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+6726,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+6730,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6733,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+6735,National health insurance fund (NHIF),Own insurance,Employer,No
+6735,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+6740,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+6740,National health insurance fund (NHIF),Own insurance,Employer,No
+6748,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+6749,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6750,National health insurance fund (NHIF),Own insurance,Employer,No
+6751,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6753,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6761,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6762,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6768,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6772,Private health insurance,Own insurance,Insurance broker/agent,Yes
+6773,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+6776,Community health insurance (CHF),Own insurance,Input suppler,Yes
+6779,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+6780,National health insurance fund (NHIF),Someone else's insurance, ,No
+6782,Community health insurance (CHF),Own insurance,Input suppler,Yes
+6786,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6786,Building insurance,Own insurance,Bank,No
+6790,National health insurance fund (NHIF),Own insurance,Employer,No
+6800,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+6801,National health insurance fund (NHIF),Own insurance,Employer,No
+6801,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6811,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6814,National health insurance fund (NHIF),Own insurance,Employer,No
+6822,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6824,Building insurance,Own insurance,Bank,No
+6829,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6836,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6836,Loan insurance in case of death,Own insurance,Insurance broker/agent,Yes
+6836,Building insurance,Own insurance,Insurance broker/agent,Yes
+6836,Households contents insurance,Own insurance,Insurance broker/agent,Yes
+6836,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6847,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+6858,National health insurance fund (NHIF),Someone else's insurance, ,No
+6862,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6871,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6889,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6894,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6894,Private health insurance,Own insurance,Insurance broker/agent,Yes
+6896,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+6896,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6907,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6910,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6910,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6912,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+6912,Funeral cover,Own insurance,Mobile phone,No
+6912,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+6917,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6918,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+6918,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6921,National health insurance fund (NHIF),Own insurance,Employer,No
+6928,Social Health Insurance Benefit (SHIB),Own insurance,Employer,Yes
+6938,National health insurance fund (NHIF),Someone else's insurance, ,No
+6961,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+6961,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+6966,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6969,National health insurance fund (NHIF),Own insurance,Employer,No
+6970,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+6972,Community health insurance (CHF),Someone else's insurance, ,Yes
+6977,National health insurance fund (NHIF),Own insurance,Employer,Yes
+6985,Motor vehicle insurance,Own insurance,Bank,Yes
+6985,Private health insurance,Own insurance,Bank,Yes
+6989,National health insurance fund (NHIF),Own insurance,Employer,No
+6994,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+7011,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Yes
+7014,TIKA (Tiba Kwa Kadi),Own insurance,Insurance broker/agent,Yes
+7019,National health insurance fund (NHIF),Own insurance,Employer,No
+7039,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7040,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+7047,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+7061,Community health insurance (CHF),Own insurance,Insurance broker/agent,No
+7063,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+7068,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+7073,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7092,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7117,National health insurance fund (NHIF),Someone else's insurance, ,No
+7122,Community health insurance (CHF),Someone else's insurance, ,Yes
+7151,National health insurance fund (NHIF),Own insurance,Employer,No
+7154,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7167,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+7171,Private health insurance,Own insurance,Hospital/health centre,Yes
+7178,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7179,National health insurance fund (NHIF),Own insurance,Employer,No
+7180,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+7182,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7183,Community health insurance (CHF),Own insurance,Mobile phone,Yes
+7184,National health insurance fund (NHIF),Own insurance,Employer,No
+7189,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+7204,Community health insurance (CHF),Own insurance,Input suppler,Yes
+7210,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+7210,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+7226,Community health insurance (CHF),Own insurance,Insurance broker/agent,Don't know
+7239,Households contents insurance,Someone else's insurance, ,Yes
+7253,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+7254,Community health insurance (CHF),Someone else's insurance, ,Yes
+7276,National health insurance fund (NHIF),Own insurance,Employer,No
+7276,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+7287,National health insurance fund (NHIF),Own insurance,Employer,No
+7290,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+7292,Community health insurance (CHF),Own insurance,Input suppler,Yes
+7307,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+7313,Social Health Insurance Benefit (SHIB),Own insurance,Employer,Don't know
+7318,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7322,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7328,Private health insurance,Someone else's insurance, ,Don't know
+7330,Motor vehicle insurance,Someone else's insurance, ,No
+7336,National health insurance fund (NHIF),Own insurance,Don't know,Don't know
+7346,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7347,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7394,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7395,Community health insurance (CHF),Own insurance,Mobile phone,Yes
+7404,National health insurance fund (NHIF),Someone else's insurance, ,No
+7406,Private health insurance,Own insurance,Bank,Yes
+7413,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7413,Funeral cover,Own insurance,Employer,Yes
+7419,National health insurance fund (NHIF),Own insurance,Employer,No
+7421,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7427,Private health insurance,Own insurance,Mobile money agent,Yes
+7429,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7432,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+7447,National health insurance fund (NHIF),Own insurance,Input suppler,No
+7454,National health insurance fund (NHIF),Own insurance,Mobile money agent,No
+7457,Community health insurance (CHF),Own insurance,Employer,No
+7465,Private health insurance,Own insurance,Insurance broker/agent,No
+7468,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+7468,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7471,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7472,National health insurance fund (NHIF),Own insurance,Employer,No
+7473,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7476,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7479,National health insurance fund (NHIF),Own insurance,Employer,No
+7481,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+7481,Life insurance,Own insurance,Hospital/health centre,No
+7482,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+7483,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+7485,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7487,Motorcycle insurance,Own insurance,Bank,No
+7489,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7490,National health insurance fund (NHIF),Own insurance,Employer,No
+7491,National health insurance fund (NHIF),Own insurance,Employer,No
+7501,National health insurance fund (NHIF),Own insurance,Employer,No
+7512,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+7527,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7536,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7540,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+7540,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+7540,Building insurance,Own insurance,Insurance broker/agent,Yes
+7540,Personal accident insurance,Own insurance,Insurance broker/agent,Yes
+7543,National health insurance fund (NHIF),Own insurance,Employer,No
+7544,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7555,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+7556,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7559,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7561,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+7599,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7604,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7621,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7648,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+7651,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7656,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+7657,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7658,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7660,National health insurance fund (NHIF),Own insurance,Employer,No
+7662,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7664,National health insurance fund (NHIF),Own insurance,Input suppler,No
+7666,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+7667,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+7669,Social Health Insurance Benefit (SHIB),Own insurance,Input suppler,Yes
+7685,National health insurance fund (NHIF),Own insurance,Employer,No
+7686,Social Health Insurance Benefit (SHIB),Own insurance,Employer,Yes
+7691,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7694,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7699,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+7701,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+7701,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7702,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7706,Private health insurance,Own insurance,Employer,Don't know
+7728,National health insurance fund (NHIF),Own insurance,Don't know,No
+7728,Motor vehicle insurance,Own insurance,Don't know,No
+7733,Social Health Insurance Benefit (SHIB),Own insurance,Employer,Yes
+7734,National health insurance fund (NHIF),Own insurance,Employer,No
+7741,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7745,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+7759,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7764,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7768,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7776,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+7777,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7777,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+7777,Loan insurance in case of death,Own insurance,Bank,No
+7782,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,No
+7783,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7787,National health insurance fund (NHIF),Own insurance,Employer,No
+7790,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+7790,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7792,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+7792,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7803,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+7804,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7807,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7811,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7816,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7819,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+7826,National health insurance fund (NHIF),Own insurance,Employer,No
+7829,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7831,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7833,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+7836,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7836,Private health insurance,Someone else's insurance, ,Yes
+7836,Loan insurance in case of death,Someone else's insurance, ,Yes
+7836,Personal accident insurance,Someone else's insurance, ,Yes
+7836,Building insurance,Someone else's insurance, ,Yes
+7836,Motor vehicle insurance,Someone else's insurance, ,Yes
+7837,National health insurance fund (NHIF),Own insurance,Employer,No
+7845,Community health insurance (CHF),Own insurance,Hospital/health centre,No
+7852,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+7857,National health insurance fund (NHIF),Own insurance,Input suppler,No
+7859,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7868,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7868,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+7875,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+7875,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+7876,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+7877,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7879,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+7885,National health insurance fund (NHIF),Own insurance,Employer,No
+7894,National health insurance fund (NHIF),Own insurance,Employer,No
+7900,National health insurance fund (NHIF),Someone else's insurance, ,No
+7901,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+7908,National health insurance fund (NHIF),Someone else's insurance, ,No
+7925,National health insurance fund (NHIF),Own insurance,Employer,No
+7926,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+7927,National health insurance fund (NHIF),Own insurance,Employer,No
+7931,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+7934,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+7957,National health insurance fund (NHIF),Own insurance,Employer,Yes
+7962,National health insurance fund (NHIF),Own insurance,Employer,No
+8004,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8017,Community health insurance (CHF),Own insurance,Employer,Yes
+8026,Education policy,Own insurance,Insurance broker/agent,Yes
+8026,Life insurance,Own insurance,Insurance broker/agent,No
+8026,Motor vehicle insurance,Own insurance,Employer,Yes
+8026,National health insurance fund (NHIF),Own insurance,Employer,No
+8028,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8030,National health insurance fund (NHIF),Someone else's insurance, ,No
+8032,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8041,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8049,National health insurance fund (NHIF),Own insurance,Don't know,No
+8058,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8061,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8062,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8093,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8099,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8100,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8103,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+8105,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8109,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8109,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+8109,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8110,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8128,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8134,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+8136,National health insurance fund (NHIF),Own insurance,Employer,No
+8136,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8138,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+8139,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8143,National health insurance fund (NHIF),Someone else's insurance, ,No
+8145,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8149,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+8152,National health insurance fund (NHIF),Own insurance,Employer,No
+8153,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8157,National health insurance fund (NHIF),Own insurance,Employer,No
+8159,Motor vehicle insurance,Someone else's insurance, ,Yes
+8161,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8177,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+8180,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8182,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8185,National health insurance fund (NHIF),Own insurance,Employer,No
+8186,National health insurance fund (NHIF),Own insurance,Employer,No
+8190,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8193,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8196,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+8197,National health insurance fund (NHIF),Own insurance,Employer,No
+8205,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+8208,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8212,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8212,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8223,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+8233,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8241,National health insurance fund (NHIF),Own insurance,Employer,No
+8249,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8251,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8258,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8258,Private health insurance,Own insurance,Insurance broker/agent,Yes
+8259,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8260,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8269,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8273,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8290,National health insurance fund (NHIF),Own insurance,Employer,No
+8296,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8300,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8305,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8307,National health insurance fund (NHIF),Own insurance,Input suppler,No
+8316,National health insurance fund (NHIF),Someone else's insurance, ,No
+8365,Community health insurance (CHF),Own insurance,Hospital/health centre,Don't know
+8367,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8369,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8370,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8372,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8386,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8395,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8401,National health insurance fund (NHIF),Own insurance,Employer,No
+8402,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Don't know
+8404,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+8414,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8418,National health insurance fund (NHIF),Own insurance,Employer,No
+8420,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8424,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8426,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8431,National health insurance fund (NHIF),Own insurance,Employer,No
+8439,National health insurance fund (NHIF),Someone else's insurance, ,No
+8440,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8441,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+8442,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+8452,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8457,Life insurance,Own insurance,Hospital/health centre,Don't know
+8469,Personal accident insurance,Own insurance,Employer,Yes
+8469,Loan insurance in case of death,Own insurance,Employer,Yes
+8469,Funeral cover,Own insurance,Employer,Yes
+8469,Life insurance,Own insurance,Employer,Yes
+8469,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8498,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+8502,National health insurance fund (NHIF),Own insurance,Employer,No
+8502,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+8509,Community health insurance (CHF),Own insurance,Input suppler,Yes
+8521,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8526,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8531,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8537,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+8540,National health insurance fund (NHIF),Own insurance,Employer,No
+8542,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8545,National health insurance fund (NHIF),Own insurance,Don't know,No
+8547,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8554,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8565,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8573,Building insurance,Own insurance,Insurance broker/agent,No
+8573,National health insurance fund (NHIF),Own insurance,Employer,No
+8574,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8580,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8583,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+8586,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8587,Motorcycle insurance,Someone else's insurance, ,Yes
+8589,National health insurance fund (NHIF),Own insurance,Employer,No
+8591,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8602,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8607,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8609,National health insurance fund (NHIF),Someone else's insurance, ,No
+8610,Private health insurance,Own insurance,Employer,No
+8616,National health insurance fund (NHIF),Own insurance,Employer,No
+8618,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8620,Community health insurance (CHF),Own insurance,Insurance broker/agent,Yes
+8621,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8624,Private health insurance,Own insurance,Insurance broker/agent,Yes
+8625,National health insurance fund (NHIF),Own insurance,Employer,No
+8633,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8647,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8652,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+8664,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8664,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8668,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8669,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8671,National health insurance fund (NHIF),Own insurance,Employer,No
+8671,Motorcycle insurance,Own insurance,Input suppler,No
+8677,National health insurance fund (NHIF),Own insurance,Employer,No
+8699,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8700,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8705,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+8707,National health insurance fund (NHIF),Own insurance,Employer,No
+8712,Motor vehicle insurance,Own insurance,Bank,Yes
+8712,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8718,National health insurance fund (NHIF),Own insurance,Employer,No
+8725,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8728,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+8732,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8733,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8745,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8746,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8751,National health insurance fund (NHIF),Own insurance,Don't know,No
+8758,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8762,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+8772,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8776,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8776,Motor vehicle insurance,Someone else's insurance, ,Yes
+8781,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+8786,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8790,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8801,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8802,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8808,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8808,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8828,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+8832,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8847,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+8854,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+8876,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8877,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8879,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8881,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8884,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8892,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+8894,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8899,Community health insurance (CHF),Own insurance,Employer,Yes
+8920,Motor vehicle insurance,Own insurance,Insurance broker/agent,No
+8926,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8926,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8939,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8941,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8950,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8953,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8970,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8972,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8978,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+8978,Community health insurance (CHF),Own insurance,Employer,Yes
+8979,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8989,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+8990,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8993,National health insurance fund (NHIF),Own insurance,Employer,Yes
+8994,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+8999,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9004,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9006,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+9012,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9019,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9020,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9027,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9028,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9036,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9042,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9045,National health insurance fund (NHIF),Own insurance,Employer,No
+9063,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9096,National health insurance fund (NHIF),Own insurance,Don't know,Yes
+9098,National health insurance fund (NHIF),Own insurance,Employer,No
+9113,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+9113,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9118,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9121,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9124,National health insurance fund (NHIF),Own insurance,Don't know,Don't know
+9132,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+9133,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+9134,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9137,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+9139,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9141,National health insurance fund (NHIF),Own insurance,Employer,No
+9142,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9148,Ushirika afya,Own insurance,Insurance broker/agent,Yes
+9152,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9155,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+9156,National health insurance fund (NHIF),Own insurance,Don't know,No
+9158,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+9163,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Don't know
+9164,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+9165,National health insurance fund (NHIF),Own insurance,Employer,No
+9174,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9174,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+9177,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+9182,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+9189,National health insurance fund (NHIF),Own insurance,Input suppler,No
+9190,National health insurance fund (NHIF),Someone else's insurance, ,No
+9195,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9198,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9199,National health insurance fund (NHIF),Own insurance,Employer,No
+9199,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9201,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+9204,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+9208,National health insurance fund (NHIF),Own insurance,Employer,No
+9212,National health insurance fund (NHIF),Own insurance,Employer,No
+9217,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+9230,National health insurance fund (NHIF),Own insurance,Employer,No
+9237,Motorcycle insurance,Someone else's insurance, ,Yes
+9249,National health insurance fund (NHIF),Own insurance,Employer,No
+9256,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9261,Community health insurance (CHF),Own insurance,Hospital/health centre,Don't know
+9282,Community health insurance (CHF),Own insurance,Hospital/health centre,Yes
+9283,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+9288,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9292,National health insurance fund (NHIF),Own insurance,Employer,No
+9307,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9316,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+9326,National health insurance fund (NHIF),Own insurance,Employer,No
+9341,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9374,National health insurance fund (NHIF),Own insurance,Employer,No
+9390,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9394,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9395,Private health insurance,Someone else's insurance, ,No
+9400,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9400,National health insurance fund (NHIF),Own insurance,Employer,No
+9404,Any other insurance product not mentioned here?,Own insurance,Insurance broker/agent,Yes
+9404,Community health insurance (CHF),Own insurance,Hospital/health centre,Don't know
+9409,Private health insurance,Own insurance,Employer,No
+9444,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9452,Private health insurance,Own insurance,Employer,No
+9460,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+9465,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9479,National health insurance fund (NHIF),Own insurance,Employer,No
+9495,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9505,National health insurance fund (NHIF),Own insurance,Employer,No
+9516,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9528,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9558,National health insurance fund (NHIF),Own insurance,Input suppler,Yes
+9579,Motor vehicle insurance,Someone else's insurance, ,Yes
+9579,National health insurance fund (NHIF),Own insurance,Employer,No
+9586,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9594,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9599,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9599,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9602,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9608,Private health insurance,Own insurance,Insurance broker/agent,Yes
+9608,Motor vehicle insurance,Someone else's insurance, ,Yes
+9608,National health insurance fund (NHIF),Own insurance,Hospital/health centre,Yes
+9613,National health insurance fund (NHIF),Own insurance,Employer,No
+9614,National health insurance fund (NHIF),Own insurance,Input suppler,Don't know
+9617,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+9618,National health insurance fund (NHIF),Own insurance,Employer,No
+9631,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9631,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+9656,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9688,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9694,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9696,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9704,National health insurance fund (NHIF),Own insurance,Employer,No
+9735,National health insurance fund (NHIF),Own insurance,Employer,No
+9739,National health insurance fund (NHIF),Own insurance,Hospital/health centre,No
+9742,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9753,National health insurance fund (NHIF),Own insurance,Employer,No
+9754,National health insurance fund (NHIF),Own insurance,Employer,No
+9755,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9757,National health insurance fund (NHIF),Own insurance,Employer,No
+9762,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+9767,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9770,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9782,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9786,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9796,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9800,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9844,Motorcycle insurance,Someone else's insurance, ,Yes
+9846,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9848,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9874,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9881,National health insurance fund (NHIF),Own insurance,Employer,Don't know
+9883,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Yes
+9885,National health insurance fund (NHIF),Someone else's insurance, ,Don't know
+9888,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9892,National health insurance fund (NHIF),Own insurance,Employer,No
+9892,Motor vehicle insurance,Own insurance,Bank,No
+9893,Motorcycle insurance,Own insurance,Insurance broker/agent,Yes
+9896,National health insurance fund (NHIF),Someone else's insurance, ,Yes
+9897,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9898,National health insurance fund (NHIF),Own insurance,Employer,Yes
+9899,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9901,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,Don't know
+9901,Motor vehicle insurance,Own insurance,Insurance broker/agent,Yes
+9915,National health insurance fund (NHIF),Own insurance,Insurance broker/agent,No
+9915,Motor vehicle insurance,Own insurance,Insurance broker/agent,No

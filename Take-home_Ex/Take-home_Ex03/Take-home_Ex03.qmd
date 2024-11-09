@@ -1,26 +1,22 @@
 ---
 title: "Take-home Exercise 3a: Modelling Geography of Financial Inclusion with Geographically Weighted Methods"
 author: "Ng Meng Ye"
-date: 2024-10-12
+date: 2024-11-09
 ---
 
 ## 1 Overview
 
-Tourism is one of Thailand’s largest industries, accounting for some 20% of the gross domestic product (GDP). In 2019, Thailand earned 90 billion US\$ from domestic and international tourism, but the COVID-19 pandemic caused revenues to crash to 24 billion US\$ in 2020.
+Financial inclusion is the availability and equality of opportunities to access financial services.
 
 ## 2 Getting Started
 
-### 2.1 Objectives
+### Objectives
 
-In view of this, we need to discover
+In view of this, we need to build an explanatory model to determine factors affecting financial inclusion by using geographical weighted regression (GWR) methods.
 
--   if the key indicators of tourism economy of Thailand are independent from space and space and time.
+### The Study Area
 
--   If the tourism economy is indeed spatial and spatio-temporal dependent, then, you would like to detect where are the clusters and outliers, and the emerging hot spot/cold spot areas
-
-### 2.2 The Study Area
-
-The focus of this study would in the Thailand, at the province level.
+The focus of this study would in the Uganda, at the **district** level.
 
 ## 3 Data Preparation
 
@@ -28,1507 +24,700 @@ Setting the analytical tools.
 
 ```{r}
 #| output: false
-pacman::p_load(sf,spNetwork,raster,spatstat,tmap,tidyverse,sp,maptools,spNetwork,knitr,ggplot2,sfdep)
+pacman::p_load(sp, sf, st, spdep, raster, spatstat, tmap, devtools,vtable, ggplot2, egg, corrplot, ggstats, ggstatsplot, GWmodel, tidyverse, gtsummary, olsrr, car, blorr,ISLR, klaR, rsample,kableExtra, performance,readxl,dplyr)
 ```
 
-### 3.1 Data Preparation
+### Data Preparation
 
-These data sets are in `shp` format
+-   geoBoundaries-UGA-ADM2, available publicly from [geoBoundaries](https://www.geoboundaries.org/countryDownloads.html), is a geospatial dataset in SHP format that delineates the district-level boundaries of our study area, Uganda.
 
--   Thailand - Subnational Administrative Boundaries, available publicly from [HDX](https://data.humdata.org/dataset/cod-ab-tha?)
-
-This data sets are in `csv` format
-
--   Thailand Domestic Tourism Statistics, available publicly from [Kaggle](https://www.kaggle.com/datasets/thaweewatboy/thailand-domestic-tourism-statistics)
+-   FinScope Uganda 2023, available publicly from [FinScope](https://fsduganda.or.ug/data-sets-finscope-uganda-2023-survey-report/), is in XLSX format and includes survey data on financial inclusion among the adult population (aged 16 and above) in Uganda.
 
 ## 4 Data Wrangling
 
-### 4.1 Thailand Road Accident 2019-2023
+### Uganda Geospatial Data
 
-#### 4.1.1 Importing Attribute Data into R
+Importing Geospatial Data into R
 
-We will import thailand_domestic_tourism_2019_2023_ver2.csv file into RStudio and save the file into an R dataframe called `thaitour`
+We will import **geoBoundaries-UGA-ADM3** `shp` file into RStudio and save the file into an R dataframe called `uganda`
 
 ```{r}
-thaitour <- read_csv("C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex02/data/aspatial/thailand_domestic_tourism_2019_2023_ver2.csv")
+uganda <-  st_read(dsn = "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/",
+                 layer = "geoBoundaries-UGA-ADM3")
 ```
 
+Transform CRS to WGS 84 / UTM zone 36N (EPSG: 32636)
+
 ```{r}
-head(thaitour)
+uganda_32636 <- st_transform(uganda, crs = 32636)
 ```
 
-Check if there are any missing values.
+Check the projected CRS is WGS 84 / UTM zone 36N
 
 ```{r}
-sum(is.na(thaitour$value))
+st_geometry(uganda_32636)
 ```
 
-Check if the values in the variable column are balanced or equally represented. All variables have equal 3850 counts.
+Use *st_crs()* to display the coordinate system of `uganda_32636`
 
 ```{r}
-table(thaitour$variable)
+st_crs(uganda_32636)
 ```
 
-### 4.2 Thailand - Subnational Administrative Boundaries
-
-We will import tha_admbnda_adm1_rtsd_20220121.csv file into RStudio and save the file into an R dataframe called `thailand`
+Plot the Uganda map
 
 ```{r}
-thailand <-  st_read(dsn = "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex02/data/geospatial",
-                 layer = "tha_admbnda_adm1_rtsd_20220121")
+plot(st_geometry(uganda_32636))
 ```
 
+Based on the plot, there are islands. Need to make sure that the point is not located on the small islands.
+
+Convert multipolygon to individual polygon
+
+Calculate the area of each polygon
+
 ```{r}
-thailand_32647 <- st_transform(thailand, crs = 32647)
+sf_polygon <- uganda_32636 %>% 
+  st_cast("POLYGON") %>% 
+  mutate(area = st_area(.))
 ```
 
+Group by the unique name and select the largest polygon by area
+
 ```{r}
-st_geometry(thailand_32647)
+uganda_modified <- sf_polygon %>% 
+  group_by(shapeName) %>% 
+  filter(area == max(area)) 
 ```
 
+view the resulting data frame
+
 ```{r}
-plot(st_geometry(thailand_32647))
+uganda_modified
 ```
 
-Keep the time series at month and year levels.
+Plot the uganda map
+
+```{r}
+plot(st_geometry(uganda_modified))
+```
+
+From the plot, we can see that the Lake Victoria is included, this should be removed.
+
+View the list of district name
+
+```{r}
+unique(uganda_modified$shapeName)
+```
+
+Remove 'Lake Victoria' from the data frame.
+
+```{r}
+uganda_modified <- uganda_modified %>%
+  filter(shapeName != "Lake Victoria")
+```
+
+Verify that 'Lake Victoria' is removed.
+
+```{r}
+unique(uganda_modified$shapeName)
+```
+
+Plot the map again
+
+```{r}
+plot(st_geometry(uganda_modified))
+```
+
+### FinScope Attribute Data
+
+Importing the attribute data from **Finscope-2023_Dataset_Final.xlsx**
+
+```{r}
+finscope <- read_excel("C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/Finscope-2023_Dataset_Final.xlsx",sheet = "Final_Dataset")
+```
+
+Display the data structure
+
+```{r}
+glimpse(finscope)
+```
+
+See the data in XCOORD column
+
+```{r}
+head(finscope$hh_gps_longitude) #see the data in XCOORD column
+```
+
+See the data in YCOORD column
+
+```{r}
+head(finscope$hh_gps_latitude) #see the data in XCOORD column
+```
+
+Remove rows with empty longitude or latitude
 
 ```{r}
 
-library(lubridate)
-
-# Create a new column with month and year in the format like 'Jan-2019'
-thaitour <- thaitour %>%
-  mutate(month_year = format(as.Date(date), "%b-%Y"))
-
-# Filter the data to keep only 'no_tourist_all' and 'revenue_all'
-filtered_data <- thaitour %>%
-  filter(variable %in% c("no_tourist_all", "revenue_all")) %>%
-  dplyr::select(province_eng, month_year, variable, value)
-
-# View the filtered data
-print(filtered_data)
+finscope <- finscope %>%
+  filter(hh_gps_longitude != 0, hh_gps_latitude != 0)
 
 ```
 
+Convert aspatial data frame into a sf object
+
 ```{r}
-# Load necessary libraries
-library(ggplot2)
-library(lubridate)
+finscope.sf <- st_as_sf(finscope,
+                            coords = c("hh_gps_longitude", "hh_gps_latitude"),
+                            crs=4326) %>%
+  st_transform(crs=32636)
+```
 
-# Ensure 'filtered_data' has only 'revenue_all' and group by 'month_year'
-monthly_revenue <- filtered_data %>%
-  filter(variable == "revenue_all") %>%
-  group_by(month_year) %>%
-  summarise(total_revenue = sum(value, na.rm = TRUE))
+List the content of `finscope.sf`
 
-# Convert 'month_year' to a date format (assuming the first day of each month)
-monthly_revenue <- monthly_revenue %>%
-  mutate(month_year_date = as.Date(paste0("01-", month_year), format = "%d-%b-%Y"))
+```{r}
+head(finscope.sf)
+```
 
-# Plot the total monthly revenue with proper sorting
-ggplot(monthly_revenue, aes(x = month_year_date, y = total_revenue)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
-  labs(title = "Monthly Total Revenue from Tourism Industry, 2019-2023",
-       x = "Month-Year",
-       y = "Total Revenue") +
-  theme_minimal() +
-  scale_x_date(date_labels = "%b-%Y", date_breaks = "1 month") +  # Proper x-axis labels
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+Show the distinct value of district
+
+```{r}
+unique(finscope.sf$District)
+```
+
+Change to title case
+
+```{r}
+library(stringr)
+finscope.sf$District <- str_to_title(finscope$District)
+```
+
+View the changes
+
+```{r}
+unique(finscope.sf$District)
+```
+
+Extract the district list from `finscope`
+
+```{r}
+district_list <- finscope.sf %>%
+  distinct(District) %>%               
+  mutate(District = str_to_title(District)) %>%  
+  arrange(District)                    
 
 ```
 
-To analyze the effects of the COVID-19 pandemic on tourism revenue, I have segmented the data into three distinct periods:
-
-1.  Pre-COVID (Year 2019): This period represents normal tourism activity before the pandemic.
-2.  COVID Period (Year 2020 to September 2021): This period captures the time when the pandemic was at its peak, and international travel restrictions were in place, significantly affecting tourism.
-3.  Post-COVID (From October 2021 Onward): This period reflects the recovery phase as restrictions were lifted, and tourism began to recover.
-
-Using this segmentation, I will create a new dataset, `reshaped_data`, based on the `filtered_data`. This dataset will include these defined periods, which will later be joined with the `thailand_32647_sorted` dataset for further spatial analysis.
+Extract the district list from `uganda_modified`
 
 ```{r}
+district_list2 <- uganda_modified %>%
+  distinct(shapeName) %>%               
+  arrange(shapeName) 
+```
 
-library(lubridate)
+Combine both list together
 
-# Convert the 'month_year' to a date-like format for easier processing
-filtered_data <- filtered_data %>%
-  mutate(month_year_date = parse_date_time(month_year, orders = "b-Y")) %>%
-  mutate(year = year(month_year_date),
-         month = month(month_year_date))
+```{r}
+merged_list <- district_list2 %>%
+  left_join(district_list %>% mutate(In_List = TRUE), by = c("shapeName" = "District")) %>%
+  mutate(In_List = ifelse(is.na(In_List), FALSE, TRUE))
+```
 
-# Classify the periods: Pre-COVID, COVID, and Post-COVID
-filtered_data <- filtered_data %>%
-  mutate(covid_period = case_when(
-    year == 2019 ~ "pre_covid",
-    year == 2020 | (year == 2021 & month <= 9) ~ "covid_period",
-    (year >= 2021 & month > 9) | year >= 2022 ~ "post_covid"
+View the district with no data collected in `finscope`
+
+```{r}
+false_districts <- merged_list %>%
+  filter(In_List == FALSE)
+
+print(false_districts$shapeName)
+```
+
+Hightlight the district in the map
+
+```{r}
+highlight_districts <- merged_list %>%
+  filter(In_List == FALSE) %>%
+  pull(shapeName)
+
+highlighted_map <- uganda_modified %>%
+  filter(shapeName %in% highlight_districts)
+
+plot(st_geometry(uganda_modified), col = "lightgray", main = "Districts with no data in Finscope in Uganda", border = "black")
+
+plot(st_geometry(highlighted_map), col = "red", add = TRUE, border = "black")
+
+text(st_coordinates(st_centroid(st_geometry(highlighted_map))), 
+     labels = highlighted_map$shapeName, 
+     cex = 0.7, pos = 3, col = "black")
+
+```
+
+## 5 Exploratory Data Analysis (EDA)
+
+Categorize Age, one of the independent variables
+
+```{r}
+finscope.sf <- finscope.sf %>%
+  mutate(age_group = cut(
+    age,
+    breaks = c(15, 19, 29, 39, 59, 79, 100),  # Start with 15 to include age 16
+    labels = c("Teenagers", "Young Adults", "Adults", "Middle-aged Adults", "Seniors", "Elderly"),
+    right = TRUE,  # Includes the right boundary in each interval
+    include.lowest = TRUE  # Ensures the lowest value (16) is included
   ))
 
 
-# Sum the values by province and covid_period for 'no_tourist_all' and 'revenue_all'
-reshaped_data <- filtered_data %>%
-  filter(variable %in% c("no_tourist_all", "revenue_all")) %>%
-  group_by(province_eng, covid_period, variable) %>%
-  summarise(total_value = sum(value, na.rm = TRUE)) %>%
-  ungroup() %>%
-  unite("period_variable", covid_period, variable, sep = "_") %>%
-  pivot_wider(names_from = period_variable, values_from = total_value)
-
-# Calculate the total from 2019 to 2023 for each province and variable
-total_data <- filtered_data %>%
-  filter(variable %in% c("no_tourist_all", "revenue_all")) %>%
-  group_by(province_eng, variable) %>%
-  summarise(total_value = sum(value, na.rm = TRUE)) %>%
-  ungroup() %>%
-  pivot_wider(names_from = variable, values_from = total_value, names_prefix = "total_")
-
-# Combine reshaped data with the total data
-reshaped_data <- left_join(reshaped_data, total_data, by = "province_eng")
-
-# View the reshaped data
-print(reshaped_data)
-
-```
-
-```{r}
-# Sort 'thailand_32647' by 'ADM1_EN' in alphabetical order
-thailand_32647_sorted <- thailand_32647 %>%
-  arrange(ADM1_EN)
-
-# Sort the 'reshaped_data' by 'province_eng' to ensure matching order
-reshaped_data_sorted <- reshaped_data %>%
-  arrange(province_eng)
-
-# Create a comparison table with 'ADM1_EN' and 'province_eng' side by side
-comparison_table <- thailand_32647_sorted %>%
-  dplyr::select(ADM1_EN) %>%
-  bind_cols(reshaped_data_sorted %>% dplyr::select(province_eng))
-
-```
-
-Based on the comparison table, we need to correct the value in ADM1_EN before we join both datasets.
-
-| Before           | After           |
-|------------------|-----------------|
-| Buri Ram         | Buriram         |
-| Chai Nat         | Chainat         |
-| Chon Buri        | Chonburi        |
-| Lop Buri         | Lopburi         |
-| Nong Bua Lam Phu | Nong Bua Lamphu |
-| Phangnga         | Phang Nga       |
-| Prachin Buri     | Prachinburi     |
-| Si Sa Ket        | Sisaket         |
-
-```{r}
-# Replace specific values in the ADM1_EN column based on the mapping you provided
-thailand_32647_sorted <- thailand_32647_sorted %>%
-  mutate(ADM1_EN = case_when(
-    ADM1_EN == "Buri Ram" ~ "Buriram",
-    ADM1_EN == "Chai Nat" ~ "Chainat",
-    ADM1_EN == "Chon Buri" ~ "Chonburi",
-    ADM1_EN == "Lop Buri" ~ "Lopburi",
-    ADM1_EN == "Nong Bua Lam Phu" ~ "Nong Bua Lamphu",
-    ADM1_EN == "Phangnga" ~ "Phang Nga",
-    ADM1_EN == "Prachin Buri" ~ "Prachinburi",
-    ADM1_EN == "Si Sa Ket" ~ "Sisaket",
-    TRUE ~ ADM1_EN  # Keep all other values as they are
-  ))
-
-# View the updated table to ensure the replacements have been made
-print(thailand_32647_sorted)
-```
-
-```{r}
-# Perform the left join with 'reshaped_data' on 'ADM1_TH' and 'province_eng'
-thailand <- left_join(thailand_32647_sorted, reshaped_data_sorted, by = c("ADM1_EN" = "province_eng")) %>% 
-  dplyr::select(1:3,17:25)
-
-# View the merged data
-head(thailand)
-```
-
-## 5 Exploratory Data Analysis
-
-Generate the statistics summary of the variable.
-
-```{r}
-summary_by_variable <- thaitour %>%
-  group_by(variable) %>%
-  summarise(
-    count = n(),
-    mean = mean(value, na.rm = TRUE),
-    std = sd(value, na.rm = TRUE),
-    min = min(value, na.rm = TRUE),
-    Q1 = quantile(value, 0.25, na.rm = TRUE),
-    median = median(value, na.rm = TRUE),
-    Q3 = quantile(value, 0.75, na.rm = TRUE),
-    max = max(value, na.rm = TRUE)
-  )
-
-# Print the summary table
-print(summary_by_variable)
-
-```
-
-Generate the boxplot for the variables.
-
-```{r}
-first_group <- thaitour %>%
-  filter(variable %in% c("no_tourist_all", "no_tourist_foreign", "no_tourist_stay", "ratio_tourist_stay"))
-
-ggplot(first_group, aes(x = variable, y = value)) +
-  geom_boxplot(fill = "lightblue", color = "black") +
-  labs(title = "Boxplots for Tourist-Related Variables",
-       x = "Variable",
-       y = "Value") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-second_group <- thaitour %>%
-  filter(variable %in% c("revenue_all", "revenue_foreign", "revenue_thai"))
-
-ggplot(second_group, aes(x = variable, y = value)) +
-  geom_boxplot(fill = "lightgreen", color = "black") +
-  labs(title = "Boxplots for Revenue-Related Variables",
-       x = "Variable",
-       y = "Value") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
-
-```
-
-The current boxplot shows that the presence of outliers distorts the scale, making it difficult to observe the distribution of the data. To address this issue and better visualize the central tendency and spread of the data, I created another boxplot that excludes the outliers
-
-```{r}
-# First group: Tourist-related variables
-first_group <- thaitour %>%
-  filter(variable %in% c("no_tourist_all", "no_tourist_foreign", "no_tourist_stay", "ratio_tourist_stay"))
-
-ggplot(first_group, aes(x = variable, y = value)) +
-  geom_boxplot(fill = "lightblue", color = "black", outlier.shape = NA) + 
-  coord_cartesian(ylim = c(0, 250000)) +# Remove outliers
-  labs(title = "Boxplots for Tourist-Related Variables",
-       x = "Variable",
-       y = "Value") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Second group: Revenue-related variables
-second_group <- thaitour %>%
-  filter(variable %in% c("revenue_all", "revenue_foreign", "revenue_thai"))
-
-ggplot(second_group, aes(x = variable, y = value)) +
-  geom_boxplot(fill = "lightgreen", color = "black", outlier.shape = NA) +
-  coord_cartesian(ylim = c(0, 600000000))+
-  labs(title = "Boxplots for Revenue-Related Variables",
-       x = "Variable",
-       y = "Value") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
-
-Generate the boxplot of `no_tourist_all` and `revenue_all` by year.
-
-```{r}
-# First, ensure that the year is extracted from the 'date' column
-thaitour <- thaitour %>%
-  mutate(year = as.numeric(format(as.Date(date), "%Y")))
-
-# Filter for the variable 'no_tourist_all' for years 2019 to 2023
-data_no_tourist <- thaitour %>%
-  filter(variable == "no_tourist_all", year %in% c(2019, 2020, 2021, 2022, 2023))
-
-# Create a boxplot for 'no_tourist_all'
-ggplot(data_no_tourist, aes(x = factor(year), y = value)) +
-  geom_boxplot(fill = "skyblue", color = "black") +
-  labs(title = "Boxplot of No_Tourist_All by Year",
-       x = "Year",
-       y = "Number of Tourists (All)") +
-  theme_minimal()
-
-
-
-data_revenue <- thaitour %>%
-  filter(variable == "revenue_all", year %in% c(2019, 2020, 2021, 2022, 2023))
-
-# Create a boxplot for 'revenue_all'
-ggplot(data_revenue, aes(x = factor(year), y = value)) +
-  geom_boxplot(fill = "lightgreen", color = "black") +
-  labs(title = "Boxplot of Revenue_All by Year",
-       x = "Year",
-       y = "Revenue (All)") +
-  theme_minimal()
-```
-
-The current boxplot shows that the presence of outliers distorts the scale, making it difficult to observe the distribution of the data. To address this issue and better visualize the central tendency and spread of the data, I created another boxplot that excludes the outliers.
-
-```{r}
-thaitour <- thaitour %>%
-  mutate(year = as.numeric(format(as.Date(date), "%Y")))
-
-# Filter for 'no_tourist_all' variable for the years 2019 to 2023
-data_no_tourist <- thaitour %>%
-  filter(variable == "no_tourist_all", year %in% c(2019, 2020, 2021, 2022, 2023))
-
-# Adjust the scale range for 'no_tourist_all' and create boxplot
-ggplot(data_no_tourist, aes(x = factor(year), y = value)) +
-  geom_boxplot(fill = "skyblue", color = "black", outlier.shape = NA) +
-  coord_cartesian(ylim = c(0, 400000)) +  # Adjust this range as necessary
-  labs(title = "Boxplot of No_Tourist_All by Year (Without Outliers)",
-       x = "Year",
-       y = "Number of Tourists (All)") +
-  theme_minimal()
-
-data_revenue <- thaitour %>%
-  filter(variable == "revenue_all", year %in% c(2019, 2020, 2021, 2022, 2023))
-
-# Adjust the scale range for 'revenue_all' and create boxplot
-ggplot(data_revenue, aes(x = factor(year), y = value)) +
-  geom_boxplot(fill = "lightgreen", color = "black", outlier.shape = NA) +
-  coord_cartesian(ylim = c(0, 1300000000)) +  # Adjust this range as necessary
-  labs(title = "Boxplot of Revenue_All by Year (Without Outliers)",
-       x = "Year",
-       y = "Revenue (All)") +
-  theme_minimal()
-
-```
-
-Plot the horizontal bar chart that shows the total revenue by province in 2019.
-
-```{r}
-# Ensure filtered_data has only 'revenue_all' and is filtered for 2019
-bar_data <- filtered_data %>%
-  filter(variable == "revenue_all" & grepl("2019", month_year)) %>%
-  dplyr::select(province_eng, value) %>%
-  group_by(province_eng) %>%
-  summarise(total_revenue_2019 = sum(value, na.rm = TRUE))
-
-# Create a horizontal bar chart with provinces ordered by total revenue in descending order
-ggplot(bar_data, aes(x = total_revenue_2019, y = reorder(province_eng, total_revenue_2019))) +
-  geom_bar(stat = "identity", fill = "skyblue") +
-  labs(title = "Total Revenue by Province in 2019",
-       x = "Total Revenue",
-       y = "Province") +
-  theme_minimal() +
-  theme(axis.text.y = element_text(size = 8))  # Adjust font size of y-axis labels
-
-# Save the plot with increased dimensions
-ggsave("total_revenue_2019.png", width = 10, height = 15)
-
-
-```
-
-![](total_revenue_2019.png) Plot the horizontal bar chart that shows the total tourists by province in 2019.
-
-```{r}
-# Assuming reshaped_data is already created with 2019_revenue_all as one of the columns
-bar_data <- reshaped_data %>%
-  dplyr::select(province_eng, `covid_period_no_tourist_all`)
-
-# Create a horizontal bar chart with provinces ordered by revenue in descending order
-ggplot(bar_data, aes(x = `covid_period_no_tourist_all`, y = reorder(province_eng, `covid_period_no_tourist_all`))) +
-  geom_bar(stat = "identity", fill = "skyblue") +
-  labs(title = "Total Tourists by Province in 2019",
-       x = "Total Revenue",
-       y = "Province") +
-  theme_minimal() +
-  theme(axis.text.y = element_text(size = 8))  # Adjust font size of y-axis labels
-
-# Save the plot with increased dimensions
-ggsave("total_tourist_2019.png", width = 10, height = 15)
-
-```
-
-![](total_tourist_2019.png){fig-align="center"}
-
-```{r}
-basemap <- tm_shape(thailand) +
-  tm_polygons() +
-  tm_text("ADM1_EN", size=0.5)
-
-revenue <- qtm(thailand, "covid_period_no_tourist_all")
-tmap_arrange(basemap, revenue, asp=1, ncol=2)
-```
-
-Plot choropleth map to see the distribution of tourism revenue
-
-```{r}
-equal <- tm_shape(thailand) +
-  tm_fill("total_revenue_all",
-          title = "Revenue by equal interval",
-          style = "equal") +
-  tm_borders(alpha = 0.5)+
-  tm_layout(main.title = "Distribution of tourism revenue by province in Thailand",
-            main.title.size = 0.8)
-
-quantile <- tm_shape(thailand) +
-  tm_fill("total_revenue_all",
-          title = "Revenue by equal quantile",
-          style = "quantile") +
-  tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "Distribution of tourism revenue by province in Thailand",
-            main.title.size = 0.8)
-
-tmap_arrange(equal, 
-             quantile, 
-             asp=1, 
-             ncol=2)
-```
-
-Plot choropleth map to see the distribution of tourism receipt
-
-```{r}
-equal <- tm_shape(thailand) +
-  tm_fill("total_no_tourist_all",
-          title = "Tourist receipt by equal interval",
-          style = "equal") +
-  tm_borders(alpha = 0.5)+
-  tm_layout(main.title = "Distribution of tourist by province in Thailand",
-            main.title.size = 0.8)
-
-quantile <- tm_shape(thailand) +
-  tm_fill("total_no_tourist_all",
-          title = "Tourist receipt  by equal quantile",
-          style = "quantile") +
-  tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "Distribution of tourist by province in Thailand",
-            main.title.size = 0.8)
-
-tmap_arrange(equal, 
-             quantile, 
-             asp=1, 
-             ncol=2)
 ```
 
-## 6 Global Spatial Autocorrelation Analysis
+Plot the distribution of dependent variables and independent variables
 
-### Derive Queen's contiguity weights: sfdep methods
-
-The code chunk below is used to compute Queen contiguity weight matrix.
-
 ```{r}
-# Load necessary libraries
-wm_q <- thailand %>%
-  mutate(nb = st_contiguity(geometry),
-         wt = st_weights(nb,
-                         style = "W",
-                         allow_zero=TRUE),
-         .before = 1) 
+library(ggpubr)
 
-```
-
-```{r}
-wm_q
-```
+plot_categorical <- function(data, column, title) {
+  ggplot(data, aes(x = !!sym(column))) +
+    geom_bar(fill = "skyblue") +
+    labs(title = title, x = column, y = "Count") +
+    theme_minimal()
+}
 
-Based on `wm_q`, Phuket has zero neighbours as shown below because it is an island.
+plot_payment_wallets <- plot_categorical(finscope.sf, "h2_2_8", "Mobile Money / E-money Wallets Usage")
+plot_insurance <- plot_categorical(finscope.sf, "j1", "Existing Insurance Policy")
+plot_payment_bank <- plot_categorical(finscope.sf, "h2_2_5", "Mobile / Internet Banking Usage")
 
-```{r}
-wm_q$ADM1_EN[[48]]
-```
+plot_education <- plot_categorical(finscope.sf, "c4", "Education Level")
+plot_mobile <- plot_categorical(finscope.sf, "c7_1_1", "Own a Mobile Phone?")
+plot_internet <- plot_categorical(finscope.sf, "c6_1_2", "Internet Access")
+plot_sex <- plot_categorical(finscope.sf, "c2", "Sex")
+plot_marital <- plot_categorical(finscope.sf, "c3", "Marital Status")
+plot_age <- plot_categorical(finscope.sf, "age_group", "Age_group")
 
-```{r}
-wm_q$nb[[48]]
 ```
 
-Use tmap to view the Phuket location
+Dependent variables
 
 ```{r}
-# Set tmap to interactive mode ('view')
-tmap_mode('view')
+# Arrange and display dependent variable plots
+dependent_plots <- ggarrange(
+  plot_payment_wallets, plot_insurance, plot_payment_bank,
+  ncol = 1, nrow = 3)
+dependent_plots  # Display the dependent variable plots
 
-# Plot the geometry and add province names
-tm_shape(thailand) + 
-  tm_polygons() +
-  tm_text("ADM1_EN", size = 0.7)  # Adjust size as necessary
 ```
-
-Use tmap to view Phuket boundary.
-
-```{r}
-library(tmap)
-library(dplyr)
-
-# Filter the thailand dataset to keep only the row for Phuket
-phuket <- thailand %>%
-  filter(ADM1_EN == "Phuket")
-
-# Set tmap to interactive mode ('view')
-tmap_mode('view')
 
-# Plot only Phuket
-tm_shape(phuket) + 
-  tm_polygons() +
-  tm_text("ADM1_EN", size = 1.2)  # Show province name if desired
+Independent variable
 
-```
-
 ```{r}
-tmap_mode('plot')
+# Arrange and display independent variable plots
+independent_plots <- ggarrange(
+  plot_education, plot_mobile, plot_internet, plot_age, plot_sex, plot_marital,
+  ncol = 2, nrow = 3)
+independent_plots 
 ```
 
-Use spdep to identify the neighbours list of Phuket
+## 6 Geographically Weighted Logistic Regression
 
-```{r}
-longitude <- map_dbl(thailand$geometry, ~st_centroid(.x)[[1]])
-```
+### Dependent variable: Mobile Money / E-money Wallets Usage
 
-```{r}
-latitude <- map_dbl(thailand$geometry, ~st_centroid(.x)[[2]])
-```
+Remove empty values in `h2_2_8` field which represents the Mobile Money / E-money Wallets Usage
 
 ```{r}
-coords <- cbind(longitude, latitude)
+finscope_mobile_money <- finscope.sf %>%
+  filter(!is.na(h2_2_8) & h2_2_8 != "")
 ```
 
-```{r}
-head(coords)
-```
+Recode **Mobile Money / E-money Wallets Usage** to 1 and 0
 
 ```{r}
-library(spdep)
-
-k1 <- knn2nb(knearneigh(coords))
-k1dists <- unlist(nbdists(k1, coords))
-summary(k1dists)
+finscope_mobile_money$h2_2_8 <- ifelse(finscope_mobile_money$h2_2_8 == 1, 1, 0)
 ```
 
-The summary report shows that the largest first nearest neighbour distance is 11.0987 km
+Independent variable = Education level, Own a mobile phone?, internet access, age_group, sex, and marital status
 
-```{r}
-wm_d120000 <- dnearneigh(coords, 0, 120000)
-wm_d120000
-```
-
-```{r}
-str(wm_d120000)
-```
+Convert Categorical Variables to Factors
 
 ```{r}
-table(thailand$ADM1_EN, card(wm_d120000))
-```
+# Convert categorical variables to factors if they are not already
+finscope_mobile_money$c2 <- as.factor(finscope_mobile_money$age_group)     
+finscope_mobile_money$c2 <- as.factor(finscope_mobile_money$c2)           # sex
+finscope_mobile_money$c3 <- as.factor(finscope_mobile_money$c3)           # marital status
+finscope_mobile_money$c4 <- as.factor(finscope_mobile_money$c4)           # education level
+finscope_mobile_money$c7_1_1 <- as.factor(finscope_mobile_money$c7_1_1)   # own a mobile phone?
+finscope_mobile_money$c6_1_2 <- as.factor(finscope_mobile_money$c6_1_2)   # internet access
 
-```{r}
-n_comp <- n.comp.nb(wm_d120000)
-n_comp$nc
 ```
 
 ```{r}
-table(n_comp$comp.id)
-```
+# Fit the logistic regression model
+model <- glm(h2_2_8 ~ age_group + c2 + c3 + c4 + c6_1_2 + c7_1_1, 
+             family = "binomial", data = finscope_mobile_money)
 
-```{r}
-plot(thailand$geometry, border="lightgrey")
-plot(wm_d120000, coords, add=TRUE)
-plot(k1, coords, add=TRUE, col="red", length=0.08)
 ```
 
-Find neighbor list and weights for Phuket, First we identify the index of Phuket.
+Explanation of the Model
 
 ```{r}
-# Find the index of Phuket
-phuket_index <- which(wm_q$ADM1_EN == "Phuket")
-print(phuket_index)
-
+summary(model)
 ```
-
-Identify the neighbor list for Phuket, Based on the results, there 2 two neighbours.
 
-```{r}
-# Access the neighbor list for Phuket
-phuket_nb <- wm_d120000[[phuket_index]]
-print(phuket_nb)
+::: callout-note
+The intercept represents the log-odds of the outcome (using mobile money/e-money wallets) when all predictors are at their reference levels.
 
-```
+**age_group** The reference level for age_group is likely Teenagers (since it’s not listed), and the other age groups are compared to this reference level.
 
-We modify Phuket weight matrix and neighbour list in `wm_q`. Since we are using row standardized W matrix, the weights would be 0.5.
+age_group **Young Adults** (Estimate = 0.60199, p ≈ 0.068): Young adults have higher log-odds (0.60199) of using mobile money/e-money wallets compared to teenagers. Odds Ratio: exp(0.60199) ≈ 1.825, suggesting that young adults have approximately 1.83 times higher odds of using mobile money/e-money wallets than teenagers.
 
-Define Phuket's neighbors (Krabi and Phang Nga) based on distance
+age_group **Adults**, age_group **Middle-aged Adults**, age_group **Seniors**: None of these age groups have statistically significant coefficients (p \> 0.05), meaning there’s no strong evidence of a difference in usage between these age groups and teenagers.
 
-```{r}
-phuket_nb <- c(18, 39)  # Neighbors: Krabi and Phang Nga
-```
+age_group **Elderly** (Estimate = -1.33603, p = 0.273): Elderly individuals have lower log-odds of using mobile money/e-money wallets compared to teenagers, but this result is not statistically significant.
 
-Define row-standardized weights (0.5 for each neighbor)
+**Sex (c2)** c22 **Male vs. Female**: The coefficient for males (0.11156) is not statistically significant (p = 0.454), suggesting that there is no strong evidence of a difference in usage between males and females.
 
-```{r}
-phuket_wt <- c(0.5, 0.5)  # Row-standardized weights for two neighbors
-```
+**Marital Status** c32, c33: None of the levels of marital status are statistically significant, indicating no clear association between marital status and the likelihood of using mobile money/e-money wallets.
 
-Update the wm_q sf object with these neighbors and weights for Phuket
+**Education Level** Reference Group: The baseline group is "Never went to school". All other education levels are compared to this group. Some primary completed (not P7):
 
-```{r}
-wm_q$nb[[48]] <- phuket_nb  # Assign the neighbors to Phuket
-wm_q$wt[[48]] <- phuket_wt  # Assign the row-standardized weights
-```
+Slightly higher odds of using mobile money/e-money wallets compared to those who never went to school. Odds Ratio: 1.55 (about 55% higher odds), but the result is only marginally significant. Completed P7, Some secondary completed (not S6), Completed S6, Specialized training/certificate, Specialized training or diploma, and Completed degree and above:
 
-Verify the updated values for Phuket
+No significant difference in mobile money/e-money wallet usage compared to those who never went to school. "Don't know" (education level not specified):
 
-```{r}
-print(wm_q$nb[[48]])
-print(wm_q$wt[[48]])
-```
+Also shows no significant difference in usage compared to those who never went to school.
 
-Check the structure of the neighbors list for the first few regions. It shows that 'nb' is integer vector of indices.
+**Internet Access**
 
-```{r}
-# Check the structure of the neighbors list for the first few regions
-str(wm_q$nb[1:5])
-```
+c6_1_22 (Internet Access = Yes): The coefficient is -0.11348 and is not statistically significant (p = 0.550), indicating no strong evidence that internet access influences the likelihood of using mobile money/e-money wallets in this dataset.
 
-Check the structure of the weights list for the first few regions. It shows that 'wt' is numeric vector of weights.
+**Own a mobile phone** c7_1_12 (Own a Mobile Phone = Yes, Estimate = -1.49183, p \< 0.001): This coefficient is statistically significant and negative, suggesting that individuals who do not own a mobile phone have much lower odds of using mobile money/e-money wallets compared to those who do own a mobile phone. Odds Ratio: exp(-1.49183) ≈ 0.225, meaning that not owning a mobile phone is associated with approximately 0.23 times the odds (or a 77% reduction in odds) of using mobile money/e-money wallets, compared to those who own a mobile phone.
+:::
 
-```{r}
-str(wm_q$wt[1:5])
-```
+#### Data Preparation for GWLR Model
 
-Ensure that 'nb' for Phuket is an integer vector of indices (neighbors) and 'wt' for Phuket is a numeric vector of weights
+Convert `finscope.sf` to spatial data
 
 ```{r}
-wm_q$nb[[48]] <- as.integer(c(18, 39))  
-
-wm_q$wt[[48]] <- as.numeric(c(0.5, 0.5)) 
+finscope.sp <- as_Spatial(finscope_mobile_money)
 ```
 
-### Performing Global Moran's I test
+Calculating distance matrix to fit the GWLR model
 
-Perform Global Moran's I test for total_no_tourist_all
-
 ```{r}
-global_moran_test(wm_q$total_no_tourist_all,
-                        wm_q$nb,
-                        wm_q$wt,
-              )
+distMAT <- gw.dist(dp.locat = coordinates(finscope.sp))
 ```
-
-Hypotheses for Moran's I test:\
-Null Hypothesis (H0): There is no spatial autocorrelation. The spatial pattern of the variable is random.\
-Alternative Hypothesis (H1): There is positive spatial autocorrelation. Neighboring regions have similar values.
 
-In this case, the Moran's I statistic is −0.001656396 which is very close to zero. This suggests that there is no significant spatial autocorrelation in the variable `total_no_tourist_all`
-
-p-value: The p-value is 0.4067, which is greater than the typical significance level (0.05). This means we **fail to reject the null hypothesis**. In other words, there is **no evidence of significant spatial autocorrelation** in the data.
-
-Perform Global Moran's I test for total_revenue_all
-
 ```{r}
-global_moran_test(wm_q$total_revenue_all,
-                        wm_q$nb,
-                        wm_q$wt,
-              )
+dim(distMAT)
 ```
-
-Hypotheses for Moran's I test:\
-Null Hypothesis (H0): There is no spatial autocorrelation. The spatial pattern of the variable is random.\
-Alternative Hypothesis (H1): There is positive spatial autocorrelation. Neighboring regions have similar values.
 
-Moran's I statistic: The Moran's I value of −0.0224 is close to zero. This suggests that there is no significant spatial autocorrelation in the variable `total_revenue_all`, meaning that the values across different regions are distributed randomly.
+Computing Adaptive Bandwidth with dependent variable = Mobile Money / E-money Wallets Usage Independent variable = Sex
 
-p-value: The p-value is 0.5754, which is greater than the typical significance level (0.05). This means we **fail to reject the null hypothesis**. In other words, there is **no evidence of significant spatial autocorrelation** in the data.
-
-Perform Global Moran's I permutation test for variable `total_no_tourist_all`
-
 ```{r}
-set.seed(1234)
-global_moran_perm(wm_q$total_no_tourist_all,
-                        wm_q$nb,
-                        wm_q$wt,
-                  nsim = 99)
-```
-
-The Monte-Carlo simulation of Moran’s I test confirms the previous result that there is **no significant spatial autocorrelation** in the `total_no_tourist_all` variable.
-
-Perform Global Moran's I permutation test for variable `total_revenue_all`
+bw.adaptive <- bw.ggwr(formula = h2_2_8 ~ c2, 
+                       family = "binomial", 
+                       data = finscope_mobile_money, 
+                       approach = "CV", 
+                       kernel = "gaussian", 
+                       adaptive = TRUE, 
+                       longlat = FALSE, 
+                       p = 2, 
+                       theta = 0, 
+                       dMat = distMAT)
 
-```{r}
-set.seed(1234)
-global_moran_perm(wm_q$total_revenue_all,
-                        wm_q$nb,
-                        wm_q$wt,
-                  nsim = 99)
 ```
-
-The Monte-Carlo simulation of Moran’s I test confirms the previous result that there is **no significant spatial autocorrelation** in the `total_revenue_all` variable.
-
-##7 Local Spatial Autocorrelation
-
-### LISA Map
 
-Computing local Moran's I of variable `total_no_tourist_all`
+::: callout-note
+The resulting adaptive bandwdith value is 626, represent the number of nearest neighbours.
+:::
 
-```{r}
-lisa_tourist <- wm_q %>%
-  mutate(local_moran=local_moran(
-    total_no_tourist_all, nb,wt,nsim=99),
-    .before = 1) %>%
-  unnest(local_moran)
-```
 
-Computing local Moran's I of variable `total_revenue_all`
-
-```{r}
-lisa_revenue <- wm_q %>%
-  mutate(local_moran=local_moran(
-    total_revenue_all, nb,wt,nsim=99),
-    .before = 1) %>%
-  unnest(local_moran)
-```
+#### Fitting GWLR model
 
-```{r}
-tmap_mode("plot")
-```
 
-Visualizing local Moran's I statistics
+Plot the distribution of the variables
 
 ```{r}
-#| warning: false
-#| message: false
-map1 <- tm_shape(lisa_tourist) +
-  tm_fill("ii") +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "local Moran's I of total tourist",
-    main.title.size = 0.8
-  )
+plot_categorical <- function(data, column, title) {
+  ggplot(data, aes(x = !!sym(column))) +
+    geom_bar(fill = "skyblue") +
+    labs(title = title, x = column, y = "Count") +
+    theme_minimal()
+}
 
-map2 <- tm_shape(lisa_revenue) +
-  tm_fill("ii") +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "local Moran's I of total revenue",
-    main.title.size = 0.8
-  )
-tmap_arrange(map1,map2,ncol=2)
 
+plot_education <- plot_categorical(finscope_mobile_money, "c4", "Education Level")
+plot_mobile <- plot_categorical(finscope_mobile_money, "c7_1_1", "Own a Mobile Phone?")
+plot_internet <- plot_categorical(finscope_mobile_money, "c6_1_2", "Internet Access")
+plot_sex <- plot_categorical(finscope_mobile_money, "c2", "Sex")
+plot_marital <- plot_categorical(finscope_mobile_money, "c3", "Marital Status")
+plot_age <- plot_categorical(finscope_mobile_money, "age_group", "Age_group")
 ```
 
-Visualizing p-value of local Moran's I
 
-```{r}
-tmap_mode("plot")
-```
 
 ```{r}
-#| warning: false
-#| message: false
-map1 <- tm_shape(lisa_tourist) +
-  tm_fill("p_ii_sim") +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "p-value of Moran's I of total tourist",
-    main.title.size = 0.5
-  )
-
-map2 <- tm_shape(lisa_revenue) +
-  tm_fill("p_ii_sim") +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "p-value of Moran's I of total revenue",
-    main.title.size = 0.5
-  )
-
-tmap_arrange(map1,map2,ncol=2)
-
+# Arrange and display independent variable plots
+independent_plots <- ggarrange(
+  plot_education, plot_mobile, plot_internet, plot_age, plot_sex, plot_marital,
+  ncol = 2, nrow = 3)
+independent_plots 
 ```
 
-Visualizing local Moran's I and p-value of variable `total_no_tourist_all`
 
+Set `bw` parameter to 626. The `family` parameter is set to "binomial" due to the binary nature of the `Mobile Money/E-money wallets usage` variable.
 ```{r}
-tmap_mode("plot")
+gwlr <- ggwr.basic(h2_2_8 ~ age_group + c7_1_1 + c6_1_2 + c3,
+                   data = finscope_mobile_money, 
+                   bw = 626, 
+                   family = "binomial", 
+                   kernel = "gaussian", 
+                   adaptive = TRUE, 
+                   cv = T, 
+                   tol = 1e-05, 
+                   maxiter = 20, 
+                   p = 2, 
+                   theta = 0, 
+                   longlat = FALSE, 
+                   dMat = distMAT)
 ```
-
 ```{r}
-#| warning: false
-#| message: false
-map1 <- tm_shape(lisa_tourist) +
-  tm_fill("ii") +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "local Moran's I of total tourist",
-    main.title.size = 1
-  )
-
-map2 <- tm_shape(lisa_tourist) +
-  tm_fill("p_ii", breaks = c(0,0.001,0.01,0.05,1),labels = c("0.001","0.01","0.05","Not Sig")) +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "p-value of Moran's I of total tourist",
-    main.title.size = 1
-  )
-
-tmap_arrange(map1,map2,ncol=2)
+gwlr
 ```
-
-Bangkok and its neighboring regions show significant negative spatial autocorrelation, meaning Bangkok's total revenue is much higher than nearby provinces. This clustering is statistically significant.
-
-In most other regions (in red on the p-value map), the spatial autocorrelation is not statistically significant, meaning that no strong clustering patterns of total revenue are detected in these areas.
-
-Visualizing local Moran's I and p-value of variable `total_revenue_all`
+::: callout-note
+Pseudo R-square (0.087): This value is relatively low, suggesting that the model explains around 8.7% of the variation in **Mobile Money / E-money Wallets Usage**
 
-```{r}
-tmap_mode("plot")
-```
+The decrease in AIC from the global model's AIC(1289.2) suggests that the GWLR model provides a slightly better fit due to spatial variation.
 
-```{r}
-#| warning: false
-#| message: false
-map1 <- tm_shape(lisa_revenue) +
-  tm_fill("ii") +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "local Moran's I of total revenue",
-    main.title.size = 1
-  )
+c7_1_1 (Owns a Mobile Phone - Yes): Strongly significant and negative (-1.480, p < 0.001). Not owning a mobile phone is associated with much lower odds of using mobile money/e-money wallets.
 
-map2 <- tm_shape(lisa_revenue) +
-  tm_fill("p_ii", breaks = c(0,0.001,0.01,0.05,1),labels = c("0.001","0.01","0.05","Not Sig")) +
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) + 
-  tm_layout(
-    main.title = "p-value of Moran's I of total revenue",
-    main.title.size = 1
-  )
+c6_1_2 (Internet Access): Not significant (p = 0.99963), indicating no strong association between internet access and mobile money/e-money usage.
 
-tmap_arrange(map1,map2,ncol=2)
-```
+Education Level (c3): Only some levels of c3 (e.g., c34) are significant, indicating that education level might affect usage, though the impact varies across levels.
+:::
 
-Plotting LISA map for both variable `total_no_tourist_all` and `total_revenue_all`
+#### Visualize GWR Output
 
-```{r}
-lisa_tourist_sig <- lisa_tourist  %>%
-  filter(p_ii_sim < 0.05)
-```
+converting SDF into sf data.frame
 
 ```{r}
-lisa_revenue_sig <- lisa_revenue  %>%
-  filter(p_ii_sim < 0.05)
-tmap_mode("plot")
+mobilemoney.sf.adaptive <- st_as_sf(gwlr$SDF) %>% 
+  st_transform(crs=32636)
 ```
 
 ```{r}
-#| warning: false
-#| message: false
-map1 <- tm_shape(lisa_tourist) +
-  tm_polygons() +
-  tm_borders(alpha = 0.5) +
-tm_shape(lisa_tourist_sig) +
-  tm_fill("mean") + 
-  tm_borders(alpha = 0.4) +
-    tm_layout(
-    main.title = "LISA of total tourist",
-    main.title.size = 1
-  )
-
-map2 <- tm_shape(lisa_revenue) +
-  tm_polygons() +
-  tm_borders(alpha = 0.5) +
-tm_shape(lisa_revenue_sig) +
-  tm_fill("mean") + 
-  tm_borders(alpha = 0.4) + tm_layout(
-    main.title = "LISA of total revenue",
-    main.title.size = 1
-  )
-
-tmap_arrange(map1,map2,ncol=2)
-
+mobilemoney.sf.adaptive.UTM36N <- st_transform(mobilemoney.sf.adaptive, 32636)
+mobilemoney.sf.adaptive.UTM36N  
 ```
-
-High-High (Red): These are areas where high values are surrounded by high values (spatial clustering of high values).\
-Low-Low (Blue-Green): These areas have low values surrounded by other low values (spatial clustering of low values).\
-Low-High (Pink): Areas with low values surrounded by high values (spatial outliers).
-
-### Hot Spot and Cold Spot Area Analysis (HCSA)
-
-Computing local GI\* statistics
-
 ```{r}
-wm_idw <- thailand %>%
-  mutate(nb = include_self(
-    st_contiguity(geometry)),
-    wts = st_inverse_distance(nb, 
-                              geometry, 
-                              scale = 1,
-                              alpha = 1),
-         .before = 1)
+gwlr.output <- as.data.frame(gwlr$SDF)
+mobilemoney.sf.adaptive <- cbind(finscope_mobile_money, as.matrix(gwlr.output))
 ```
 
-Computing local GI\* statistics of variable `total_no_tourist_all`
+Calculate local pseudo R² for each observation.
 
 ```{r}
-HCSA_tourist <- wm_idw %>% 
-  mutate(local_Gi = local_gstar_perm(
-    total_no_tourist_all, nb, wts, nsim = 99),
-         .before = 1) %>%
-  unnest(local_Gi)
-HCSA_tourist
-```
+# Step 1: Calculate the null deviance from a null model (intercept-only model)
+null_model <- glm(h2_2_8 ~ 1, data = finscope_mobile_money, family = "binomial")
+null_deviance <- deviance(null_model)
 
-Computing local GI\* statistics of variable `total_revenue`
+# Step 2: Extract local fitted values and residuals, converting to numeric if necessary
+local_fitted_values <- as.numeric(mobilemoney.sf.adaptive$yhat)
+local_residuals <- as.numeric(mobilemoney.sf.adaptive$residual)
 
-```{r}
-HCSA_revenue <- wm_idw %>% 
-  mutate(local_Gi = local_gstar_perm(
-    total_revenue_all, nb, wts, nsim = 99),
-         .before = 1) %>%
-  unnest(local_Gi)
-HCSA_revenue
+# Step 3: Calculate Local Pseudo R² for each observation
+mobilemoney.sf.adaptive$local_pseudo_r2 <- 1 - (local_residuals^2 / null_deviance)
 ```
-
-Visualizing Gi\*
 
 ```{r}
-tmap_mode("plot")
+tmap_mode("view")
+tm_shape(uganda_modified)+ 
+  tm_polygons(alpha = 0.1) +
+tm_shape(mobilemoney.sf.adaptive) +  
+  tm_dots(col = "local_pseudo_r2", 
+          border.col = "gray60",
+          border.lwd = 1)
 ```
-
-```{r}
+::: callout-note
+In logistic regression (and similarly in geographically weighted logistic regression), a pseudo R² is an approximation of the proportion of variance in the dependent variable (in this case, mobile money/e-money wallet usage) explained by the model. 
 
-#| warning: false
-#| message: false
-map1 <- tm_shape(HCSA_tourist) +
-  tm_fill("gi_star") + 
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) +
-    tm_borders(alpha = 0.4) + tm_layout(
-    main.title = "Total tourist",
-    main.title.size = 1
-  )
+Higher Pseudo R² Values indicate areas where the model fits well.
 
+Lower Pseudo R² Values (Lighter Colors)indicate areas where the model explains less of the variability in mobile money usage
+:::
 
-map2 <- tm_shape(HCSA_revenue) +
-  tm_fill("gi_star") + 
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8))+
-    tm_borders(alpha = 0.4) + tm_layout(
-    main.title = "Total revenue",
-    main.title.size = 1
-  )
 
-tmap_arrange(map1,map2,ncol=2)
+### Dependent variable: Mobile / Internet Banking Usage
 
-```
-
-Gi-star values range from low to high. High values indicate spatial clustering of high values (hot spots), and low values indicate spatial clustering of low values (cold spots).
-
-Visualizing p-value of HCSA
-
-```{r}
-tmap_mode("plot")
-```
+Remove empty values in `h2_2_5` field which represents the Mobile Money / E-money Wallets Usage
 
 ```{r}
-
-#| warning: false
-#| message: false
-map1 <- tm_shape(HCSA_tourist) +
-  tm_fill("p_sim") + 
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) +
-    tm_borders(alpha = 0.4) + tm_layout(
-    main.title = "Total tourist",
-    main.title.size = 1
-  )
-
-
-map2 <- tm_shape(HCSA_revenue) +
-  tm_fill("p_sim") + 
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8))+
-    tm_borders(alpha = 0.4) + tm_layout(
-    main.title = "Total revenue",
-    main.title.size = 1
-  )
-
-tmap_arrange(map1,map2,ncol=2)
+finscope_internet_banking <- finscope.sf %>%
+  filter(!is.na(h2_2_5) & h2_2_5 != "")
 ```
-
-Low p-values indicating significant clustering of high or low values (either a hotspot or cold spot).
 
-Visualizing local HCSA
+Recode **Mobile / Internet Banking Usage** to 1 and 0
 
 ```{r}
-tmap_mode("plot")
+finscope_internet_banking$h2_2_5 <- ifelse(finscope_internet_banking$h2_2_5 == 1, 1, 0)
 ```
 
-```{r}
-map1 <- tm_shape(HCSA_tourist) +
-  tm_fill("gi_star") + 
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) +
-  tm_layout(main.title = "Gi* of total revenue",
-            main.title.size = 0.8)
+Independent variable = Education level, Own a mobile phone?, internet access, age_group, sex, and marital status
 
-map2 <- tm_shape(HCSA_tourist) +
-  tm_fill("p_value",
-          breaks = c(0, 0.001, 0.01, 0.05, 1),
-              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
-  tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "p-value of Gi*",
-            main.title.size = 0.8)
-
-tmap_arrange(map1, map2, ncol = 2)
-```
+Convert Categorical Variables to Factors
 
 ```{r}
 
-#| warning: false
-#| message: false
-map1 <- tm_shape(HCSA_revenue) +
-  tm_fill("gi_star") + 
-  tm_borders(alpha = 0.5) +
-  tm_view(set.zoom.limits = c(6,8)) +
-  tm_layout(main.title = "Gi* of total revenue",
-            main.title.size = 0.8)
+finscope_internet_banking$c2 <- as.factor(finscope_internet_banking$age_group)     
+finscope_internet_banking$c2 <- as.factor(finscope_internet_banking$c2)           # sex
+finscope_internet_banking$c3 <- as.factor(finscope_internet_banking$c3)           # marital status
+finscope_internet_banking$c4 <- as.factor(finscope_internet_banking$c4)           # education level
+finscope_internet_banking$c7_1_1 <- as.factor(finscope_internet_banking$c7_1_1)   # own a mobile phone?
+finscope_internet_banking$c6_1_2 <- as.factor(finscope_internet_banking$c6_1_2)   # internet access
 
-map2 <- tm_shape(HCSA_revenue) +
-  tm_fill("p_value",
-          breaks = c(0, 0.001, 0.01, 0.05, 1),
-              labels = c("0.001", "0.01", "0.05", "Not sig")) + 
-  tm_borders(alpha = 0.5) +
-  tm_layout(main.title = "p-value of Gi*",
-            main.title.size = 0.8)
-
-tmap_arrange(map1, map2, ncol = 2)
-```
-
-Visualizing hot spot and cold spot areas
-
-```{r}
-HCSA_sig_tourist <- HCSA_tourist  %>%
-  filter(p_sim < 0.05)
-```
-
-```{r}
-HCSA_sig_revenue <- HCSA_revenue  %>%
-  filter(p_sim < 0.05)
-tmap_mode("plot")
 ```
 
+Fit the logistic regression model using `glm`
 ```{r}
-map1 <- tm_shape(HCSA_tourist) +
-  tm_polygons() +
-  tm_borders(alpha = 0.5) +
-tm_shape(HCSA_sig_tourist) +
-  tm_fill("cluster") + 
-  tm_borders(alpha = 0.4) +
-  tm_layout(main.title = "Hot spot and cold spot areas of tourist",
-            main.title.size = 0.8)
-
-map2 <- tm_shape(HCSA_revenue) +
-  tm_polygons() +
-  tm_borders(alpha = 0.5) +
-tm_shape(HCSA_sig_revenue) +
-  tm_fill("cluster") + 
-  tm_borders(alpha = 0.4) +
-  tm_layout(main.title = "Hot spot and cold spot areas of revenue",
-            main.title.size = 0.8)
-
-tmap_arrange(map1, map2, ncol = 2)
+model_2 <- glm(h2_2_5 ~ age_group + c2 + c3 + c4 + c6_1_2 + c7_1_1, 
+             family = "binomial", data = finscope_internet_banking)
 ```
-
-These regions represent coldspots. A coldspot indicates significant clustering of low values. These areas tend to have lower activity or lower values for the measured variable.
 
-## 8 Emerging Hot Spot Analysis
+Explanation of the Model
 
 ```{r}
-pacman::p_load(sf, sfdep, tmap, plotly, tidyverse,Kendall)
+summary(model_2)
 ```
-
-### Data Wrangling
-
-Segregate attribute data into 3 periods: Pre-covid, covid_period, post_covid
+::: callout-note
 
-Change the **month_year** in `filtered_data` as integer in the new column **month_year_numeric**
+The logistic regression model assesses the likelihood of using internet or mobile banking based on demographic and behavioral factors. Most variables, including age groups, are not significant, suggesting limited predictive power for these factors individually. However, education level (specifically, category c34) is borderline significant (p ≈ 0.054), hinting that higher education may slightly increase the likelihood of internet banking usage. Internet access (c6_1_22) and mobile phone ownership (c7_1_12) are significant predictors, with negative coefficients, indicating that lacking internet access or a mobile phone significantly reduces the likelihood of using internet or mobile banking. The model has a modest fit, with a pseudo R² around 8.9% (Null deviance vs. Residual deviance), and an AIC of 914.09, suggesting room for additional or alternative predictors. Five levels of c2 (sex) were omitted due to singularities, indicating redundancy or perfect multicollinearity.
 
-```{r}
-# Create a new column with format 'YYYYMM' as an integer
-filtered_data <- filtered_data %>%
-  mutate(month_year_numeric = as.integer(format(as.Date(month_year_date), "%Y%m")))
-
-# View the updated data
-head(filtered_data)
-```
+:::
 
-Rename the column **province_eng** to **ADM1_EN**
-
-```{r}
-# Rename 'province_eng' to 'ADM1_EN'
-filtered_data <- filtered_data %>%
-  rename(ADM1_EN = province_eng)
 
-# View the updated dataset
-head(filtered_data)
-```
+#### Data Preparation for GWLR Model
 
-Filter the data based on **no_tourist_all** and **revenue_all** Create the time series cube
+Convert `finscope_internet_banking` to spatial data
 
 ```{r}
-tourist_pre_covid <- filtered_data %>%
-  filter(variable == "no_tourist_all", covid_period == "pre_covid")
-
-tourist_covid_period <- filtered_data %>%
-  filter(variable == "no_tourist_all", covid_period == "covid_period")
-
-tourist_post_covid <- filtered_data %>%
-  filter(variable == "no_tourist_all", covid_period == "post_covid")
-
-# Revenue-related datasets
-revenue_pre_covid <- filtered_data %>%
-  filter(variable == "revenue_all", covid_period == "pre_covid")
-
-revenue_covid_period <- filtered_data %>%
-  filter(variable == "revenue_all", covid_period == "covid_period")
-
-revenue_post_covid <- filtered_data %>%
-  filter(variable == "revenue_all", covid_period == "post_covid")
-
-
+finscope_internet_banking.sp <- as_Spatial(finscope_internet_banking)
 ```
-
-```{r}
-tourist_pre_covid_st <- spacetime(tourist_pre_covid, thailand_32647_sorted,
-                      .loc_col = "ADM1_EN",
-                      .time_col = "month_year_numeric")
-
-tourist_covid_period_st <- spacetime(tourist_covid_period, thailand_32647_sorted,
-                      .loc_col = "ADM1_EN",
-                      .time_col = "month_year_numeric")
 
-tourist_post_covid_st <- spacetime(tourist_post_covid, thailand_32647_sorted,
-                      .loc_col = "ADM1_EN",
-                      .time_col = "month_year_numeric")
 
-is_spacetime_cube(tourist_pre_covid_st)
-is_spacetime_cube(tourist_covid_period_st)
-is_spacetime_cube(tourist_post_covid_st)
-
-```
+Calculating distance matrix to fit the GWLR model
 
 ```{r}
-revenue_pre_covid_st <- spacetime(revenue_pre_covid, thailand_32647_sorted,
-                      .loc_col = "ADM1_EN",
-                      .time_col = "month_year_numeric")
-
-revenue_covid_period_st <- spacetime(revenue_covid_period, thailand_32647_sorted,
-                      .loc_col = "ADM1_EN",
-                      .time_col = "month_year_numeric")
-
-revenue_post_covid_st <- spacetime(revenue_post_covid, thailand_32647_sorted,
-                      .loc_col = "ADM1_EN",
-                      .time_col = "month_year_numeric")
-
-is_spacetime_cube(revenue_pre_covid_st)
-is_spacetime_cube(revenue_covid_period_st)
-is_spacetime_cube(revenue_post_covid_st)
+distMAT_internet_banking <- gw.dist(dp.locat = coordinates(finscope_internet_banking.sp))
 ```
-
-### Emerging Hot Spot Analysis: Tourist Variable
-
-Computing Computing Gi\*
 
-Deriving the spatial weights
 
 ```{r}
-#| warning: false
-#| message: false
-tourist_pre_covid_nb <- tourist_pre_covid_st %>%
-  activate("geometry") %>%
-  mutate(nb = include_self(
-    st_contiguity(geometry)),
-    wt = st_inverse_distance(nb, 
-                             geometry, 
-                             scale = 1,
-                             alpha = 1),
-    .before = 1) %>%
-  set_nbs("nb") %>%
-  set_wts("wt")
-
-tourist_covid_period_nb <- tourist_covid_period_st %>%
-  activate("geometry") %>%
-  mutate(nb = include_self(
-    st_contiguity(geometry)),
-    wt = st_inverse_distance(nb, 
-                             geometry, 
-                             scale = 1,
-                             alpha = 1),
-    .before = 1) %>%
-  set_nbs("nb") %>%
-  set_wts("wt")
-
-tourist_post_covid_nb <- tourist_post_covid_st %>%
-  activate("geometry") %>%
-  mutate(nb = include_self(
-    st_contiguity(geometry)),
-    wt = st_inverse_distance(nb, 
-                             geometry, 
-                             scale = 1,
-                             alpha = 1),
-    .before = 1) %>%
-  set_nbs("nb") %>%
-  set_wts("wt")
-
-
-
+dim(distMAT_internet_banking)
 ```
-
-Manually calculate the local GI\* for each location
-
-```{r}
-gi_stars_tourist_pre_covid <- tourist_pre_covid_nb %>% 
-  group_by(month_year_numeric) %>% 
-  mutate(gi_star = local_gstar_perm(
-    value, nb, wt)) %>% 
-  tidyr::unnest(gi_star)
-
-gi_stars_tourist_covid_period <- tourist_covid_period_nb %>% 
-  group_by(month_year_numeric) %>% 
-  mutate(gi_star = local_gstar_perm(
-    value, nb, wt)) %>% 
-  tidyr::unnest(gi_star)
 
-gi_stars_post_covid <- tourist_post_covid_nb %>% 
-  group_by(month_year_numeric) %>% 
-  mutate(gi_star = local_gstar_perm(
-    value, nb, wt)) %>% 
-  tidyr::unnest(gi_star)
 
-```
-
-Evaluate a location for a trend
+Computing Adaptive Bandwidth
 
 ```{r}
-cbg_tourist_pre_covid <- gi_stars_tourist_pre_covid %>% 
-  ungroup() %>% #must ungroup because it is a cube
-  filter(ADM1_EN == "Bangkok") |> #r version of %>%  = |>
-  dplyr::select(ADM1_EN, month_year_numeric, gi_star)
-
-
-cbg_tourist_covid_period <- gi_stars_tourist_covid_period %>% 
-  ungroup() %>% #must ungroup because it is a cube
-  filter(ADM1_EN == "Bangkok") |> #r version of %>%  = |>
-  dplyr::select(ADM1_EN, month_year_numeric, gi_star)
+bw.adaptive_internet_banking <- bw.ggwr(formula = h2_2_5 ~ c3, 
+                       family = "binomial", 
+                       data = finscope_internet_banking, 
+                       approach = "CV", 
+                       kernel = "gaussian", 
+                       adaptive = TRUE, 
+                       longlat = FALSE, 
+                       p = 2, 
+                       theta = 0, 
+                       dMat = distMAT_internet_banking)
 
-cbg_tourist_post_covid <- gi_stars_post_covid %>% 
-  ungroup() %>% #must ungroup because it is a cube
-  filter(ADM1_EN == "Bangkok") |> #r version of %>%  = |>
-  dplyr::select(ADM1_EN, month_year_numeric, gi_star)
-
-
 ```
-
-Plot the result using `ggplot2` functions
-
-```{r}
 
-#| warning: false
-#| message: false
-library(patchwork)
-# Create the three ggplots
-plot1 <- ggplot(data = cbg_tourist_pre_covid,
-                aes(x = month_year_numeric, y = gi_star)) +
-  geom_line() +
-  theme_light() +
-  labs(title = "Pre-COVID")
+::: callout-note
+The resulting adaptive bandwdith value is 555, represent the number of nearest neighbours.
+:::
 
-plot2 <- ggplot(data = cbg_tourist_covid_period,
-                aes(x = month_year_numeric, y = gi_star)) +
-  geom_line() +
-  theme_light() +
-  labs(title = "COVID Period")
 
-plot3 <- ggplot(data = cbg_tourist_post_covid,
-                aes(x = month_year_numeric, y = gi_star)) +
-  geom_line() +
-  theme_light() +
-  labs(title = "Post-COVID")
 
-# Combine the three plots side by side using patchwork
-```
-
-```{r}
-plot1 / plot2 / plot3
-```
+#### Fitting GWLR model
 
-Printing Mann-Kendall test report
 
-Null Hypothesis (H₀): There is no trend in the data (no significant increase or decrease over time). Alternative Hypothesis (H₁): There is a trend in the data (either an increasing or decreasing trend over time).
-
+Set `bw` parameter to 555. The `family` parameter is set to "binomial" due to the binary nature of the `Mobile / Internet Banking Usage` variable.
 ```{r}
-cbg_tourist_pre_covid %>% 
-  summarise(mk = list(
-    unclass(
-      Kendall::MannKendall(gi_star)))) %>% 
-  tidyr:: unnest_wider(mk)
+gwlr_internet_banking <- ggwr.basic(h2_2_5 ~ c3 + c6_1_2 + c7_1_1,
+                   data = finscope_internet_banking, 
+                   bw = 555, 
+                   family = "binomial", 
+                   kernel = "gaussian", 
+                   adaptive = TRUE, 
+                   cv = T, 
+                   tol = 1e-05, 
+                   maxiter = 20, 
+                   p = 2, 
+                   theta = 0, 
+                   longlat = FALSE, 
+                   dMat = distMAT_internet_banking)
 ```
-
-p-value = 0.537: This means that the trend is not statistically significant. A high p-value suggests that the null hypothesis (no trend) cannot be rejected. Therefore, we conclude that the weak negative trend observed is likely due to chance.
 
 ```{r}
-cbg_tourist_covid_period %>% 
-  summarise(mk = list(
-    unclass(
-      Kendall::MannKendall(gi_star)))) %>% 
-  tidyr:: unnest_wider(mk)
+gwlr_internet_banking
 ```
 
-Since the p-value is less than 0.05, this suggests that the trend is statistically significant. We can reject the null hypothesis of no trend and conclude that the negative trend observed in the data is statistically significant.
+::: callout-note
+Internet Access (c6_1_22): The local coefficients for internet access are consistently negative across locations, ranging from -0.975 to -0.930, indicating a uniformly strong negative effect on usage.
 
-```{r}
-cbg_tourist_post_covid %>% 
-  summarise(mk = list(
-    unclass(
-      Kendall::MannKendall(gi_star)))) %>% 
-  tidyr:: unnest_wider(mk)
-```
+Mobile Phone Ownership (c7_1_12): The effect of mobile phone ownership also varies, ranging from -1.26 to -0.90, with stronger negative effects in some areas, suggesting that lack of mobile phone access has a more significant impact in certain regions.
 
-The p-value is very small, well below 0.05, which indicates that the trend is highly statistically significant. We can confidently reject the null hypothesis of no trend and conclude that the positive trend observed in the data is statistically significant.
+Education Levels (c3 series): These variables show varying effects, but their median and quartile values suggest limited impact overall, as indicated by the global results.
 
-Apply the Mann-Kendall test for trend detection on the Gi\* values for each province over time.
+AIC (916.88) and Pseudo R² (0.064) for the GWLR model indicate a slightly improved fit over the global model, capturing spatial heterogeneity but still explaining only a modest portion of the variance.
 
-```{r}
-ehsa_tourist_pre_covid <- gi_stars_tourist_pre_covid %>% 
-  group_by(ADM1_EN) %>% #because 88 counties and observations
-  summarise(mk = list(
-    unclass(
-      Kendall::MannKendall(gi_star)))) %>% 
-  tidyr:: unnest_wider(mk)
-head(ehsa_tourist_pre_covid)
-```
+:::
 
-Sort the data based on the statistical significance and the strength of trends
 
+#### Visualize GWR Output
 ```{r}
-emerging_tourist_pre_covid <- ehsa_tourist_pre_covid %>% 
-  arrange(sl, abs(tau)) %>% 
-  slice(1:10)
-head(emerging_tourist_pre_covid)
+internetbanking.sf.adaptive <- st_as_sf(gwlr_internet_banking$SDF) %>% 
+  st_transform(crs=32636)
 ```
-
-Perform Emerging hotspot analysis of tourist
 
 ```{r}
-ehsa_tourist_pre_covid <- emerging_hotspot_analysis(
-  x = tourist_pre_covid_st,
-  .var = "value",
-  k = 1,
-  nsim = 99
-)
-
-
-ehsa_tourist_covid_period <- emerging_hotspot_analysis(
-  x = tourist_covid_period_st,
-  .var = "value",
-  k = 1,
-  nsim = 99
-)
-
-
-ehsa_tourist_post_covid <- emerging_hotspot_analysis(
-  x = tourist_post_covid_st,
-  .var = "value",
-  k = 1,
-  nsim = 99
-)
+internetbanking.sf.adaptive.UTM36N <- st_transform(internetbanking.sf.adaptive, 32636)
+internetbanking.sf.adaptive.UTM36N  
 ```
-
-Plot the classifications
-
-```{r}
-plot1 <- ggplot(data=ehsa_tourist_pre_covid,
-       aes(x=classification)) +
-  geom_bar()+
-  theme_light() +
-  labs(title = "Pre-COVID")
 
-plot2 <- ggplot(data=ehsa_tourist_covid_period,
-       aes(x=classification)) +
-  geom_bar()+
-  theme_light() +
-  labs(title = "COVID Period")
 
-plot3 <- ggplot(data=ehsa_tourist_post_covid,
-       aes(x=classification)) +
-  geom_bar()+
-  theme_light() +
-  labs(title = "Post COVID")
-```
-
 ```{r}
-plot1 / plot2 / plot3
+gwlr_internet_banking.output <- as.data.frame(gwlr_internet_banking$SDF)
+internetbanking.sf.adaptive <- cbind(finscope_internet_banking, as.matrix(gwlr_internet_banking.output))
 ```
 
-Join both `thailand_32647_sorted` and `ehsa` to visualize the geographic distribution of EHSA classes.
+Calculate local pseudo R² for each observation.
 
 ```{r}
-tourist_pre_covid_ehsa <- thailand_32647_sorted %>% 
-  left_join(ehsa_tourist_pre_covid,
-            by = join_by(ADM1_EN == location))
+null_model_ib <- glm(h2_2_5 ~ 1, data = finscope_internet_banking, family = "binomial")
+null_deviance_ib <- deviance(null_model)
 
+local_fitted_values_ib <- as.numeric(internetbanking.sf.adaptive$yhat)
+local_residuals_ib <- as.numeric(internetbanking.sf.adaptive$residual)
 
-tourist_covid_period_ehsa <- thailand_32647_sorted %>% 
-  left_join(ehsa_tourist_covid_period,
-            by = join_by(ADM1_EN == location))
-
-tourist_post_covid_ehsa <- thailand_32647_sorted %>% 
-  left_join(ehsa_tourist_post_covid,
-            by = join_by(ADM1_EN == location))
-
+internetbanking.sf.adaptive$local_pseudo_r2 <- 1 - (local_residuals_ib^2 / null_deviance_ib)
 ```
 
+Plot the map
 ```{r}
-#| warning: false
-#| message: false
-ehsa_tourist_pre_covid_sig <- tourist_pre_covid_ehsa%>%
-  filter(p_value < 0.05)
-
-ehsa_tourist_covid_period_sig <- tourist_covid_period_ehsa%>%
-  filter(p_value < 0.05)
-
-ehsa_tourist_post_covid_sig <- tourist_post_covid_ehsa%>%
-  filter(p_value < 0.05)
-
-tmap_mode("plot")
+tmap_mode("view")
+tm_shape(uganda_modified)+ 
+  tm_polygons(alpha = 0.1) +
+tm_shape(internetbanking.sf.adaptive) +  
+  tm_dots(col = "local_pseudo_r2", 
+          border.col = "gray60",
+          border.lwd = 1)
 ```
+::: callout-note
+Higher Pseudo R² Values indicate areas where the model fits well.
 
-Visualizing EHSA
+Lower Pseudo R² Values (Lighter Colors)indicate areas where the model explains less of the variability in mobile money usage
 
-```{r}
-#| warning: false
-#| message: false
-map1 <- tm_shape(tourist_pre_covid_ehsa) +
-  tm_polygons() +
-  tm_borders(alpha = 0.5) +
-tm_shape(ehsa_tourist_pre_covid_sig) +
-  tm_fill("classification")+
-  tm_borders(alpha = 0.4)+
-  tm_layout(main.title = "Pre-covid",
-            main.title.size = 0.8)
-  
-map2 <- tm_shape(tourist_covid_period_ehsa) +
-  tm_polygons() +
-  tm_borders(alpha = 0.5) +
-tm_shape(ehsa_tourist_covid_period_sig) +
-  tm_fill("classification") + 
-  tm_borders(alpha = 0.4) + 
-  tm_layout(main.title = "Covid period",
-            main.title.size = 0.8)
+Kampala’s location in the central region likely influences the results, as urban settings tend to have better infrastructure, making predictors like mobile phone and internet access more uniformly available. This can affect the local pseudo R² values and how well the model fits for internet/mobile banking usage patterns.
+:::
 
 
-map3 <- tm_shape(tourist_post_covid_ehsa) +
-  tm_polygons() +
-  tm_borders(alpha = 0.5) +
-tm_shape(ehsa_tourist_post_covid_sig) +
-  tm_fill("classification") + 
-  tm_borders(alpha = 0.4) +
-  tm_layout(main.title = "Post-covid",
-            main.title.size = 0.8)
 
-tmap_arrange(map1, map2,map3, ncol = 3)
-
-```

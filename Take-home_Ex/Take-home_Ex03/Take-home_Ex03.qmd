@@ -429,41 +429,10 @@ bw.adaptive <- bw.ggwr(formula = h2_2_8 ~ c2,
 The resulting adaptive bandwdith value is 626, represent the number of nearest neighbours.
 :::
 
-
 #### Fitting GWLR model
 
-
-Plot the distribution of the variables
-
-```{r}
-plot_categorical <- function(data, column, title) {
-  ggplot(data, aes(x = !!sym(column))) +
-    geom_bar(fill = "skyblue") +
-    labs(title = title, x = column, y = "Count") +
-    theme_minimal()
-}
-
-
-plot_education <- plot_categorical(finscope_mobile_money, "c4", "Education Level")
-plot_mobile <- plot_categorical(finscope_mobile_money, "c7_1_1", "Own a Mobile Phone?")
-plot_internet <- plot_categorical(finscope_mobile_money, "c6_1_2", "Internet Access")
-plot_sex <- plot_categorical(finscope_mobile_money, "c2", "Sex")
-plot_marital <- plot_categorical(finscope_mobile_money, "c3", "Marital Status")
-plot_age <- plot_categorical(finscope_mobile_money, "age_group", "Age_group")
-```
-
-
-
-```{r}
-# Arrange and display independent variable plots
-independent_plots <- ggarrange(
-  plot_education, plot_mobile, plot_internet, plot_age, plot_sex, plot_marital,
-  ncol = 2, nrow = 3)
-independent_plots 
-```
-
-
 Set `bw` parameter to 626. The `family` parameter is set to "binomial" due to the binary nature of the `Mobile Money/E-money wallets usage` variable.
+
 ```{r}
 gwlr <- ggwr.basic(h2_2_8 ~ age_group + c7_1_1 + c6_1_2 + c3,
                    data = finscope_mobile_money, 
@@ -479,15 +448,17 @@ gwlr <- ggwr.basic(h2_2_8 ~ age_group + c7_1_1 + c6_1_2 + c3,
                    longlat = FALSE, 
                    dMat = distMAT)
 ```
+
 ```{r}
 gwlr
 ```
+
 ::: callout-note
 Pseudo R-square (0.087): This value is relatively low, suggesting that the model explains around 8.7% of the variation in **Mobile Money / E-money Wallets Usage**
 
 The decrease in AIC from the global model's AIC(1289.2) suggests that the GWLR model provides a slightly better fit due to spatial variation.
 
-c7_1_1 (Owns a Mobile Phone - Yes): Strongly significant and negative (-1.480, p < 0.001). Not owning a mobile phone is associated with much lower odds of using mobile money/e-money wallets.
+c7_1_1 (Owns a Mobile Phone - Yes): Strongly significant and negative (-1.480, p \< 0.001). Not owning a mobile phone is associated with much lower odds of using mobile money/e-money wallets.
 
 c6_1_2 (Internet Access): Not significant (p = 0.99963), indicating no strong association between internet access and mobile money/e-money usage.
 
@@ -507,6 +478,7 @@ mobilemoney.sf.adaptive <- st_as_sf(gwlr$SDF) %>%
 mobilemoney.sf.adaptive.UTM36N <- st_transform(mobilemoney.sf.adaptive, 32636)
 mobilemoney.sf.adaptive.UTM36N  
 ```
+
 ```{r}
 gwlr.output <- as.data.frame(gwlr$SDF)
 mobilemoney.sf.adaptive <- cbind(finscope_mobile_money, as.matrix(gwlr.output))
@@ -536,14 +508,14 @@ tm_shape(mobilemoney.sf.adaptive) +
           border.col = "gray60",
           border.lwd = 1)
 ```
+
 ::: callout-note
-In logistic regression (and similarly in geographically weighted logistic regression), a pseudo R² is an approximation of the proportion of variance in the dependent variable (in this case, mobile money/e-money wallet usage) explained by the model. 
+In logistic regression (and similarly in geographically weighted logistic regression), a pseudo R² is an approximation of the proportion of variance in the dependent variable (in this case, mobile money/e-money wallet usage) explained by the model.
 
 Higher Pseudo R² Values indicate areas where the model fits well.
 
 Lower Pseudo R² Values (Lighter Colors)indicate areas where the model explains less of the variability in mobile money usage
 :::
-
 
 ### Dependent variable: Mobile / Internet Banking Usage
 
@@ -576,6 +548,7 @@ finscope_internet_banking$c6_1_2 <- as.factor(finscope_internet_banking$c6_1_2) 
 ```
 
 Fit the logistic regression model using `glm`
+
 ```{r}
 model_2 <- glm(h2_2_5 ~ age_group + c2 + c3 + c4 + c6_1_2 + c7_1_1, 
              family = "binomial", data = finscope_internet_banking)
@@ -586,12 +559,10 @@ Explanation of the Model
 ```{r}
 summary(model_2)
 ```
+
 ::: callout-note
-
 The logistic regression model assesses the likelihood of using internet or mobile banking based on demographic and behavioral factors. Most variables, including age groups, are not significant, suggesting limited predictive power for these factors individually. However, education level (specifically, category c34) is borderline significant (p ≈ 0.054), hinting that higher education may slightly increase the likelihood of internet banking usage. Internet access (c6_1_22) and mobile phone ownership (c7_1_12) are significant predictors, with negative coefficients, indicating that lacking internet access or a mobile phone significantly reduces the likelihood of using internet or mobile banking. The model has a modest fit, with a pseudo R² around 8.9% (Null deviance vs. Residual deviance), and an AIC of 914.09, suggesting room for additional or alternative predictors. Five levels of c2 (sex) were omitted due to singularities, indicating redundancy or perfect multicollinearity.
-
 :::
-
 
 #### Data Preparation for GWLR Model
 
@@ -601,18 +572,15 @@ Convert `finscope_internet_banking` to spatial data
 finscope_internet_banking.sp <- as_Spatial(finscope_internet_banking)
 ```
 
-
 Calculating distance matrix to fit the GWLR model
 
 ```{r}
 distMAT_internet_banking <- gw.dist(dp.locat = coordinates(finscope_internet_banking.sp))
 ```
 
-
 ```{r}
 dim(distMAT_internet_banking)
 ```
-
 
 Computing Adaptive Bandwidth
 
@@ -634,12 +602,10 @@ bw.adaptive_internet_banking <- bw.ggwr(formula = h2_2_5 ~ c3,
 The resulting adaptive bandwdith value is 555, represent the number of nearest neighbours.
 :::
 
-
-
 #### Fitting GWLR model
 
-
 Set `bw` parameter to 555. The `family` parameter is set to "binomial" due to the binary nature of the `Mobile / Internet Banking Usage` variable.
+
 ```{r}
 gwlr_internet_banking <- ggwr.basic(h2_2_5 ~ c3 + c6_1_2 + c7_1_1,
                    data = finscope_internet_banking, 
@@ -668,11 +634,10 @@ Mobile Phone Ownership (c7_1_12): The effect of mobile phone ownership also vari
 Education Levels (c3 series): These variables show varying effects, but their median and quartile values suggest limited impact overall, as indicated by the global results.
 
 AIC (916.88) and Pseudo R² (0.064) for the GWLR model indicate a slightly improved fit over the global model, capturing spatial heterogeneity but still explaining only a modest portion of the variance.
-
 :::
 
-
 #### Visualize GWR Output
+
 ```{r}
 internetbanking.sf.adaptive <- st_as_sf(gwlr_internet_banking$SDF) %>% 
   st_transform(crs=32636)
@@ -682,7 +647,6 @@ internetbanking.sf.adaptive <- st_as_sf(gwlr_internet_banking$SDF) %>%
 internetbanking.sf.adaptive.UTM36N <- st_transform(internetbanking.sf.adaptive, 32636)
 internetbanking.sf.adaptive.UTM36N  
 ```
-
 
 ```{r}
 gwlr_internet_banking.output <- as.data.frame(gwlr_internet_banking$SDF)
@@ -702,6 +666,7 @@ internetbanking.sf.adaptive$local_pseudo_r2 <- 1 - (local_residuals_ib^2 / null_
 ```
 
 Plot the map
+
 ```{r}
 tmap_mode("view")
 tm_shape(uganda_modified)+ 
@@ -711,6 +676,7 @@ tm_shape(internetbanking.sf.adaptive) +
           border.col = "gray60",
           border.lwd = 1)
 ```
+
 ::: callout-note
 Higher Pseudo R² Values indicate areas where the model fits well.
 
@@ -719,5 +685,175 @@ Lower Pseudo R² Values (Lighter Colors)indicate areas where the model explains 
 Kampala’s location in the central region likely influences the results, as urban settings tend to have better infrastructure, making predictors like mobile phone and internet access more uniformly available. This can affect the local pseudo R² values and how well the model fits for internet/mobile banking usage patterns.
 :::
 
+### Dependent variable: Existing Insurance Policy
+
+Remove empty values in `j1` field which represents the Insurance Policy ownership
+
+```{r}
+finscope_insurance <- finscope.sf %>%
+  filter(!is.na(j1) & j1 != "")
+```
+
+Recode **Existing Insurance Policy** to 1 and 0
+
+```{r}
+finscope_insurance$j1 <- ifelse(finscope_insurance$j1 == 1, 1, 0)
+```
+
+Independent variable = Education level, Own a mobile phone?, internet access, age_group, sex, and marital status
+
+Convert Categorical Variables to Factors
+
+```{r}
+
+finscope_insurance$c2 <- as.factor(finscope_insurance$age_group)     
+finscope_insurance$c2 <- as.factor(finscope_insurance$c2)           # sex
+finscope_insurance$c3 <- as.factor(finscope_insurance$c3)           # marital status
+finscope_insurance$c4 <- as.factor(finscope_insurance$c4)           # education level
+finscope_insurance$c7_1_1 <- as.factor(finscope_insurance$c7_1_1)   # own a mobile phone?
+finscope_insurance$c6_1_2 <- as.factor(finscope_insurance$c6_1_2)   # internet access
+
+```
+
+Fit the logistic regression model using `glm`
+
+```{r}
+model_3 <- glm(j1 ~ age_group + c2 + c3 + c4 + c6_1_2 + c7_1_1, 
+             family = "binomial", data = finscope_insurance)
+```
+
+Explanation of the Model
+
+```{r}
+summary(model_3)
+```
+
+::: callout-note
+The model suggests that lack of internet access is associated with lower likelihood of having insurance, which may reflect barriers in accessing information and services related to insurance. Other predictors, including age and mobile phone ownership, do not appear to have a statistically significant effect on insurance ownership in this dataset. The singularities in certain categories highlight potential multicollinearity issues, which could be further explored to refine the model.
+:::
+
+#### Data Preparation for GWLR Model
+
+Convert `finscope_insurance` to spatial data
+
+```{r}
+finscope_insurance.sp <- as_Spatial(finscope_insurance)
+```
+
+Calculating distance matrix to fit the GWLR model
+
+```{r}
+distMAT_insurance <- gw.dist(dp.locat = coordinates(finscope_insurance.sp))
+```
+
+```{r}
+dim(distMAT_insurance)
+```
+
+Computing Adaptive Bandwidth
+
+```{r}
+bw.adaptive_insurance <- bw.ggwr(formula = j1 ~ c6_1_2, 
+                       family = "binomial", 
+                       data = finscope_insurance, 
+                       approach = "CV", 
+                       kernel = "gaussian", 
+                       adaptive = TRUE, 
+                       longlat = FALSE, 
+                       p = 2, 
+                       theta = 0, 
+                       dMat = distMAT_insurance)
+
+```
+
+::: callout-note
+The resulting adaptive bandwdith value is 387, represent the number of nearest neighbours.
+:::
+
+#### Fitting GWLR model
+
+Set `bw` parameter to 387. The `family` parameter is set to "binomial" due to the binary nature of the `Existing Insurance Policy` variable.
+
+```{r}
+gwlr_insurance <- ggwr.basic(j1 ~ c3 + c6_1_2 + c7_1_1 + c2 + c3 + c4,
+                   data = finscope_insurance, 
+                   bw = 387, 
+                   family = "binomial", 
+                   kernel = "gaussian", 
+                   adaptive = TRUE, 
+                   cv = T, 
+                   tol = 1e-05, 
+                   maxiter = 20, 
+                   p = 2, 
+                   theta = 0, 
+                   longlat = FALSE, 
+                   dMat = distMAT_insurance)
+```
+
+```{r}
+gwlr_insurance
+```
+::: callout-note
+The GWR model’s pseudo R² is approximately 45%, a notable improvement over the global model’s fit, suggesting that the GWR model captures significant spatial variation in the predictors' effects.
+
+AIC for GWR is 602.46, indicating a slightly higher AIC than the global model, likely due to the additional complexity introduced by modeling spatial variability.
+
+Internet Access and Mobile Phone Ownership appear to have strong, location-dependent impacts on insurance ownership, indicating that these factors are crucial for facilitating access to insurance in certain regions.
+Policy Implications: Regions with strong negative impacts from lack of internet or mobile phone access might benefit from policies aimed at improving digital infrastructure or providing digital literacy programs to enhance awareness and accessibility of insurance products.
+
+Variable Influence by Region: The variability in coefficients suggests that the predictors’ influence on insurance adoption may depend on local characteristics, such as urbanization, socioeconomic factors, or access to insurance providers.
+:::
+
+#### Visualize GWR Output
+```{r}
+insurance.sf.adaptive <- st_as_sf(gwlr_insurance$SDF) %>% 
+  st_transform(crs=32636)
+```
+
+```{r}
+insurance.sf.adaptive.UTM36N <- st_transform(insurance.sf.adaptive, 32636)
+insurance.sf.adaptive.UTM36N  
+```
 
 
+```{r}
+gwlr_insurance.output <- as.data.frame(gwlr_insurance$SDF)
+insurance.sf.adaptive <- cbind(finscope_insurance, as.matrix(gwlr_insurance.output))
+```
+
+Calculate local pseudo R² for each observation.
+
+```{r}
+null_model_in <- glm(j1 ~ 1, data = finscope_insurance, family = "binomial")
+null_deviance_in <- deviance(null_model)
+
+local_fitted_values_in <- as.numeric(insurance.sf.adaptive$yhat)
+local_residuals_in <- as.numeric(insurance.sf.adaptive$residual)
+
+insurance.sf.adaptive$local_pseudo_r2 <- 1 - (local_residuals_in^2 / null_deviance_in)
+```
+
+Plot the map
+```{r}
+tmap_mode("view")
+tm_shape(uganda_modified)+ 
+  tm_polygons(alpha = 0.1) +
+tm_shape(insurance.sf.adaptive) +  
+  tm_dots(col = "local_pseudo_r2", 
+          border.col = "gray60",
+          border.lwd = 1)
+```
+::: callout-note
+The prevalence of darker colors suggests a strong and consistent fit of the GWLR model across Uganda, indicating that the selected predictors are likely important and relevant factors for insurance ownership nationwide. This offers confidence in the model's results and provides useful insights for policies targeting these factors across different regions.
+:::
+
+```{r}
+write_rds(uganda_32636, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/uganda_32636.rds")
+write_rds(uganda_modified, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/uganda_modified.rds")
+write_rds(finscope_insurance, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/finscope_insurance.rds")
+write_rds(finscope_internet_banking, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/finscope_internet_banking.rds")
+write_rds(finscope_mobile_money, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/finscope_mobile_money.rds")
+write_rds(model, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/model.rds")
+write_rds(model_2, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/model_2.rds")
+write_rds(model_3, "C:/ngmengye/ISSS626-GAA/Take-home_Ex/Take-home_Ex03/Uganda/data/rds/model_3.rds")
+```
